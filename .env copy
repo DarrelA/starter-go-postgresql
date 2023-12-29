@@ -1,0 +1,8 @@
+# Postgres
+PGDB_HOST=localhost
+PGDB_PORT=5432
+PGDB_USERNAME=
+PGDB_PASSWORD=
+PGDB_SSLMODE=disable
+PGDB_NAME=pgstarter
+SCHEMA_USER=users
