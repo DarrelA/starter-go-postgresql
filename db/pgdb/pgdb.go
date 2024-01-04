@@ -5,13 +5,14 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 )
 
 // Db is the database connection pool.
+// Package pgxpool is a concurrency-safe connection pool for pgx.
+// pgxpool implements a nearly identical interface to pgx connections.
 var Db *pgxpool.Pool
 
 func ConnectDatabase() {
@@ -20,16 +21,17 @@ func ConnectDatabase() {
 		log.Println("Error is occurred  on .env file please check")
 	}
 
-	host := os.Getenv("PGDB_HOST")
-	port, _ := strconv.Atoi(os.Getenv("PGDB_PORT")) // Convert from int type
 	user := os.Getenv("PGDB_USERNAME")
-	dbname := os.Getenv("PGDB_NAME")
 	pass := os.Getenv("PGDB_PASSWORD")
+	host := os.Getenv("PGDB_HOST")
+	port := os.Getenv("PGDB_PORT")
+	dbname := os.Getenv("PGDB_NAME")
 	sslmode := os.Getenv("PGDB_SSLMODE")
+	pool_max_conns := os.Getenv("PGDB_POOL_MAX_CONNS")
 
 	connString := fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s sslmode=%s dbname=%s",
-		host, port, user, pass, sslmode, dbname,
+		"user=%s password=%s host=%s port=%s dbname=%s sslmode=%s pool_max_conns=%s",
+		user, pass, host, port, dbname, sslmode, pool_max_conns,
 	)
 
 	Db, err = pgxpool.New(context.Background(), connString)

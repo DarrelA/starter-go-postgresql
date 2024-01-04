@@ -1,12 +1,7 @@
 package main
 
-import (
-	"log"
-
-	"github.com/DarrelA/starter-go-postgresql/server/app"
-)
+import "github.com/DarrelA/starter-go-postgresql/app"
 
 func main() {
 	app.StartApp()
-	log.Println("hello")
 }
