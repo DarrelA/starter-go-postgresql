@@ -76,7 +76,6 @@ In a combined MVC and DAO setup, the patterns interact primarily through the Mod
 
 ```sh
 # Updating `go.mod`
-cd server
 go get -u
 go mod tidy
 ```
