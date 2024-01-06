@@ -8,8 +8,9 @@ import (
 )
 
 var (
-	queryInsertUser = "INSERT INTO users(first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING id;"
-	queryGetUser    = "SELECT id, first_name, last_name, email, password FROM users WHERE email=$1;"
+	queryInsertUser  = "INSERT INTO users(first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING id;"
+	queryGetUser     = "SELECT id, first_name, last_name, email, password FROM users WHERE email=$1;"
+	queryGetUserByID = "SELECT id, first_name, last_name, email FROM users WHERE id=$1;"
 )
 
 /*
@@ -32,6 +33,15 @@ func (user *User) Save() *errors.RestErr {
 func (user *User) GetByEmail() *errors.RestErr {
 	result := pgdb.Db.QueryRow(context.Background(), queryGetUser, user.Email)
 	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password); getErr != nil {
+		return errors.NewInternalServerError("database error")
+	}
+
+	return nil
+}
+
+func (user *User) GetByID() *errors.RestErr {
+	result := pgdb.Db.QueryRow(context.Background(), queryGetUserByID, user.ID)
+	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email); getErr != nil {
 		return errors.NewInternalServerError("database error")
 	}
 

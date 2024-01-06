@@ -39,3 +39,12 @@ func GetUser(user users.User) (*users.User, *errors.RestErr) {
 	resultWp := &users.User{ID: result.ID, FirstName: result.FirstName, LastName: result.LastName, Email: result.Email}
 	return resultWp, nil
 }
+
+func GetUserByID(userId int64) (*users.User, *errors.RestErr) {
+	result := &users.User{ID: userId}
+
+	if err := result.GetByID(); err != nil {
+		return nil, err
+	}
+	return result, nil
+}

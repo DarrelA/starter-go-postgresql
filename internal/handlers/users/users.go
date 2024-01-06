@@ -52,19 +52,20 @@ func Login(c *gin.Context) {
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
 	})
 
-	token, err := claims.SignedString([]byte(os.Getenv("JWT_SECRET")))
-	if err != nil {
-		err := errors.NewInternalServerError("login failed")
-		c.JSON(err.Status, err)
-		return
-	}
-
+	jwtSecret := os.Getenv("JWT_SECRET")
 	jwtName := os.Getenv("JWT_NAME")
 	jwtPath := os.Getenv("JWT_PATH")
 	jwtDomain := os.Getenv("JWT_DOMAIN")
 	jwtMaxAgeStr := os.Getenv("JWT_MAXAGE")
 	jwtSecureStr := os.Getenv("JWT_SECURE")
 	jwtHttpOnlyStr := os.Getenv("JWT_HTTPONLY")
+
+	token, err := claims.SignedString([]byte(jwtSecret))
+	if err != nil {
+		err := errors.NewInternalServerError("login failed")
+		c.JSON(err.Status, err)
+		return
+	}
 
 	jwtMaxAge, err := strconv.Atoi(jwtMaxAgeStr)
 	if err != nil {
@@ -82,5 +83,43 @@ func Login(c *gin.Context) {
 	}
 
 	c.SetCookie(jwtName, token, jwtMaxAge, jwtPath, jwtDomain, jwtSecure, jwtHttpOnly)
+	c.JSON(http.StatusOK, result)
+}
+
+func Get(c *gin.Context) {
+	cookie, err := c.Cookie("jwt")
+	if err != nil {
+		getErr := errors.NewInternalServerError("could not retrieve cookie")
+		c.JSON(getErr.Status, getErr)
+		return
+	}
+
+	token, err := jwt.ParseWithClaims(cookie, &jwt.RegisteredClaims{}, func(*jwt.Token) (interface{}, error) {
+		return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+
+	if err != nil {
+		restErr := errors.NewInternalServerError("error parsing cookie")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
+	// set `claims` variable to be a type of `RegisteredClaims`
+	// so we can access `claims.Issuer`
+	claims := token.Claims.(*jwt.RegisteredClaims)
+	issuer, err := strconv.ParseInt(claims.Issuer, 10, 64)
+	if err != nil {
+		restErr := errors.NewBadRequestError("user id should be a number")
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
+	// basically issuer is our user id
+	result, restErr := services.GetUserByID(issuer)
+	if restErr != nil {
+		c.JSON(restErr.Status, restErr)
+		return
+	}
+
 	c.JSON(http.StatusOK, result)
 }
