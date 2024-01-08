@@ -4,10 +4,9 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 
+	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/joho/godotenv"
 )
 
 // Db is the database connection pool.
@@ -16,24 +15,14 @@ import (
 var Db *pgxpool.Pool
 
 func ConnectDatabase() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println("Error is occurred  on .env file please check")
-	}
-
-	user := os.Getenv("PGDB_USERNAME")
-	pass := os.Getenv("PGDB_PASSWORD")
-	host := os.Getenv("PGDB_HOST")
-	port := os.Getenv("PGDB_PORT")
-	dbname := os.Getenv("PGDB_NAME")
-	sslmode := os.Getenv("PGDB_SSLMODE")
-	pool_max_conns := os.Getenv("PGDB_POOL_MAX_CONNS")
+	dbCfg := configs.PGDB
 
 	connString := fmt.Sprintf(
 		"user=%s password=%s host=%s port=%s dbname=%s sslmode=%s pool_max_conns=%s",
-		user, pass, host, port, dbname, sslmode, pool_max_conns,
+		dbCfg.Username, dbCfg.Password, dbCfg.Host, dbCfg.Port, dbCfg.Name, dbCfg.SslMode, dbCfg.PoolMaxConns,
 	)
 
+	var err error
 	Db, err = pgxpool.New(context.Background(), connString)
 	if err != nil {
 		log.Printf("Unable to connect to the database: %v\n", err)

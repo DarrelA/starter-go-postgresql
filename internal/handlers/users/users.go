@@ -2,16 +2,18 @@ package users
 
 import (
 	"net/http"
-	"os"
 	"strconv"
 	"time"
 
+	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
 	"github.com/DarrelA/starter-go-postgresql/internal/services"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
+
+var jwtCfg = configs.JWTSettings
 
 func Register(c *gin.Context) {
 	var user users.User
@@ -52,42 +54,19 @@ func Login(c *gin.Context) {
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(1 * time.Hour)),
 	})
 
-	jwtSecret := os.Getenv("JWT_SECRET")
-	jwtName := os.Getenv("JWT_NAME")
-	jwtPath := os.Getenv("JWT_PATH")
-	jwtDomain := os.Getenv("JWT_DOMAIN")
-	jwtMaxAgeStr := os.Getenv("JWT_MAXAGE")
-	jwtSecureStr := os.Getenv("JWT_SECURE")
-	jwtHttpOnlyStr := os.Getenv("JWT_HTTPONLY")
-
-	token, err := claims.SignedString([]byte(jwtSecret))
+	token, err := claims.SignedString([]byte(jwtCfg.Secret))
 	if err != nil {
 		err := errors.NewInternalServerError("login failed")
 		c.JSON(err.Status, err)
 		return
 	}
 
-	jwtMaxAge, err := strconv.Atoi(jwtMaxAgeStr)
-	if err != nil {
-		errors.NewInternalServerError("Check JWT Config")
-	}
-
-	jwtSecure, err := strconv.ParseBool(jwtSecureStr)
-	if err != nil {
-		errors.NewInternalServerError("Check JWT Config")
-	}
-
-	jwtHttpOnly, err := strconv.ParseBool(jwtHttpOnlyStr)
-	if err != nil {
-		errors.NewInternalServerError("Check JWT Config")
-	}
-
-	c.SetCookie(jwtName, token, jwtMaxAge, jwtPath, jwtDomain, jwtSecure, jwtHttpOnly)
+	c.SetCookie(jwtCfg.Name, token, jwtCfg.MaxAge, jwtCfg.Path, jwtCfg.Domain, jwtCfg.Secure, jwtCfg.HttpOnly)
 	c.JSON(http.StatusOK, result)
 }
 
 func Get(c *gin.Context) {
-	cookie, err := c.Cookie("jwt")
+	cookie, err := c.Cookie(jwtCfg.Name)
 	if err != nil {
 		getErr := errors.NewInternalServerError("could not retrieve cookie")
 		c.JSON(getErr.Status, getErr)
@@ -95,7 +74,7 @@ func Get(c *gin.Context) {
 	}
 
 	token, err := jwt.ParseWithClaims(cookie, &jwt.RegisteredClaims{}, func(*jwt.Token) (interface{}, error) {
-		return []byte(os.Getenv("JWT_SECRET")), nil
+		return []byte(jwtCfg.Secret), nil
 	})
 
 	if err != nil {
@@ -122,4 +101,11 @@ func Get(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+func Logout(c *gin.Context) {
+	c.SetCookie(jwtCfg.Name, "", -1, "", "", jwtCfg.Secure, jwtCfg.HttpOnly)
+	c.JSON(http.StatusOK, gin.H{
+		"message": "success",
+	})
 }
