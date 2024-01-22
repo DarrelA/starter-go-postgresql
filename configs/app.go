@@ -8,6 +8,8 @@ import (
 	"github.com/joho/godotenv"
 )
 
+var Port string
+
 func loadEnv() {
 	env := os.Getenv("APP_ENV")
 	if env == "" {
@@ -23,6 +25,11 @@ func loadEnv() {
 
 	godotenv.Load(envBasePath + ".env." + env)
 	godotenv.Load()
+
+	Port = os.Getenv("APP_PORT")
+	if Port == "" {
+		Port = "4040" // Default port
+	}
 }
 
 type DBConfig struct {
@@ -37,7 +44,7 @@ type DBConfig struct {
 
 var PGDB DBConfig
 
-func InitDBSettings() {
+func initDBSettings() {
 	PGDB = DBConfig{
 		Username:     os.Getenv("PGDB_USERNAME"),
 		Password:     os.Getenv("PGDB_PASSWORD"),
@@ -104,7 +111,7 @@ func loadCORSConfigs() {
 
 func init() {
 	loadEnv()
-	InitDBSettings()
+	initDBSettings()
 	loadJWTConfigs()
 	loadCORSConfigs()
 }
