@@ -56,6 +56,18 @@ func initDBSettings() {
 	}
 }
 
+type RedisConfig struct {
+	RedisUri string
+}
+
+var RedisDB RedisConfig
+
+func initRedisSettings() {
+	RedisDB = RedisConfig{
+		RedisUri: os.Getenv("REDIS_URL"),
+	}
+}
+
 type JWTConfig struct {
 	Secret   string
 	Name     string
@@ -112,6 +124,7 @@ func loadCORSConfigs() {
 func init() {
 	loadEnv()
 	initDBSettings()
+	initRedisSettings()
 	loadJWTConfigs()
 	loadCORSConfigs()
 }

@@ -9,4 +9,6 @@ up:
 down:
 	@cd deployments && docker-compose down
 
-# Add more targets as needed
+# Target to rebuild the docker-compose services
+rebuild:
+	@cd deployments && docker-compose build

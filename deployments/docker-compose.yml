@@ -23,6 +23,19 @@ services:
       - '6379:6379'
     volumes:
       - redisDB:/data
+  app:
+    build:
+      context: ..
+      dockerfile: ./deployments/Dockerfile
+    image: starter-go-postgresql
+    container_name: starter-go-postgresql
+    ports:
+      - '8080:8080'
+    env_file:
+      - ../configs/.env.development
+    depends_on:
+      - postgres
+      - redis
 volumes:
   redisDB:
   progresDB:
