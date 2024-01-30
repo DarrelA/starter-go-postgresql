@@ -46,13 +46,13 @@ var PGDB DBConfig
 
 func initDBSettings() {
 	PGDB = DBConfig{
-		Username:     os.Getenv("PGDB_USERNAME"),
-		Password:     os.Getenv("PGDB_PASSWORD"),
-		Host:         os.Getenv("PGDB_HOST"),
-		Port:         os.Getenv("PGDB_PORT"),
-		Name:         os.Getenv("PGDB_NAME"),
-		SslMode:      os.Getenv("PGDB_SSLMODE"),
-		PoolMaxConns: os.Getenv("PGDB_POOL_MAX_CONNS"),
+		Username:     os.Getenv("POSTGRES_USERNAME"),
+		Password:     os.Getenv("POSTGRES_PASSWORD"),
+		Host:         os.Getenv("POSTGRES_HOST"),
+		Port:         os.Getenv("POSTGRES_PORT"),
+		Name:         os.Getenv("POSTGRES_NAME"),
+		SslMode:      os.Getenv("POSTGRES_SSLMODE"),
+		PoolMaxConns: os.Getenv("POSTGRES_POOL_MAX_CONNS"),
 	}
 }
 
