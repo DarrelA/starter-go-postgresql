@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
+	"github.com/golang-migrate/migrate"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -16,6 +17,11 @@ var Db *pgxpool.Pool
 
 func ConnectDatabase() {
 	dbCfg := configs.PGDB
+
+	// Run migrations before establishing the connection pool
+	if err := runMigrations(dbCfg); err != nil {
+		log.Fatalf("Failed to run migrations: %v\n", err)
+	}
 
 	connString := fmt.Sprintf(
 		"user=%s password=%s host=%s port=%s dbname=%s sslmode=%s pool_max_conns=%s",
@@ -29,4 +35,21 @@ func ConnectDatabase() {
 		panic(err)
 	}
 	log.Println("Successfully connected to the Postgres database!")
+}
+
+func runMigrations(dbCfg configs.DBConfig) error {
+	migrationDbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
+		dbCfg.Username, dbCfg.Password, dbCfg.Host, dbCfg.Port, dbCfg.Name, dbCfg.SslMode)
+
+	m, err := migrate.New("../migration", migrationDbURL)
+	if err != nil {
+		return err
+	}
+
+	// Apply all up migrations
+	if err := m.Up(); err != nil && err != migrate.ErrNoChange {
+		return err
+	}
+
+	return nil
 }

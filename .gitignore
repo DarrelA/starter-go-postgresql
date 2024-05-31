@@ -1,4 +1,7 @@
 .DS_Store
+
 .env.development
 .env.test
 .env.production
+
+db/pgdb/servers.json

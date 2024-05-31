@@ -8,6 +8,8 @@
   - [Advantages of Combining MVC and DAO](#advantages-of-combining-mvc-and-dao)
   - [Considerations](#considerations)
 - [Maintenance](#maintenance)
+- [psql](#psql)
+- [golang-migrate](#golang-migrate)
 
 # References
 
@@ -78,4 +80,28 @@ In a combined MVC and DAO setup, the patterns interact primarily through the Mod
 # Updating `go.mod`
 go get -u
 go mod tidy
+```
+
+# psql
+
+```sh
+docker exec -it postgres bash
+su - postgres
+psql -U user1 -d pgstarter
+SELECT * FROM users;
+```
+
+# golang-migrate
+
+```sh
+# To work with the scripts in db/migration folder
+brew install golang-migrate
+migrate create -ext sql -dir db/migration/ -seq init_schema
+
+# Format
+# {version}_{title}.down.sql
+# {version}_{title}.up.sql
+
+# pgAdmin
+http://localhost:5050/browser/
 ```

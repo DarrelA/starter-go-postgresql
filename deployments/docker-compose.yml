@@ -1,4 +1,4 @@
-version: '1'
+version: '3.8'
 services:
   postgres:
     image: postgres:latest
@@ -7,15 +7,20 @@ services:
       - '6500:5432'
     volumes:
       - progresDB:/var/lib/postgresql/data
+      - ../db/init.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
-      - ../configs/.env.development
+      - ../configs/.env.development # Amend accordingly
+
   pgAdmin:
     image: dpage/pgadmin4
     container_name: pgAdmin
-    env_file:
-      - ../configs/.env.development
     ports:
       - '5050:80'
+    volumes:
+      - ../db/pgdb/servers.json:/pgadmin4/servers.json
+    env_file:
+      - ../configs/.env.development # Amend accordingly
+
   redis:
     image: redis:alpine
     container_name: redis
@@ -23,6 +28,7 @@ services:
       - '6379:6379'
     volumes:
       - redisDB:/data
+
   app:
     build:
       context: ..
