@@ -9,3 +9,20 @@ CREATE TABLE IF NOT EXISTS
     password VARCHAR(255) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL
   );
+
+INSERT INTO
+  users (first_name, last_name, password, email)
+VALUES
+  (
+    'FirstName1',
+    'LastName1',
+    'Password1',
+    'user1@example.com'
+  ),
+  (
+    'FirstName2',
+    'LastName2',
+    'Password2',
+    'user2@example.com'
+  ) ON CONFLICT (email)
+DO NOTHING;

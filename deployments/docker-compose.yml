@@ -7,7 +7,7 @@ services:
       - '6500:5432'
     volumes:
       - progresDB:/var/lib/postgresql/data
-      - ../db/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../db/pgdb/init.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
       - ../configs/.env.development # Amend accordingly
 
@@ -42,6 +42,7 @@ services:
     depends_on:
       - postgres
       - redis
+
 volumes:
   redisDB:
   progresDB:

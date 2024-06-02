@@ -80,6 +80,9 @@ In a combined MVC and DAO setup, the patterns interact primarily through the Mod
 # Updating `go.mod`
 go get -u
 go mod tidy
+
+# pgAdmin
+http://localhost:5050/browser/
 ```
 
 # psql
@@ -101,7 +104,4 @@ migrate create -ext sql -dir db/migration/ -seq init_schema
 # Format
 # {version}_{title}.down.sql
 # {version}_{title}.up.sql
-
-# pgAdmin
-http://localhost:5050/browser/
 ```
