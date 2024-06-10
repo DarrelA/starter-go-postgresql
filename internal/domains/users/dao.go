@@ -21,7 +21,7 @@ via a pointer to the `User` struct. The data flow typically starts from
 */
 func (user *User) Save() *errors.RestErr {
 	var lastInsertId int64
-	err := pgdb.Db.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertId)
+	err := pgdb.Dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertId)
 	if err != nil {
 		return errors.NewInternalServerError("database error: " + err.Error())
 	}
@@ -31,7 +31,7 @@ func (user *User) Save() *errors.RestErr {
 }
 
 func (user *User) GetByEmail() *errors.RestErr {
-	result := pgdb.Db.QueryRow(context.Background(), queryGetUser, user.Email)
+	result := pgdb.Dbpool.QueryRow(context.Background(), queryGetUser, user.Email)
 	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password); getErr != nil {
 		return errors.NewInternalServerError("database error")
 	}
@@ -40,7 +40,7 @@ func (user *User) GetByEmail() *errors.RestErr {
 }
 
 func (user *User) GetByID() *errors.RestErr {
-	result := pgdb.Db.QueryRow(context.Background(), queryGetUserByID, user.ID)
+	result := pgdb.Dbpool.QueryRow(context.Background(), queryGetUserByID, user.ID)
 	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email); getErr != nil {
 		return errors.NewInternalServerError("database error")
 	}

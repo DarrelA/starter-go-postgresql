@@ -14,5 +14,10 @@ down-v:
 	@cd deployments && docker-compose down -v
 
 # Target to rebuild the docker-compose services
-rebuild:
+build:
 	@cd deployments && docker-compose build
+
+# Target to rebuild the docker-compose services
+build-app:
+	@cd deployments && docker-compose build app
+

@@ -12,7 +12,7 @@ import (
 // Db is the database connection pool.
 // Package pgxpool is a concurrency-safe connection pool for pgx.
 // pgxpool implements a nearly identical interface to pgx connections.
-var Db *pgxpool.Pool
+var Dbpool *pgxpool.Pool
 
 func ConnectDatabase() {
 	dbCfg := configs.PGDB
@@ -23,10 +23,11 @@ func ConnectDatabase() {
 	)
 
 	var err error
-	Db, err = pgxpool.New(context.Background(), connString)
+	Dbpool, err = pgxpool.New(context.Background(), connString)
 	if err != nil {
 		log.Printf("Unable to connect to the database: %v\n", err)
 		panic(err)
 	}
-	log.Println("Successfully connected to the Postgres database!!")
+
+	log.Println("Successfully connected to the Postgres database")
 }
