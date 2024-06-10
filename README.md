@@ -7,6 +7,7 @@
   - [Workflow](#workflow)
   - [Advantages of Combining MVC and DAO](#advantages-of-combining-mvc-and-dao)
   - [Considerations](#considerations)
+- [Generate the Private and Public Keys](#generate-the-private-and-public-keys)
 - [Maintenance](#maintenance)
 - [psql](#psql)
 - [golang-migrate](#golang-migrate)
@@ -15,6 +16,7 @@
 
 - [go-project-layout](https://appliedgo.com/blog/go-project-layout)
 - [golang-standards/project-layout](https://github.com/golang-standards/project-layout/tree/master)
+- [wpcodevo/golang-fiber-jwt-rs256](https://github.com/wpcodevo/golang-fiber-jwt-rs256)
 
 # N-tier Architecture
 
@@ -73,6 +75,12 @@ In a combined MVC and DAO setup, the patterns interact primarily through the Mod
 
 - **Complexity:** Introducing multiple layers and abstractions can increase complexity. It's essential to balance the benefits with the complexity added.
 - **Performance Overhead:** Each layer adds a bit of overhead. In performance-critical applications, the design should be carefully evaluated.
+
+# Generate the Private and Public Keys
+
+- [Online RSA Key Generator](https://travistidwell.com/jsencrypt/demo/)
+  - Key Size: 2048 bit
+- [BASE64 Decode and Encode](https://www.base64encode.org/)
 
 # Maintenance
 
