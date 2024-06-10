@@ -46,7 +46,7 @@ var PGDB DBConfig
 
 func initDBSettings() {
 	PGDB = DBConfig{
-		Username:     os.Getenv("POSTGRES_USERNAME"),
+		Username:     os.Getenv("POSTGRES_USER"),
 		Password:     os.Getenv("POSTGRES_PASSWORD"),
 		Host:         os.Getenv("POSTGRES_HOST"),
 		Port:         os.Getenv("POSTGRES_PORT"),
