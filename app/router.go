@@ -1,28 +1,23 @@
 package app
 
 import (
-	"time"
-
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/DarrelA/starter-go-postgresql/internal/handlers/users"
-	"github.com/gin-contrib/cors"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 func mapUrls() {
-	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{configs.CORSSettings.AllowedOrigins},
-		AllowMethods:     []string{"GET", "POST"},
-		AllowHeaders:     []string{"Content-Type"},
-		ExposeHeaders:    []string{"Content-Length"},
+	app.Use(cors.New(cors.Config{
+		AllowOrigins:     configs.CORSSettings.AllowedOrigins,
+		AllowMethods:     "GET,POST",
+		AllowHeaders:     "Content-Type",
+		ExposeHeaders:    "Content-Length",
 		AllowCredentials: true,
-		AllowOriginFunc: func(origin string) bool {
+		AllowOriginsFunc: func(origin string) bool {
 			return origin == configs.CORSSettings.AllowedOrigins
 		},
-		MaxAge: 12 * time.Hour,
+		MaxAge: 12 * 60 * 60,
 	}))
 
-	router.POST("/api/register", users.Register)
-	router.POST("/api/login", users.Login)
-	router.GET("/api/user", users.Get)
-	router.GET("/api/logout", users.Logout)
+	app.Post("/api/register", users.Register)
 }

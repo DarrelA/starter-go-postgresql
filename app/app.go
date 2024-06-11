@@ -3,15 +3,15 @@ package app
 import (
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/DarrelA/starter-go-postgresql/db/pgdb"
-	"github.com/gin-gonic/gin"
+	"github.com/gofiber/fiber/v2"
 )
 
 var (
-	router = gin.Default()
+	app = fiber.New()
 )
 
 func StartApp() {
 	pgdb.ConnectDatabase()
 	mapUrls()
-	router.Run(":" + configs.Port)
+	app.Listen(":" + configs.Port)
 }
