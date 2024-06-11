@@ -6,7 +6,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func CreateUser(user users.User) (*users.User, *errors.RestErr) {
+func CreateUser(user users.User) (*users.UserResponse, *errors.RestErr) {
 	if err := user.Validate(); err != nil {
 		return nil, err
 	}
@@ -23,7 +23,14 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 		return nil, err
 	}
 
-	return &user, nil
+	userResponse := &users.UserResponse{
+		ID:        user.ID,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+	}
+
+	return userResponse, nil
 }
 
 func GetUser(user users.User) (*users.User, *errors.RestErr) {
