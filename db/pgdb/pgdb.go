@@ -1,4 +1,4 @@
-package pgdb
+package db
 
 import (
 	"context"
@@ -14,7 +14,7 @@ import (
 // pgxpool implements a nearly identical interface to pgx connections.
 var Dbpool *pgxpool.Pool
 
-func ConnectDatabase() {
+func ConnectPostgresDatabase() {
 	dbCfg := configs.PGDB
 
 	connString := fmt.Sprintf(
