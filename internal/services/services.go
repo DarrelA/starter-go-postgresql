@@ -6,28 +6,35 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func CreateUser(user users.User) (*users.UserResponse, *errors.RestErr) {
-	if err := user.Validate(); err != nil {
+func CreateUser(payload users.UserRequest) (*users.UserResponse, *errors.RestErr) {
+	newUser := &users.User{
+		FirstName: payload.FirstName,
+		LastName:  payload.LastName,
+		Email:     payload.Email,
+		Password:  payload.Password,
+	}
+
+	if err := newUser.Validate(); err != nil {
 		return nil, err
 	}
 
-	pwSlice, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	pwSlice, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), 14)
 	if err != nil {
 		return nil, errors.NewBadRequestError(("failed to encrypt the password"))
 	}
 
 	// parse from byte to string
-	user.Password = string(pwSlice[:])
+	newUser.Password = string(pwSlice[:])
 
-	if err := user.Save(); err != nil {
+	if err := newUser.Save(); err != nil {
 		return nil, err
 	}
 
 	userResponse := &users.UserResponse{
-		ID:        user.ID,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
+		ID:        newUser.ID,
+		FirstName: newUser.FirstName,
+		LastName:  newUser.LastName,
+		Email:     newUser.Email,
 	}
 
 	return userResponse, nil
