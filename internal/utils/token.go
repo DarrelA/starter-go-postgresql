@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
 	"github.com/golang-jwt/jwt/v5"
 	uuid "github.com/google/uuid"
 )
@@ -12,11 +13,11 @@ import (
 type TokenDetails struct {
 	Token     *string
 	TokenUUID string
-	UserID    string
+	UserUUID  string
 	ExpiresIn *int64
 }
 
-func CreateToken(userid string, ttl time.Duration, privateKey string) (*TokenDetails, error) {
+func CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*TokenDetails, *errors.RestErr) {
 	now := time.Now().UTC()
 	td := &TokenDetails{
 		ExpiresIn: new(int64),
@@ -27,25 +28,25 @@ func CreateToken(userid string, ttl time.Duration, privateKey string) (*TokenDet
 
 	id, err := uuid.NewV7()
 	if err != nil {
-		fmt.Println("Failed to generate UUID:", err)
+		errors.NewInternalServerError("failed to generate UUID: " + err.Error())
 	}
 	td.TokenUUID = id.String()
 
-	td.UserID = userid
+	td.UserUUID = user_uuid
 
 	decodePrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
 	if err != nil {
-		return nil, fmt.Errorf("could not decode token private key: %w", err)
+		return nil, errors.NewInternalServerError("could not decode token private key: " + err.Error())
 	}
 
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodePrivateKey)
 
 	if err != nil {
-		return nil, fmt.Errorf("create: parse token private key:  %w", err)
+		return nil, errors.NewInternalServerError("create: parse token private key: " + err.Error())
 	}
 
 	atClaims := make(jwt.MapClaims)
-	atClaims["sub"] = userid
+	atClaims["sub"] = user_uuid
 	atClaims["token_uuid"] = td.TokenUUID
 	atClaims["exp"] = td.ExpiresIn
 	atClaims["iat"] = now.Unix() // Issued at
@@ -53,7 +54,7 @@ func CreateToken(userid string, ttl time.Duration, privateKey string) (*TokenDet
 
 	*td.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, atClaims).SignedString(key)
 	if err != nil {
-		return nil, fmt.Errorf("create: sign token: %w", err)
+		return nil, errors.NewInternalServerError("create: sign token: " + err.Error())
 	}
 
 	return td, nil
@@ -88,6 +89,6 @@ func ValidateToken(token string, publicKey string) (*TokenDetails, error) {
 
 	return &TokenDetails{
 		TokenUUID: fmt.Sprint(claims["token_uuid"]),
-		UserID:    fmt.Sprint(claims["subs"]),
+		UserUUID:  fmt.Sprint(claims["subs"]),
 	}, nil
 }

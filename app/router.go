@@ -13,11 +13,9 @@ func mapUrls() {
 		AllowHeaders:     "Content-Type",
 		ExposeHeaders:    "Content-Length",
 		AllowCredentials: true,
-		AllowOriginsFunc: func(origin string) bool {
-			return origin == configs.CORSSettings.AllowedOrigins
-		},
-		MaxAge: 12 * 60 * 60,
+		MaxAge:           12 * 60 * 60,
 	}))
 
 	app.Post("/api/register", users.Register)
+	app.Post("/api/login", users.Login)
 }

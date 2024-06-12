@@ -2,7 +2,8 @@ package app
 
 import (
 	"github.com/DarrelA/starter-go-postgresql/configs"
-	db "github.com/DarrelA/starter-go-postgresql/db/pgdb"
+	pgdb "github.com/DarrelA/starter-go-postgresql/db/pgdb"
+	redis "github.com/DarrelA/starter-go-postgresql/db/redis"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -11,7 +12,8 @@ var (
 )
 
 func StartApp() {
-	db.ConnectPostgresDatabase()
+	pgdb.ConnectPostgresDatabase()
+	redis.ConnectRedis()
 	mapUrls()
 	app.Listen(":" + configs.Port)
 }
