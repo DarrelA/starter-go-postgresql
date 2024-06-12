@@ -1,22 +1,13 @@
-- [References](#references)
 - [N-tier Architecture](#n-tier-architecture)
-- [MVC \& DAO Design Pattern](#mvc--dao-design-pattern)
-  - [Model-View-Controller (MVC)](#model-view-controller-mvc)
-  - [Data Access Object (DAO)](#data-access-object-dao)
-  - [Combining MVC and DAO](#combining-mvc-and-dao)
-  - [Workflow](#workflow)
-  - [Advantages of Combining MVC and DAO](#advantages-of-combining-mvc-and-dao)
-  - [Considerations](#considerations)
-- [Generate the Private and Public Keys](#generate-the-private-and-public-keys)
+- [Model-View-Controller (MVC)](#model-view-controller-mvc)
+- [Setup](#setup)
+  - [Handle Initial Files](#handle-initial-files)
+  - [Generate the Private and Public Keys](#generate-the-private-and-public-keys)
 - [Maintenance](#maintenance)
-- [psql](#psql)
-- [golang-migrate](#golang-migrate)
-
-# References
-
-- [go-project-layout](https://appliedgo.com/blog/go-project-layout)
-- [golang-standards/project-layout](https://github.com/golang-standards/project-layout/tree/master)
-- [wpcodevo/golang-fiber-jwt-rs256](https://github.com/wpcodevo/golang-fiber-jwt-rs256)
+  - [`go.mod` file](#gomod-file)
+  - [psql](#psql)
+  - [golang-migrate](#golang-migrate)
+- [References](#references)
 
 # N-tier Architecture
 
@@ -36,11 +27,7 @@ The n-tier architecture's decoupling allows for:
 
 However, it's worth noting that while n-tier architecture offers these benefits, it also introduces complexity in terms of network latency, configuration, and management. Each layer will likely need to communicate over a network, which can introduce performance and complexity considerations that wouldn't be as prominent in a monolithic architecture.
 
-# MVC & DAO Design Pattern
-
-The combination of Model-View-Controller (MVC) and Data Access Object (DAO) design patterns is a powerful architectural approach in software development, particularly useful in web applications and services. Here's an overview of how these two design patterns can work together:
-
-## Model-View-Controller (MVC)
+# Model-View-Controller (MVC)
 
 MVC is a design pattern that separates an application into three interconnected components:
 
@@ -48,41 +35,23 @@ MVC is a design pattern that separates an application into three interconnected 
 2. **View:** Presents data to the user. It represents the UI components and is used to display the model's data.
 3. **Controller:** Acts as an intermediary between the Model and View. It listens to the user input (through the View) and processes the requests (updating the Model, selecting the View to display).
 
-## Data Access Object (DAO)
+# Setup
 
-DAO is a pattern used to abstract and encapsulate all access to the data source. It manages the connection with the data source to obtain and store data. The DAO implements the access mechanism required to work with the data source.
+## Handle Initial Files
 
-## Combining MVC and DAO
+- Respective `.env` files in `configs` folder
+- **`init.sql` script**: Create initial schemas
+- **`servers.json` file**: Establish server connection from pgAdmin to Postgres
 
-In a combined MVC and DAO setup, the patterns interact primarily through the Model component of MVC:
-
-- **Model with DAO:** The Model component of MVC uses DAO to interact with the data source. DAO manages the persistence and retrieval of the Model data, hiding the details of the data source and retrieval mechanisms.
-
-## Workflow
-
-1. **User Interaction:** The user interacts with the View, which sends the user's input to the Controller.
-2. **Controller Processing:** The Controller interprets the user input (sent from the View), commanding the Model to change its state (e.g., updating data).
-3. **Model and DAO Interaction:** The Model uses DAO to retrieve or update data in the data source. DAO provides a clean API to the Model so that the Model does not need to know about the underlying database specifics.
-4. **Update View:** Once the Model has changed state (data updated or retrieved), the View is updated to reflect the new data. The View gets the latest data from the Model.
-
-## Advantages of Combining MVC and DAO
-
-- **Separation of Concerns:** MVC separates the application logic, UI, and data access. DAO further isolates data access specifics from the business logic.
-- **Reusability and Maintainability:** Both patterns promote reusability and maintainability. DAOs can be reused across different parts of the application. MVC facilitates changing the UI without affecting the underlying business logic.
-- **Scalability and Flexibility:** Separating concerns makes it easier to scale and modify applications. You can change the data source or business logic without affecting other parts of the application.
-
-## Considerations
-
-- **Complexity:** Introducing multiple layers and abstractions can increase complexity. It's essential to balance the benefits with the complexity added.
-- **Performance Overhead:** Each layer adds a bit of overhead. In performance-critical applications, the design should be carefully evaluated.
-
-# Generate the Private and Public Keys
+## Generate the Private and Public Keys
 
 - [Online RSA Key Generator](https://travistidwell.com/jsencrypt/demo/)
   - Key Size: 2048 bit
 - [BASE64 Decode and Encode](https://www.base64encode.org/)
 
 # Maintenance
+
+## `go.mod` file
 
 ```sh
 # Updating `go.mod`
@@ -93,16 +62,17 @@ go mod tidy
 http://localhost:5050/browser/
 ```
 
-# psql
+## psql
 
 ```sh
+# If not using pgAdmin
 docker exec -it postgres bash
 su - postgres
 psql -U user1 -d pgstarter
 SELECT * FROM users;
 ```
 
-# golang-migrate
+## golang-migrate
 
 ```sh
 # To work with the scripts in db/migration folder
@@ -113,3 +83,9 @@ migrate create -ext sql -dir db/migration/ -seq init_schema
 # {version}_{title}.down.sql
 # {version}_{title}.up.sql
 ```
+
+# References
+
+- [go-project-layout](https://appliedgo.com/blog/go-project-layout)
+- [golang-standards/project-layout](https://github.com/golang-standards/project-layout/tree/master)
+- [wpcodevo/golang-fiber-jwt-rs256](https://github.com/wpcodevo/golang-fiber-jwt-rs256)
