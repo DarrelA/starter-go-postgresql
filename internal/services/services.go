@@ -1,8 +1,15 @@
+/*
+@TODO:
+	- Rename `services.go` to `auth.go`
+	- Move `token.go` from `utils` folder to `services` folder
+*/
+
 package services
 
 import (
 	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -60,10 +67,15 @@ func GetUser(user users.LoginInput) (*users.UserResponse, *errors.RestErr) {
 	return userResponse, nil
 }
 
-func GetUserByID(userId int64) (*users.User, *errors.RestErr) {
-	result := &users.User{ID: userId}
+func GetUserByUUID(userUuid string) (*users.User, *errors.RestErr) {
+	uuidPointer, err := uuid.Parse(userUuid)
+	if err != nil {
+		return nil, errors.NewInternalServerError("Error parsing UUID: " + err.Error())
+	}
 
-	if err := result.GetByID(); err != nil {
+	result := &users.User{UUID: &uuidPointer}
+
+	if err := result.GetByUUID(); err != nil {
 		return nil, err
 	}
 	return result, nil

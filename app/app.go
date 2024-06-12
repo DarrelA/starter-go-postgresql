@@ -1,9 +1,10 @@
+// Spin `auth` as microservice
 package app
 
 import (
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	pgdb "github.com/DarrelA/starter-go-postgresql/db/pgdb"
-	redis "github.com/DarrelA/starter-go-postgresql/db/redis"
+	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -13,7 +14,7 @@ var (
 
 func StartApp() {
 	pgdb.ConnectPostgresDatabase()
-	redis.ConnectRedis()
+	redisDb.ConnectRedis()
 	mapUrls()
 	app.Listen(":" + configs.Port)
 }

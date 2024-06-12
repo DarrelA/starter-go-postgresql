@@ -40,7 +40,7 @@ func (user *User) GetByEmail() *errors.RestErr {
 	return nil
 }
 
-func (user *User) GetByID() *errors.RestErr {
+func (user *User) GetByUUID() *errors.RestErr {
 	result := pgdb.Dbpool.QueryRow(context.Background(), queryGetUserByID, user.UUID)
 	if getErr := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email); getErr != nil {
 		return errors.NewInternalServerError("database error")

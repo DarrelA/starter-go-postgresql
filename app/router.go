@@ -1,3 +1,9 @@
+/*
+@TODO:
+	- Mount `api` path
+	- Update routing path to use `auth`
+*/
+
 package app
 
 import (
@@ -18,4 +24,5 @@ func mapUrls() {
 
 	app.Post("/api/register", users.Register)
 	app.Post("/api/login", users.Login)
+	app.Get("/api/refresh", users.RefreshAccessToken)
 }

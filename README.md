@@ -7,6 +7,7 @@
   - [`go.mod` file](#gomod-file)
   - [psql](#psql)
   - [golang-migrate](#golang-migrate)
+  - [redis](#redis)
 - [References](#references)
 
 # N-tier Architecture
@@ -82,6 +83,20 @@ migrate create -ext sql -dir db/migration/ -seq init_schema
 # Format
 # {version}_{title}.down.sql
 # {version}_{title}.up.sql
+```
+
+## redis
+
+```sh
+docker exec -it redis /bin/sh
+redis-cli
+INFO
+
+KEYS *
+# Get the value of the key (user_uuid)
+GET key
+# Check the remaining time to live (TTL) of a key
+TTL key
 ```
 
 # References
