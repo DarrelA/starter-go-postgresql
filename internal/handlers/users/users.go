@@ -8,16 +8,16 @@ import (
 )
 
 func Register(c *fiber.Ctx) error {
-	var payload users.UserRequest
+	var payload users.RegisterInput
 
 	if err := c.BodyParser(&payload); err != nil {
 		err := errors.NewBadRequestError("invalid json body")
 		return c.Status(err.Status).JSON(err)
 	}
 
-	result, saveErr := services.CreateUser(payload)
-	if saveErr != nil {
-		return c.Status(saveErr.Status).JSON(saveErr)
+	result, err := services.CreateUser(payload)
+	if err != nil {
+		return c.Status(err.Status).JSON(err)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(result)

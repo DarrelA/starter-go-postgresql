@@ -5,16 +5,18 @@ import (
 	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
+	"github.com/google/uuid"
 )
 
 type User struct {
-	ID        int64     `json:"ID"`
-	FirstName string    `json:"first_name"`
-	LastName  string    `json:"last_name"`
-	Password  string    `json:"password"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID        int64      `json:"ID"`
+	UUID      *uuid.UUID `json:"uuid"`
+	FirstName string     `json:"first_name"`
+	LastName  string     `json:"last_name"`
+	Password  string     `json:"password"`
+	Email     string     `json:"email"`
+	CreatedAt time.Time  `json:"created_at"`
+	UpdatedAt time.Time  `json:"updated_at"`
 }
 
 // specify a receiver to make it a method
@@ -34,7 +36,14 @@ func (user *User) Validate() *errors.RestErr {
 	return nil
 }
 
-type UserRequest struct {
+type RegisterInput struct {
+	FirstName string `json:"first_name"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email"`
+	Password  string `json:"password"`
+}
+
+type LoginInput struct {
 	FirstName string `json:"first_name"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
@@ -42,8 +51,8 @@ type UserRequest struct {
 }
 
 type UserResponse struct {
-	ID        int64  `json:"id"`
-	FirstName string `json:"first_name"`
-	LastName  string `json:"last_name"`
-	Email     string `json:"email"`
+	UUID      *uuid.UUID `json:"uuid"`
+	FirstName string     `json:"first_name"`
+	LastName  string     `json:"last_name"`
+	Email     string     `json:"email"`
 }

@@ -5,10 +5,11 @@ import (
 
 	db "github.com/DarrelA/starter-go-postgresql/db/pgdb"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
+	"github.com/google/uuid"
 )
 
 var (
-	queryInsertUser  = "INSERT INTO users(first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING id;"
+	queryInsertUser  = "INSERT INTO users(first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING user_uuid;"
 	queryGetUser     = "SELECT id, first_name, last_name, email, password FROM users WHERE email=$1;"
 	queryGetUserByID = "SELECT id, first_name, last_name, email FROM users WHERE id=$1;"
 )
@@ -20,13 +21,13 @@ via a pointer to the `User` struct. The data flow typically starts from
 `users_dao.go` where it interacts with the database.
 */
 func (user *User) Save() *errors.RestErr {
-	var lastInsertId int64
-	err := db.Dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertId)
+	var lastInsertUuid *uuid.UUID
+	err := db.Dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)
 	if err != nil {
 		return errors.NewInternalServerError("database error: " + err.Error())
 	}
 
-	user.ID = lastInsertId
+	user.UUID = lastInsertUuid
 	return nil
 }
 

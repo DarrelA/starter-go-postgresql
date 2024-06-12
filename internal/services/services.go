@@ -6,7 +6,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func CreateUser(payload users.UserRequest) (*users.UserResponse, *errors.RestErr) {
+func CreateUser(payload users.RegisterInput) (*users.UserResponse, *errors.RestErr) {
 	newUser := &users.User{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
@@ -31,7 +31,7 @@ func CreateUser(payload users.UserRequest) (*users.UserResponse, *errors.RestErr
 	}
 
 	userResponse := &users.UserResponse{
-		ID:        newUser.ID,
+		UUID:      newUser.UUID,
 		FirstName: newUser.FirstName,
 		LastName:  newUser.LastName,
 		Email:     newUser.Email,
@@ -40,7 +40,7 @@ func CreateUser(payload users.UserRequest) (*users.UserResponse, *errors.RestErr
 	return userResponse, nil
 }
 
-func GetUser(user users.User) (*users.User, *errors.RestErr) {
+func GetUser(user users.LoginInput) (*users.UserResponse, *errors.RestErr) {
 	result := &users.User{Email: user.Email}
 	if err := result.GetByEmail(); err != nil {
 		return nil, err
@@ -50,8 +50,14 @@ func GetUser(user users.User) (*users.User, *errors.RestErr) {
 		return nil, errors.NewBadRequestError("failed to decrypt the password")
 	}
 
-	resultWp := &users.User{ID: result.ID, FirstName: result.FirstName, LastName: result.LastName, Email: result.Email}
-	return resultWp, nil
+	userResponse := &users.UserResponse{
+		UUID:      result.UUID,
+		FirstName: result.FirstName,
+		LastName:  result.LastName,
+		Email:     result.Email,
+	}
+
+	return userResponse, nil
 }
 
 func GetUserByID(userId int64) (*users.User, *errors.RestErr) {
