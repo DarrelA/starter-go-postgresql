@@ -3,15 +3,15 @@ package users
 import (
 	"context"
 
-	db "github.com/DarrelA/starter-go-postgresql/db/pgdb"
+	pgdb "github.com/DarrelA/starter-go-postgresql/db/pgdb"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
 	"github.com/google/uuid"
 )
 
 var (
 	queryInsertUser  = "INSERT INTO users(first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING user_uuid;"
-	queryGetUser     = "SELECT id, first_name, last_name, email, password FROM users WHERE email=$1;"
-	queryGetUserByID = "SELECT id, first_name, last_name, email FROM users WHERE id=$1;"
+	queryGetUser     = "SELECT user_uuid, first_name, last_name, email, password FROM users WHERE email=$1;"
+	queryGetUserByID = "SELECT user_uuid, first_name, last_name, email FROM users WHERE user_uuid=$1;"
 )
 
 /*
@@ -22,7 +22,7 @@ via a pointer to the `User` struct. The data flow typically starts from
 */
 func (user *User) Save() *errors.RestErr {
 	var lastInsertUuid *uuid.UUID
-	err := db.Dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)
+	err := pgdb.Dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)
 	if err != nil {
 		return errors.NewInternalServerError("database error: " + err.Error())
 	}
@@ -32,8 +32,8 @@ func (user *User) Save() *errors.RestErr {
 }
 
 func (user *User) GetByEmail() *errors.RestErr {
-	result := db.Dbpool.QueryRow(context.Background(), queryGetUser, user.Email)
-	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email, &user.Password); getErr != nil {
+	result := pgdb.Dbpool.QueryRow(context.Background(), queryGetUser, user.Email)
+	if getErr := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email, &user.Password); getErr != nil {
 		return errors.NewInternalServerError("database error")
 	}
 
@@ -41,8 +41,8 @@ func (user *User) GetByEmail() *errors.RestErr {
 }
 
 func (user *User) GetByID() *errors.RestErr {
-	result := db.Dbpool.QueryRow(context.Background(), queryGetUserByID, user.ID)
-	if getErr := result.Scan(&user.ID, &user.FirstName, &user.LastName, &user.Email); getErr != nil {
+	result := pgdb.Dbpool.QueryRow(context.Background(), queryGetUserByID, user.UUID)
+	if getErr := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email); getErr != nil {
 		return errors.NewInternalServerError("database error")
 	}
 
