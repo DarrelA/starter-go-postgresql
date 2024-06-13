@@ -1,9 +1,3 @@
-/*
-@TODO:
-	- Rename `services.go` to `auth.go`
-	- Move `token.go` from `utils` folder to `services` folder
-*/
-
 package services
 
 import (

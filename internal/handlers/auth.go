@@ -1,5 +1,4 @@
-// @TODO: Rename package from `users` to `auth`
-package users
+package handlers
 
 import (
 	"context"
@@ -11,7 +10,6 @@ import (
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
 	"github.com/DarrelA/starter-go-postgresql/internal/services"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
 	"github.com/gofiber/fiber/v2"
 )
@@ -47,7 +45,7 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	accessTokenDetails, err := utils.CreateToken(
+	accessTokenDetails, err := services.CreateToken(
 		user.UUID.String(),
 		jwtCfg.AccessTokenExpiredIn,
 		jwtCfg.AccessTokenPrivateKey,
@@ -56,7 +54,7 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(err)
 	}
 
-	refreshTokenDetails, err := utils.CreateToken(
+	refreshTokenDetails, err := services.CreateToken(
 		user.UUID.String(),
 		jwtCfg.RefreshTokenExpiredIn,
 		jwtCfg.RefreshTokenPrivateKey,
@@ -133,7 +131,7 @@ func RefreshAccessToken(c *fiber.Ctx) error {
 
 	ctx := context.TODO()
 
-	tokenClaims, err := utils.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
+	tokenClaims, err := services.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
 	if err != nil {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": err.Error()})
 	}
@@ -149,7 +147,7 @@ func RefreshAccessToken(c *fiber.Ctx) error {
 		return c.Status(restErr.Status).JSON(restErr)
 	}
 
-	accessTokenDetails, restErr := utils.CreateToken(
+	accessTokenDetails, restErr := services.CreateToken(
 		user.UUID.String(),
 		jwtCfg.AccessTokenExpiredIn,
 		jwtCfg.AccessTokenPrivateKey,

@@ -1,14 +1,13 @@
 /*
 @TODO:
 	- Mount `api` path
-	- Update routing path to use `auth`
 */
 
 package app
 
 import (
 	"github.com/DarrelA/starter-go-postgresql/configs"
-	"github.com/DarrelA/starter-go-postgresql/internal/handlers/users"
+	"github.com/DarrelA/starter-go-postgresql/internal/handlers"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
@@ -22,7 +21,7 @@ func mapUrls() {
 		MaxAge:           12 * 60 * 60,
 	}))
 
-	app.Post("/api/register", users.Register)
-	app.Post("/api/login", users.Login)
-	app.Get("/api/refresh", users.RefreshAccessToken)
+	app.Post("/api/register", handlers.Register)
+	app.Post("/api/login", handlers.Login)
+	app.Get("/api/refresh", handlers.RefreshAccessToken)
 }
