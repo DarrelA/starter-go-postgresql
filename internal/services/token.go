@@ -8,6 +8,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
 	"github.com/golang-jwt/jwt/v5"
 	uuid "github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 type TokenDetails struct {
@@ -28,7 +29,8 @@ func CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*Token
 
 	id, err := uuid.NewV7()
 	if err != nil {
-		errors.NewInternalServerError("failed to generate UUID: " + err.Error())
+		log.Error().Msg("uuid_error: " + err.Error())
+		return nil, errors.NewUnprocessableEntityError("something went wrong")
 	}
 	td.TokenUUID = id.String()
 
@@ -36,13 +38,15 @@ func CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*Token
 
 	decodePrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
 	if err != nil {
-		return nil, errors.NewInternalServerError("could not decode token private key: " + err.Error())
+		log.Error().Msg("DecodeString_privateKey_error: " + err.Error())
+		return nil, errors.NewUnprocessableEntityError("something went wrong")
 	}
 
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodePrivateKey)
 
 	if err != nil {
-		return nil, errors.NewInternalServerError("create: parse token private key: " + err.Error())
+		log.Error().Msg("ParseRSA_privateKey_error: " + err.Error())
+		return nil, errors.NewUnprocessableEntityError("something went wrong")
 	}
 
 	atClaims := make(jwt.MapClaims)
@@ -54,21 +58,24 @@ func CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*Token
 
 	*td.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, atClaims).SignedString(key)
 	if err != nil {
-		return nil, errors.NewInternalServerError("create: sign token: " + err.Error())
+		log.Error().Msg("sign_key_error: " + err.Error())
+		return nil, errors.NewUnprocessableEntityError("something went wrong")
 	}
 
 	return td, nil
 }
 
-func ValidateToken(token string, publicKey string) (*TokenDetails, error) {
+func ValidateToken(token string, publicKey string) (*TokenDetails, *errors.RestErr) {
 	decodePublicKey, err := base64.StdEncoding.DecodeString(publicKey)
 	if err != nil {
-		return nil, fmt.Errorf("could not decode: %w", err)
+		log.Error().Msg("DecodeString_publicKey_error: " + err.Error())
+		return nil, errors.NewInternalServerError("something went wrong")
 	}
 
 	key, err := jwt.ParseRSAPublicKeyFromPEM(decodePublicKey)
 	if err != nil {
-		return nil, fmt.Errorf("validate: parse key: %w", err)
+		log.Error().Msg("ParseRSA_publicKey_error: " + err.Error())
+		return nil, errors.NewInternalServerError("something went wrong")
 	}
 
 	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
@@ -79,12 +86,14 @@ func ValidateToken(token string, publicKey string) (*TokenDetails, error) {
 	})
 
 	if err != nil {
-		return nil, fmt.Errorf("validate: %w", err)
+		log.Error().Msg("validate_token_error: " + err.Error())
+		return nil, errors.NewForbiddenError("please login again")
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok || !parsedToken.Valid {
-		return nil, fmt.Errorf("validate: invalid token")
+		log.Error().Msg("validation: invalid_token")
+		return nil, errors.NewForbiddenError("please login again")
 	}
 
 	return &TokenDetails{

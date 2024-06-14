@@ -25,3 +25,19 @@ func NewBadRequestError(message string) *RestErr {
 		Error:   "bad_request",
 	}
 }
+
+func NewUnprocessableEntityError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Status:  http.StatusUnprocessableEntity,
+		Error:   "unprocessable_entity",
+	}
+}
+
+func NewForbiddenError(message string) *RestErr {
+	return &RestErr{
+		Message: message,
+		Status:  http.StatusForbidden,
+		Error:   "forbidden",
+	}
+}

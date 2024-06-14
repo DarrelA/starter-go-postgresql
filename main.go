@@ -22,6 +22,7 @@ func main() {
 		New(zerolog.
 			MultiLevelWriter(zerolog.ConsoleWriter{Out: os.Stderr}, logFile)).
 		With().
+		Caller().
 		Timestamp().
 		Logger()
 

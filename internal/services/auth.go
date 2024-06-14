@@ -4,6 +4,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,7 +22,8 @@ func CreateUser(payload users.RegisterInput) (*users.UserResponse, *errors.RestE
 
 	pwSlice, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), 14)
 	if err != nil {
-		return nil, errors.NewBadRequestError(("failed to encrypt the password"))
+		log.Error().Msg("bcrypt_error: " + err.Error())
+		return nil, errors.NewInternalServerError(("something went wrong"))
 	}
 
 	// parse from byte to string
@@ -48,7 +50,7 @@ func GetUser(user users.LoginInput) (*users.UserResponse, *errors.RestErr) {
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(user.Password)); err != nil {
-		return nil, errors.NewBadRequestError("failed to decrypt the password")
+		return nil, errors.NewBadRequestError("invalid credentials")
 	}
 
 	userResponse := &users.UserResponse{
@@ -64,7 +66,8 @@ func GetUser(user users.LoginInput) (*users.UserResponse, *errors.RestErr) {
 func GetUserByUUID(userUuid string) (*users.User, *errors.RestErr) {
 	uuidPointer, err := uuid.Parse(userUuid)
 	if err != nil {
-		return nil, errors.NewInternalServerError("Error parsing UUID: " + err.Error())
+		log.Error().Msg("uuid_error: " + err.Error())
+		return nil, errors.NewUnprocessableEntityError(("something went wrong"))
 	}
 
 	result := &users.User{UUID: &uuidPointer}

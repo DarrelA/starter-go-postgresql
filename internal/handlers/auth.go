@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog/log"
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
@@ -21,15 +22,15 @@ func Register(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&payload); err != nil {
 		err := errors.NewBadRequestError("invalid json body")
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "message": err.Message})
 	}
 
 	result, err := services.CreateUser(payload)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "message": err.Message})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(result)
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "user": result})
 }
 
 func Login(c *fiber.Ctx) error {
@@ -37,12 +38,12 @@ func Login(c *fiber.Ctx) error {
 
 	if err := c.BodyParser(&payload); err != nil {
 		err := errors.NewBadRequestError("invalid json body")
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "message": err.Message})
 	}
 
 	user, err := services.GetUser(payload)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "message": err.Message})
 	}
 
 	accessTokenDetails, err := services.CreateToken(
@@ -51,7 +52,7 @@ func Login(c *fiber.Ctx) error {
 		jwtCfg.AccessTokenPrivateKey,
 	)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "message": err.Message})
 	}
 
 	refreshTokenDetails, err := services.CreateToken(
@@ -60,7 +61,7 @@ func Login(c *fiber.Ctx) error {
 		jwtCfg.RefreshTokenPrivateKey,
 	)
 	if err != nil {
-		return c.Status(err.Status).JSON(err)
+		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "message": err.Message})
 	}
 
 	ctx := context.TODO()
@@ -74,7 +75,8 @@ func Login(c *fiber.Ctx) error {
 	).Err()
 
 	if errAccess != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": errAccess.Error()})
+		log.Error().Msg("redis_error: " + errAccess.Error())
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": "something went wrong"})
 	}
 
 	errRefresh := redisDb.RedisClient.Set(
@@ -85,7 +87,8 @@ func Login(c *fiber.Ctx) error {
 	).Err()
 
 	if errRefresh != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": errRefresh.Error()})
+		log.Error().Msg("redis_error: " + errRefresh.Error())
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": "something went wrong"})
 	}
 
 	c.Cookie(&fiber.Cookie{
@@ -122,7 +125,7 @@ func Login(c *fiber.Ctx) error {
 }
 
 func RefreshAccessToken(c *fiber.Ctx) error {
-	message := "could not refresh access token"
+	message := "please login again"
 	refresh_token := c.Cookies("refresh_token")
 
 	if refresh_token == "" {
@@ -133,27 +136,26 @@ func RefreshAccessToken(c *fiber.Ctx) error {
 
 	tokenClaims, err := services.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
 	if err != nil {
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": err.Error()})
+		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "message": err.Message})
 	}
 
-	user_uuid, err := redisDb.RedisClient.Get(ctx, tokenClaims.TokenUUID).Result()
-	if err == redis.Nil {
+	user_uuid, errGetTokenUUID := redisDb.RedisClient.Get(ctx, tokenClaims.TokenUUID).Result()
+	if errGetTokenUUID == redis.Nil {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": message})
 	}
 
-	// @TODO: Streamline custom error handling and Fiber error handling
-	user, restErr := services.GetUserByUUID(user_uuid)
-	if restErr != nil {
-		return c.Status(restErr.Status).JSON(restErr)
+	user, err := services.GetUserByUUID(user_uuid)
+	if err != nil {
+		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "message": err.Message})
 	}
 
-	accessTokenDetails, restErr := services.CreateToken(
+	accessTokenDetails, err := services.CreateToken(
 		user.UUID.String(),
 		jwtCfg.AccessTokenExpiredIn,
 		jwtCfg.AccessTokenPrivateKey,
 	)
-	if restErr != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": err.Error()})
+	if err != nil {
+		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "message": err.Message})
 	}
 
 	timeNow := time.Now()
@@ -166,7 +168,7 @@ func RefreshAccessToken(c *fiber.Ctx) error {
 	).Err()
 
 	if errAccess != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"message": errAccess.Error()})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": "something went wrong"})
 	}
 
 	c.Cookie(&fiber.Cookie{

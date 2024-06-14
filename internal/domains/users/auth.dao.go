@@ -6,6 +6,7 @@ import (
 	pgdb "github.com/DarrelA/starter-go-postgresql/db/pgdb"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -24,7 +25,8 @@ func (user *User) Save() *errors.RestErr {
 	var lastInsertUuid *uuid.UUID
 	err := pgdb.Dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)
 	if err != nil {
-		return errors.NewInternalServerError("database error: " + err.Error())
+		log.Error().Msg("pgdb_error: " + err.Error())
+		return errors.NewInternalServerError("something went wrong")
 	}
 
 	user.UUID = lastInsertUuid
@@ -33,8 +35,9 @@ func (user *User) Save() *errors.RestErr {
 
 func (user *User) GetByEmail() *errors.RestErr {
 	result := pgdb.Dbpool.QueryRow(context.Background(), queryGetUser, user.Email)
-	if getErr := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email, &user.Password); getErr != nil {
-		return errors.NewInternalServerError("database error")
+	if err := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email, &user.Password); err != nil {
+		log.Error().Msg("pgdb_error: " + err.Error())
+		return errors.NewInternalServerError("something went wrong")
 	}
 
 	return nil
@@ -42,8 +45,9 @@ func (user *User) GetByEmail() *errors.RestErr {
 
 func (user *User) GetByUUID() *errors.RestErr {
 	result := pgdb.Dbpool.QueryRow(context.Background(), queryGetUserByID, user.UUID)
-	if getErr := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email); getErr != nil {
-		return errors.NewInternalServerError("database error")
+	if err := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email); err != nil {
+		log.Error().Msg("pgdb_error: " + err.Error())
+		return errors.NewInternalServerError("something went wrong")
 	}
 
 	return nil

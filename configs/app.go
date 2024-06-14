@@ -6,9 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 var Port string
@@ -124,37 +124,37 @@ var JWTSettings JWTConfig
 func loadJWTConfigs() {
 	MaxAge, err := strconv.Atoi(os.Getenv("JWT_MAXAGE"))
 	if err != nil {
-		errors.NewInternalServerError("Check JWT Config")
+		log.Error().Err(err).Msg("check JWT config")
 	}
 
 	Secure, err := strconv.ParseBool(os.Getenv("JWT_Secure"))
 	if err != nil {
-		errors.NewInternalServerError("Check JWT Config")
+		log.Error().Err(err).Msg("check JWT config")
 	}
 
 	HttpOnly, err := strconv.ParseBool(os.Getenv("JWT_HTTPONLY"))
 	if err != nil {
-		errors.NewInternalServerError("Check JWT Config")
+		log.Error().Err(err).Msg("check JWT config")
 	}
 
 	AccessTokenMaxAge, err := strconv.Atoi(os.Getenv("ACCESS_TOKEN_MAXAGE"))
 	if err != nil {
-		errors.NewInternalServerError("Check JWT Config")
+		log.Error().Err(err).Msg("check JWT config")
 	}
 
 	AccessTokenExpiredIn, err := time.ParseDuration(os.Getenv("ACCESS_TOKEN_EXPIRED_IN"))
 	if err != nil {
-		panic("Check JWT Config")
+		log.Error().Err(err).Msg("check JWT config")
 	}
 
 	RefreshTokenMaxAge, err := strconv.Atoi(os.Getenv("REFRESH_TOKEN_MAXAGE"))
 	if err != nil {
-		errors.NewInternalServerError("Check JWT Config")
+		log.Error().Err(err).Msg("check JWT config")
 	}
 
 	RefreshTokenExpiredIn, err := time.ParseDuration(os.Getenv("REFRESH_TOKEN_EXPIRED_IN"))
 	if err != nil {
-		panic("Check JWT Config")
+		log.Error().Err(err).Msg("check JWT config")
 	}
 
 	// Initialize the JWTSettings struct with environment variable values
