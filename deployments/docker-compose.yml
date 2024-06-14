@@ -37,6 +37,8 @@ services:
     container_name: starter-go-postgresql
     ports:
       - '8080:8080'
+    volumes:
+      - ./logs:/app/logs
     env_file:
       - ../configs/.env.development
     depends_on:

@@ -3,10 +3,12 @@ package configs
 import (
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
 	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
 )
 
 var Port string
@@ -29,7 +31,36 @@ func loadEnv() {
 
 	Port = os.Getenv("APP_PORT")
 	if Port == "" {
-		Port = "4040" // Default port
+		Port = "8080" // Default port
+	}
+}
+
+func initLogSettings() {
+	logLevel := os.Getenv("LOG_LEVEL")
+
+	// Whichever level is chosen,
+	// all logs with a level greater than or equal to that level will be written.
+	switch strings.ToLower(logLevel) {
+	case "trace":
+		zerolog.SetGlobalLevel(zerolog.TraceLevel) // Level -1
+	case "debug":
+		zerolog.SetGlobalLevel(zerolog.DebugLevel) // Level 0
+	case "info":
+		zerolog.SetGlobalLevel(zerolog.InfoLevel) // Level 1
+	case "warn":
+		zerolog.SetGlobalLevel(zerolog.WarnLevel) // Level 2
+	case "error":
+		zerolog.SetGlobalLevel(zerolog.ErrorLevel) // Level 3
+	case "fatal":
+		zerolog.SetGlobalLevel(zerolog.FatalLevel) // Level 4
+	case "panic":
+		zerolog.SetGlobalLevel(zerolog.PanicLevel) // Level 5
+	default:
+		zerolog.SetGlobalLevel(zerolog.InfoLevel) // Level 1
+	}
+
+	if _, err := os.Stat("/app/logs"); os.IsNotExist(err) {
+		os.Mkdir("/app/logs", 0755)
 	}
 }
 
@@ -160,6 +191,7 @@ func loadCORSConfigs() {
 
 func init() {
 	loadEnv()
+	initLogSettings()
 	initDBSettings()
 	initRedisSettings()
 	loadJWTConfigs()

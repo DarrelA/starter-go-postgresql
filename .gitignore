@@ -5,3 +5,5 @@
 .env.production
 
 db/pgdb/servers.json
+
+*.log
