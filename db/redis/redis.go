@@ -2,10 +2,10 @@ package db
 
 import (
 	"context"
-	"log"
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -25,5 +25,16 @@ func ConnectRedis() {
 		panic(err)
 	}
 
-	log.Println("Successfully connected to the Redis database")
+	log.Info().Msg("successfully connected to the Redis database")
+}
+
+func DisconnectRedis() {
+	if RedisClient != nil {
+		err := RedisClient.Close()
+		if err != nil {
+			log.Error().Msg("error closing Redis database: " + err.Error())
+		} else {
+			log.Info().Msg("Redis database connection closed")
+		}
+	}
 }

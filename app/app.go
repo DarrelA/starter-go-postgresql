@@ -29,8 +29,13 @@ func StartApp() {
 		MaxAge:           12 * 60 * 60,
 	}))
 
-	pgdb.ConnectPostgresDatabase()
+	pgdb.ConnectPostgres()
 	redisDb.ConnectRedis()
 	authServiceRouter()
 	log.Fatal(app.Listen(":" + configs.Port))
+}
+
+func CloseConnections() {
+	pgdb.DisconnectPostgres()
+	redisDb.DisconnectRedis()
 }

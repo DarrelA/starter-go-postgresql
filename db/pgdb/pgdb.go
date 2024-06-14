@@ -3,10 +3,10 @@ package db
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rs/zerolog/log"
 )
 
 // Db is the database connection pool.
@@ -14,7 +14,7 @@ import (
 // pgxpool implements a nearly identical interface to pgx connections.
 var Dbpool *pgxpool.Pool
 
-func ConnectPostgresDatabase() {
+func ConnectPostgres() {
 	dbCfg := configs.PGDB
 
 	connString := fmt.Sprintf(
@@ -25,9 +25,16 @@ func ConnectPostgresDatabase() {
 	var err error
 	Dbpool, err = pgxpool.New(context.Background(), connString)
 	if err != nil {
-		log.Printf("Unable to connect to the database: %v\n", err)
+		log.Panic().Msg("unable to connect to the database: " + err.Error())
 		panic(err)
 	}
 
-	log.Println("Successfully connected to the Postgres database")
+	log.Info().Msg("successfully connected to the Postgres database")
+}
+
+func DisconnectPostgres() {
+	if Dbpool != nil {
+		Dbpool.Close()
+		log.Info().Msg("PostgreSQL database connection closed")
+	}
 }

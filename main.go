@@ -2,6 +2,8 @@ package main
 
 import (
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/DarrelA/starter-go-postgresql/app"
 	"github.com/rs/zerolog"
@@ -14,8 +16,6 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create log file")
 	}
-	log.Info().Msg("log file has been created")
-	defer logFile.Close()
 
 	// Configure logger to write to both file and console
 	log.Logger = zerolog.
@@ -26,5 +26,14 @@ func main() {
 		Timestamp().
 		Logger()
 
-	app.StartApp()
+	go app.StartApp()
+
+	// Create a channel to listen for OS signals
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
+	<-sigChan              // Block until a signal is received
+	app.CloseConnections() // Gracefully close the connections
+
+	logFile.Close()
+	os.Exit(0)
 }
