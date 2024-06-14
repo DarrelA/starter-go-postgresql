@@ -121,60 +121,61 @@ type JWTConfig struct {
 // Define a variable to hold the configuration
 var JWTSettings JWTConfig
 
+func loadEnvVariableInt(envVar string, target *int) {
+	valueStr := os.Getenv(envVar)
+	if valueStr == "" {
+		log.Error().Msgf("%s is not set", envVar)
+		return
+	}
+	value, err := strconv.Atoi(valueStr)
+	if err != nil {
+		log.Error().Err(err).Msgf("check JWT config: %s", envVar)
+		return
+	}
+	*target = value
+}
+
+func loadEnvVariableBool(envVar string, target *bool) {
+	valueStr := os.Getenv(envVar)
+	if valueStr == "" {
+		log.Error().Msgf("%s is not set", envVar)
+		return
+	}
+	value, err := strconv.ParseBool(valueStr)
+	if err != nil {
+		log.Error().Err(err).Msgf("check JWT config: %s", envVar)
+		return
+	}
+	*target = value
+}
+
+func loadEnvVariableDuration(envVar string, target *time.Duration) {
+	valueStr := os.Getenv(envVar)
+	if valueStr == "" {
+		log.Error().Msgf("%s is not set", envVar)
+		return
+	}
+	value, err := time.ParseDuration(valueStr)
+	if err != nil {
+		log.Error().Err(err).Msgf("check JWT config: %s", envVar)
+		return
+	}
+	*target = value
+}
+
 func loadJWTConfigs() {
-	MaxAge, err := strconv.Atoi(os.Getenv("JWT_MAXAGE"))
-	if err != nil {
-		log.Error().Err(err).Msg("check JWT config")
-	}
-
-	Secure, err := strconv.ParseBool(os.Getenv("JWT_Secure"))
-	if err != nil {
-		log.Error().Err(err).Msg("check JWT config")
-	}
-
-	HttpOnly, err := strconv.ParseBool(os.Getenv("JWT_HTTPONLY"))
-	if err != nil {
-		log.Error().Err(err).Msg("check JWT config")
-	}
-
-	AccessTokenMaxAge, err := strconv.Atoi(os.Getenv("ACCESS_TOKEN_MAXAGE"))
-	if err != nil {
-		log.Error().Err(err).Msg("check JWT config")
-	}
-
-	AccessTokenExpiredIn, err := time.ParseDuration(os.Getenv("ACCESS_TOKEN_EXPIRED_IN"))
-	if err != nil {
-		log.Error().Err(err).Msg("check JWT config")
-	}
-
-	RefreshTokenMaxAge, err := strconv.Atoi(os.Getenv("REFRESH_TOKEN_MAXAGE"))
-	if err != nil {
-		log.Error().Err(err).Msg("check JWT config")
-	}
-
-	RefreshTokenExpiredIn, err := time.ParseDuration(os.Getenv("REFRESH_TOKEN_EXPIRED_IN"))
-	if err != nil {
-		log.Error().Err(err).Msg("check JWT config")
-	}
-
-	// Initialize the JWTSettings struct with environment variable values
-	JWTSettings = JWTConfig{
-		Secret:                 os.Getenv("JWT_SECRET"),
-		Name:                   os.Getenv("JWT_NAME"),
-		Path:                   os.Getenv("JWT_PATH"),
-		Domain:                 os.Getenv("JWT_DOMAIN"),
-		MaxAge:                 MaxAge,
-		Secure:                 Secure,
-		HttpOnly:               HttpOnly,
-		AccessTokenPrivateKey:  os.Getenv("ACCESS_TOKEN_PRIVATE_KEY"),
-		AccessTokenPublicKey:   os.Getenv("ACCESS_TOKEN_PUBLIC_KEY"),
-		AccessTokenExpiredIn:   AccessTokenExpiredIn,
-		AccessTokenMaxAge:      AccessTokenMaxAge,
-		RefreshTokenPrivateKey: os.Getenv("REFRESH_TOKEN_PRIVATE_KEY"),
-		RefreshTokenPublicKey:  os.Getenv("REFRESH_TOKEN_PUBLIC_KEY"),
-		RefreshTokenExpiredIn:  RefreshTokenExpiredIn,
-		RefreshTokenMaxAge:     RefreshTokenMaxAge,
-	}
+	JWTSettings.Path = os.Getenv("JWT_PATH")
+	JWTSettings.Domain = os.Getenv("JWT_DOMAIN")
+	loadEnvVariableBool("JWT_SECURE", &JWTSettings.Secure)
+	loadEnvVariableBool("JWT_HTTPONLY", &JWTSettings.HttpOnly)
+	JWTSettings.AccessTokenPrivateKey = os.Getenv("ACCESS_TOKEN_PRIVATE_KEY")
+	JWTSettings.AccessTokenPublicKey = os.Getenv("ACCESS_TOKEN_PUBLIC_KEY")
+	loadEnvVariableDuration("ACCESS_TOKEN_EXPIRED_IN", &JWTSettings.AccessTokenExpiredIn)
+	loadEnvVariableInt("ACCESS_TOKEN_MAXAGE", &JWTSettings.AccessTokenMaxAge)
+	JWTSettings.RefreshTokenPrivateKey = os.Getenv("REFRESH_TOKEN_PRIVATE_KEY")
+	JWTSettings.RefreshTokenPublicKey = os.Getenv("REFRESH_TOKEN_PUBLIC_KEY")
+	loadEnvVariableDuration("REFRESH_TOKEN_EXPIRED_IN", &JWTSettings.RefreshTokenExpiredIn)
+	loadEnvVariableInt("REFRESH_TOKEN_MAXAGE", &JWTSettings.RefreshTokenMaxAge)
 }
 
 type CORSConfig struct {
