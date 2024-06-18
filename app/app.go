@@ -8,7 +8,6 @@ import (
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/fiber/v2/middleware/logger"
 )
 
 var (
@@ -18,8 +17,8 @@ var (
 
 func StartApp() {
 	app.Mount("/api", authService)
-	app.Use(logger.New())
 
+	// Middlewares
 	app.Use(cors.New(cors.Config{
 		AllowOrigins:     configs.CORSSettings.AllowedOrigins,
 		AllowMethods:     "GET,POST",
