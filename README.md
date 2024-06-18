@@ -5,6 +5,7 @@
   - [Combining Microservices and N-tier Architectures](#combining-microservices-and-n-tier-architectures)
   - [Middlewares](#middlewares)
     - [Logging and Monitoring](#logging-and-monitoring)
+      - [`X-Correlation-ID` \& `Request-ID`](#x-correlation-id--request-id)
   - [JWT](#jwt)
     - [Implementation of Refresh Token with Redis](#implementation-of-refresh-token-with-redis)
 - [Setup](#setup)
@@ -86,19 +87,34 @@ Combining N-tier architecture with microservices involves separating concerns wi
 
 | **Information**             | **Use Case (Software Engineers)**                                                                                                                   | **Use Case (DevOps)**                                                                                                                                             |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Host/</br>Server Info**   | Identifying issues related to specific servers or instances in a distributed environment.                                                           | Monitoring server health and performance to identify potential issues and balance load across instances.                                                          |
 | **Request Method**          | Identifying the type of HTTP request (GET, POST, etc.) to understand user actions and flow through the application.                                 | Monitoring the distribution of different request types to identify unusual patterns or spikes that may indicate issues.                                           |
 | **HTTP Referrer**           | Understanding the sources of traffic and user navigation patterns to optimize user experience and marketing efforts.                                | Tracking referral sources to identify potential security threats, such as phishing or spam attacks, and to optimize resource allocation based on traffic sources. |
 | **Request URL**             | Debugging issues related to specific endpoints and understanding which resources are being accessed.                                                | Tracking usage patterns across different endpoints to optimize performance and resource allocation.                                                               |
 | **Status Code**             | Identifying success or failure of requests to pinpoint potential issues in the application logic.                                                   | Monitoring overall application health and identifying trends in error rates or unusual spikes in specific status codes.                                           |
-| **Request Headers**         | Debugging issues related to client-server communication, such as missing or incorrect headers.                                                      | Monitoring headers to identify unusual patterns or potential security threats, such as unauthorized access attempts.                                              |
 | **Response Time**           | Measuring the performance of individual requests to identify slow responses and potential bottlenecks in the application.                           | Ensuring the application meets performance SLAs and identifying areas for optimization to improve response times.                                                 |
 | **Latency**                 | Measuring the time taken for different parts of the request processing to identify and optimize slow components.                                    | Monitoring end-to-end latency to ensure the application meets performance SLAs and identifying areas for optimization.                                            |
 | **IP Address**              | Tracking user activity and identifying potential malicious activities or misuse of the application.                                                 | Monitoring the geographic distribution of traffic and identifying potential security threats such as DDoS attacks.                                                |
 | **User Agent**              | Understanding the types of clients (browsers, mobile devices, etc.) accessing the application to ensure compatibility and optimize user experience. | Tracking the mix of client types to plan for capacity and performance testing, as well as identifying potentially malicious clients.                              |
-| **Timestamp**               | Correlating events and debugging issues based on the timing of requests and responses.                                                              | Analyzing request patterns over time to identify trends, peak usage times, and potential issues related to specific time periods.                                 |
 | **Correlation ID**          | Tracing requests through the entire application stack to diagnose issues and ensure consistency across services.                                    | Linking logs from different services and components to get a holistic view of the application's behavior and identify root causes of issues.                      |
+| **Request ID**              | Tracking and debugging specific requests within a service to identify issues and optimize request handling.                                         | Monitoring individual request logs to identify patterns, performance issues, and potential security threats at a granular level.                                  |
 | **User ID/</br>Session ID** | Tracking user activity and debugging issues related to specific users or sessions.                                                                  | Monitoring user behavior and session patterns to identify potential misuse or performance issues affecting specific user groups.                                  |
-| **Host/</br>Server Info**   | Identifying issues related to specific servers or instances in a distributed environment.                                                           | Monitoring server health and performance to identify potential issues and balance load across instances.                                                          |
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+#### `X-Correlation-ID` & `Request-ID`
+
+- **`X-Correlation-ID`**
+  - **Purpose:** Used to trace and correlate a series of related requests across multiple services. It helps in understanding the journey of a particular transaction or user action through the system.
+  - **Scope:** Typically spans multiple services and systems. It's used to connect different parts of a transaction that might pass through various microservices.
+  - **Usage:** The `X-Correlation-ID` header is included in HTTP requests and responses to maintain the correlation ID across different services.
+- **`Request-ID`**
+  - **Purpose:** Used to uniquely identify a single request within a service. It helps in logging and debugging individual requests.
+  - **Scope:** Usually limited to a single request-response cycle within a service. It can be useful for tracking the processing of a request through different components of the same service.
+  - **Usage:** The `Request-ID` header is included in HTTP requests and responses to identify the specific request.
+- **Key Differences**
+  - **Scope:** `X-Correlation-ID` has a broader scope, typically spanning multiple services, while `Request-ID` is more narrowly focused on a single request within a service.
+  - **Usage Scenario:** Use `X-Correlation-ID` when you need to trace an end-to-end transaction through multiple microservices. Use `Request-ID` for tracking and debugging individual requests within a specific service.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

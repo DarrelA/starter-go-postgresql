@@ -1,13 +1,13 @@
 package app
 
 import (
-	"log"
-
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	pgdb "github.com/DarrelA/starter-go-postgresql/db/pgdb"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
+	"github.com/DarrelA/starter-go-postgresql/internal/middlewares"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/rs/zerolog/log"
 )
 
 var (
@@ -19,7 +19,7 @@ func StartApp() {
 	app.Mount("/api", authService)
 
 	// Middlewares
-	app.Use(cors.New(cors.Config{
+	authService.Use(cors.New(cors.Config{
 		AllowOrigins:     configs.CORSSettings.AllowedOrigins,
 		AllowMethods:     "GET,POST",
 		AllowHeaders:     "Content-Type",
@@ -27,11 +27,17 @@ func StartApp() {
 		AllowCredentials: true,
 		MaxAge:           12 * 60 * 60,
 	}))
+	authService.Use(middlewares.CorrelationAndRequestID)
+	authService.Use(middlewares.LogRequest)
 
 	pgdb.ConnectPostgres()
 	redisDb.ConnectRedis()
 	authServiceRouter()
-	log.Fatal(app.Listen(":" + configs.Port))
+
+	err := app.Listen(":" + configs.Port)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to start server")
+	}
 }
 
 func CloseConnections() {
