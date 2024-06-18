@@ -193,3 +193,53 @@ func RefreshAccessToken(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "access_token": accessTokenDetails.Token})
 }
+
+func Logout(c *fiber.Ctx) error {
+	message := "please login again"
+	refresh_token := c.Cookies("refresh_token")
+
+	if refresh_token == "" {
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": message})
+	}
+
+	ctx := context.TODO()
+
+	tokenClaims, err := services.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
+	if err != nil {
+		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "message": err.Message})
+	}
+
+	accessTokenUUID, ok := c.Locals("access_token_uuid").(string) // type assertion
+	if !ok {
+		log.Error().Msg("access_token is not a string or not set")
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "fail", "message": message})
+	}
+
+	_, errDelTokenUUID := redisDb.RedisClient.Del(ctx, tokenClaims.TokenUUID, accessTokenUUID).Result()
+	if errDelTokenUUID != nil {
+		return c.Status(fiber.StatusBadGateway).
+			JSON(fiber.Map{"status": "fail", "message": errDelTokenUUID.Error()})
+	}
+
+	expired := time.Now().Add(-time.Hour * 24)
+
+	c.Cookie(&fiber.Cookie{
+		Name:    "access_token",
+		Value:   "",
+		Expires: expired,
+	})
+
+	c.Cookie(&fiber.Cookie{
+		Name:    "refresh_token",
+		Value:   "",
+		Expires: expired,
+	})
+
+	c.Cookie(&fiber.Cookie{
+		Name:    "logged_in",
+		Value:   "",
+		Expires: expired,
+	})
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success"})
+}
