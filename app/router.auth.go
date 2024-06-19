@@ -7,21 +7,20 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func authServiceRouter() {
-	authService.Route("/auth", func(router fiber.Router) {
-		router.Post("/register", handlers.Register)
-		router.Post("/login", handlers.Login)
-		router.Get("/logout", handlers.Logout)
-		router.Get("/refresh", handlers.RefreshAccessToken)
-	})
+func authServiceRouter(router *fiber.App) {
+	v1 := router.Group("/api")
 
-	authService.Get("/users/me", middlewares.Deserializer, handlers.GetMe)
+	v1.Post("/register", handlers.Register)
+	v1.Post("/login", handlers.Login)
+	v1.Get("/logout", middlewares.Deserializer, handlers.Logout)
+	v1.Get("/refresh", handlers.RefreshAccessToken)
+	v1.Get("/users/me", middlewares.Deserializer, handlers.GetMe)
 
-	authService.Get("/health", func(c *fiber.Ctx) error {
+	v1.Get("/health", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success"})
 	})
 
-	authService.All("*", func(c *fiber.Ctx) error {
+	v1.All("*", func(c *fiber.Ctx) error {
 		path := c.Path()
 		log.Error().Msg("Invalid Path: " + path)
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{

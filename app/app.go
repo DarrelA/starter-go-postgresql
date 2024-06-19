@@ -16,7 +16,7 @@ var (
 )
 
 func StartApp() {
-	app.Mount("/api", authService)
+	app.Mount("/auth", authService)
 
 	// Middlewares
 	authService.Use(cors.New(cors.Config{
@@ -32,7 +32,7 @@ func StartApp() {
 
 	pgdb.ConnectPostgres()
 	redisDb.ConnectRedis()
-	authServiceRouter()
+	authServiceRouter(authService)
 
 	err := app.Listen(":" + configs.Port)
 	if err != nil {
