@@ -95,30 +95,22 @@ func Login(c *fiber.Ctx) error {
 		Name:     "access_token",
 		Value:    *accessTokenDetails.Token,
 		Path:     "/",
+		Domain:   jwtCfg.Domain,
 		MaxAge:   jwtCfg.AccessTokenMaxAge * 60,
 		Secure:   jwtCfg.Secure,
 		HTTPOnly: jwtCfg.HttpOnly,
-		Domain:   jwtCfg.Domain,
+		SameSite: "strict",
 	})
 
 	c.Cookie(&fiber.Cookie{
 		Name:     "refresh_token",
 		Value:    *refreshTokenDetails.Token,
 		Path:     "/",
+		Domain:   jwtCfg.Domain,
 		MaxAge:   jwtCfg.RefreshTokenMaxAge * 60,
 		Secure:   jwtCfg.Secure,
 		HTTPOnly: jwtCfg.HttpOnly,
-		Domain:   jwtCfg.Domain,
-	})
-
-	c.Cookie(&fiber.Cookie{
-		Name:     "logged_in",
-		Value:    "true",
-		Path:     "/",
-		MaxAge:   jwtCfg.AccessTokenMaxAge * 60,
-		Secure:   false,
-		HTTPOnly: false,
-		Domain:   "localhost",
+		SameSite: "strict",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "access_token": accessTokenDetails.Token})
@@ -175,20 +167,11 @@ func RefreshAccessToken(c *fiber.Ctx) error {
 		Name:     "access_token",
 		Value:    *accessTokenDetails.Token,
 		Path:     "/",
+		Domain:   jwtCfg.Domain,
 		MaxAge:   jwtCfg.AccessTokenMaxAge * 60,
 		Secure:   jwtCfg.Secure,
 		HTTPOnly: jwtCfg.HttpOnly,
-		Domain:   jwtCfg.Domain,
-	})
-
-	c.Cookie(&fiber.Cookie{
-		Name:     "logged_in",
-		Value:    "true",
-		Path:     "/",
-		MaxAge:   jwtCfg.AccessTokenMaxAge * 60,
-		Secure:   false,
-		HTTPOnly: false,
-		Domain:   "localhost",
+		SameSite: "strict",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "access_token": accessTokenDetails.Token})
@@ -231,12 +214,6 @@ func Logout(c *fiber.Ctx) error {
 
 	c.Cookie(&fiber.Cookie{
 		Name:    "refresh_token",
-		Value:   "",
-		Expires: expired,
-	})
-
-	c.Cookie(&fiber.Cookie{
-		Name:    "logged_in",
 		Value:   "",
 		Expires: expired,
 	})
