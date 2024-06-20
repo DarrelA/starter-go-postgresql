@@ -20,7 +20,7 @@ type PostgresDBConfig struct {
 	PoolMaxConns string
 }
 
-type RedisConfig struct {
+type RedisDBConfig struct {
 	RedisUri string
 }
 
@@ -50,7 +50,7 @@ type CORSConfig struct {
 var (
 	Port         string
 	PGDB         PostgresDBConfig
-	RedisDB      RedisConfig
+	RedisDB      RedisDBConfig
 	JWTSettings  JWTConfig
 	CORSSettings CORSConfig
 )
@@ -119,7 +119,7 @@ func initDBSettings() {
 }
 
 func initRedisSettings() {
-	RedisDB = RedisConfig{
+	RedisDB = RedisDBConfig{
 		RedisUri: os.Getenv("REDIS_URL"),
 	}
 }

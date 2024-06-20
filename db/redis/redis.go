@@ -8,12 +8,23 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type RedisDB struct {
+	configs.RedisDBConfig
+}
+
 var (
 	RedisClient *redis.Client
 	ctx         context.Context
 )
 
-func ConnectRedis() {
+// NewDB creates a new RedisDB instance with loaded config
+func NewDB() *RedisDB {
+	return &RedisDB{
+		RedisDBConfig: configs.RedisDB,
+	}
+}
+
+func (db *RedisDB) Connect() {
 	dbCfg := configs.RedisDB
 	ctx = context.TODO()
 
@@ -28,7 +39,7 @@ func ConnectRedis() {
 	log.Info().Msg("successfully connected to the Redis database")
 }
 
-func DisconnectRedis() {
+func (db *RedisDB) Disconnect() {
 	if RedisClient != nil {
 		err := RedisClient.Close()
 		if err != nil {

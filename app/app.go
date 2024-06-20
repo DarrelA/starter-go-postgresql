@@ -3,7 +3,6 @@ package app
 import (
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/DarrelA/starter-go-postgresql/db"
-	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/middlewares"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -15,8 +14,9 @@ var (
 	authService = fiber.New()
 )
 
-func StartApp(rdbms db.RDBMS) {
+func StartApp(rdbms db.RDBMS, inMemoryDb db.InMemoryDB) {
 	pgdb := rdbms
+	redisDb := inMemoryDb
 
 	app.Mount("/auth", authService)
 
@@ -33,7 +33,7 @@ func StartApp(rdbms db.RDBMS) {
 	authService.Use(middlewares.LogRequest)
 
 	pgdb.Connect()
-	redisDb.ConnectRedis()
+	redisDb.Connect()
 	authServiceRouter(authService)
 
 	err := app.Listen(":" + configs.Port)
@@ -42,9 +42,10 @@ func StartApp(rdbms db.RDBMS) {
 	}
 }
 
-func CloseConnections(rdbms db.RDBMS) {
+func CloseConnections(rdbms db.RDBMS, inMemoryDb db.InMemoryDB) {
 	pgdb := rdbms
+	redisDb := inMemoryDb
 
 	pgdb.Disconnect()
-	redisDb.DisconnectRedis()
+	redisDb.Disconnect()
 }
