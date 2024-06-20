@@ -2,16 +2,58 @@ package configs
 
 import (
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
+	"github.com/DarrelA/starter-go-postgresql/internal/utils"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
-var Port string
+type PostgresDBConfig struct {
+	Username     string
+	Password     string
+	Host         string
+	Port         string
+	Name         string
+	SslMode      string
+	PoolMaxConns string
+}
+
+type RedisConfig struct {
+	RedisUri string
+}
+
+type JWTConfig struct {
+	Secret                 string
+	Name                   string
+	Path                   string
+	Domain                 string
+	MaxAge                 int
+	Secure                 bool
+	HttpOnly               bool
+	AccessTokenPrivateKey  string
+	AccessTokenPublicKey   string
+	AccessTokenExpiredIn   time.Duration
+	AccessTokenMaxAge      int
+	RefreshTokenPrivateKey string
+	RefreshTokenPublicKey  string
+	RefreshTokenExpiredIn  time.Duration
+	RefreshTokenMaxAge     int
+}
+
+type CORSConfig struct {
+	AllowedOrigins string
+}
+
+// Define the variables to hold the configuration
+var (
+	Port         string
+	PGDB         PostgresDBConfig
+	RedisDB      RedisConfig
+	JWTSettings  JWTConfig
+	CORSSettings CORSConfig
+)
 
 func loadEnv() {
 	env := os.Getenv("APP_ENV")
@@ -64,18 +106,6 @@ func initLogSettings() {
 	}
 }
 
-type PostgresDBConfig struct {
-	Username     string
-	Password     string
-	Host         string
-	Port         string
-	Name         string
-	SslMode      string
-	PoolMaxConns string
-}
-
-var PGDB PostgresDBConfig
-
 func initDBSettings() {
 	PGDB = PostgresDBConfig{
 		Username:     os.Getenv("POSTGRES_USER"),
@@ -88,101 +118,26 @@ func initDBSettings() {
 	}
 }
 
-type RedisConfig struct {
-	RedisUri string
-}
-
-var RedisDB RedisConfig
-
 func initRedisSettings() {
 	RedisDB = RedisConfig{
 		RedisUri: os.Getenv("REDIS_URL"),
 	}
 }
 
-type JWTConfig struct {
-	Secret                 string
-	Name                   string
-	Path                   string
-	Domain                 string
-	MaxAge                 int
-	Secure                 bool
-	HttpOnly               bool
-	AccessTokenPrivateKey  string
-	AccessTokenPublicKey   string
-	AccessTokenExpiredIn   time.Duration
-	AccessTokenMaxAge      int
-	RefreshTokenPrivateKey string
-	RefreshTokenPublicKey  string
-	RefreshTokenExpiredIn  time.Duration
-	RefreshTokenMaxAge     int
-}
-
-// Define a variable to hold the configuration
-var JWTSettings JWTConfig
-
-func loadEnvVariableInt(envVar string, target *int) {
-	valueStr := os.Getenv(envVar)
-	if valueStr == "" {
-		log.Error().Msgf("%s is not set", envVar)
-		return
-	}
-	value, err := strconv.Atoi(valueStr)
-	if err != nil {
-		log.Error().Err(err).Msgf("check JWT config: %s", envVar)
-		return
-	}
-	*target = value
-}
-
-func loadEnvVariableBool(envVar string, target *bool) {
-	valueStr := os.Getenv(envVar)
-	if valueStr == "" {
-		log.Error().Msgf("%s is not set", envVar)
-		return
-	}
-	value, err := strconv.ParseBool(valueStr)
-	if err != nil {
-		log.Error().Err(err).Msgf("check JWT config: %s", envVar)
-		return
-	}
-	*target = value
-}
-
-func loadEnvVariableDuration(envVar string, target *time.Duration) {
-	valueStr := os.Getenv(envVar)
-	if valueStr == "" {
-		log.Error().Msgf("%s is not set", envVar)
-		return
-	}
-	value, err := time.ParseDuration(valueStr)
-	if err != nil {
-		log.Error().Err(err).Msgf("check JWT config: %s", envVar)
-		return
-	}
-	*target = value
-}
-
 func loadJWTConfigs() {
 	JWTSettings.Path = os.Getenv("JWT_PATH")
 	JWTSettings.Domain = os.Getenv("JWT_DOMAIN")
-	loadEnvVariableBool("JWT_SECURE", &JWTSettings.Secure)
-	loadEnvVariableBool("JWT_HTTPONLY", &JWTSettings.HttpOnly)
+	utils.LoadEnvVariableBool("JWT_SECURE", &JWTSettings.Secure)
+	utils.LoadEnvVariableBool("JWT_HTTPONLY", &JWTSettings.HttpOnly)
 	JWTSettings.AccessTokenPrivateKey = os.Getenv("ACCESS_TOKEN_PRIVATE_KEY")
 	JWTSettings.AccessTokenPublicKey = os.Getenv("ACCESS_TOKEN_PUBLIC_KEY")
-	loadEnvVariableDuration("ACCESS_TOKEN_EXPIRED_IN", &JWTSettings.AccessTokenExpiredIn)
-	loadEnvVariableInt("ACCESS_TOKEN_MAXAGE", &JWTSettings.AccessTokenMaxAge)
+	utils.LoadEnvVariableDuration("ACCESS_TOKEN_EXPIRED_IN", &JWTSettings.AccessTokenExpiredIn)
+	utils.LoadEnvVariableInt("ACCESS_TOKEN_MAXAGE", &JWTSettings.AccessTokenMaxAge)
 	JWTSettings.RefreshTokenPrivateKey = os.Getenv("REFRESH_TOKEN_PRIVATE_KEY")
 	JWTSettings.RefreshTokenPublicKey = os.Getenv("REFRESH_TOKEN_PUBLIC_KEY")
-	loadEnvVariableDuration("REFRESH_TOKEN_EXPIRED_IN", &JWTSettings.RefreshTokenExpiredIn)
-	loadEnvVariableInt("REFRESH_TOKEN_MAXAGE", &JWTSettings.RefreshTokenMaxAge)
+	utils.LoadEnvVariableDuration("REFRESH_TOKEN_EXPIRED_IN", &JWTSettings.RefreshTokenExpiredIn)
+	utils.LoadEnvVariableInt("REFRESH_TOKEN_MAXAGE", &JWTSettings.RefreshTokenMaxAge)
 }
-
-type CORSConfig struct {
-	AllowedOrigins string
-}
-
-var CORSSettings CORSConfig
 
 func loadCORSConfigs() {
 	CORSSettings = CORSConfig{
