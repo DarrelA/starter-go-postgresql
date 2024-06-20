@@ -30,16 +30,6 @@ func NewDB() *PostgresDB {
 }
 
 func (db *PostgresDB) Connect() {
-	log.Info().
-		Str("username", db.Username).
-		Str("password", db.Password).
-		Str("host", db.Host).
-		Str("port", db.Port).
-		Str("dbname", db.Name).
-		Str("sslmode", db.SslMode).
-		Str("pool_max_conns", db.PoolMaxConns).
-		Msg("Database connection details")
-
 	connString := fmt.Sprintf(
 		"user=%s password=%s host=%s port=%s dbname=%s sslmode=%s pool_max_conns=%s",
 		db.Username, db.Password, db.Host, db.Port, db.Name, db.SslMode, db.PoolMaxConns,
