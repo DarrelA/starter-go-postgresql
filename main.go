@@ -6,6 +6,7 @@ import (
 	"syscall"
 
 	"github.com/DarrelA/starter-go-postgresql/app"
+	pgdb "github.com/DarrelA/starter-go-postgresql/db/pgdb"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -26,13 +27,16 @@ func main() {
 		Timestamp().
 		Logger()
 
-	go app.StartApp()
+	// Configure Instances
+	rdbmsInstance := pgdb.NewDB()
+
+	go app.StartApp(rdbmsInstance)
 
 	// Create a channel to listen for OS signals
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-	<-sigChan              // Block until a signal is received
-	app.CloseConnections() // Gracefully close the connections
+	<-sigChan                           // Block until a signal is received
+	app.CloseConnections(rdbmsInstance) // Gracefully close the connections
 
 	logFile.Close()
 	os.Exit(0)

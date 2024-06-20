@@ -1,3 +1,5 @@
+<a name="readme-top"></a>
+
 - [Design Considerations](#design-considerations)
   - [Requirements](#requirements)
   - [Model-View-Controller (MVC)](#model-view-controller-mvc)
@@ -5,7 +7,7 @@
   - [Combining Microservices and N-tier Architectures](#combining-microservices-and-n-tier-architectures)
   - [Middlewares](#middlewares)
     - [Logging and Monitoring](#logging-and-monitoring)
-      - [Custom Headers: `Correlation-ID` \& `Request-ID`](#custom-headers-correlation-id--request-id)
+      - [Custom Headers: `Correlation-ID` and `Request-ID`](#custom-headers-correlation-id-and-request-id)
   - [JWT](#jwt)
     - [Implementation of Refresh Token with Redis](#implementation-of-refresh-token-with-redis)
       - [Redis and JWT Statelessness](#redis-and-jwt-statelessness)
@@ -23,9 +25,12 @@
   - [psql](#psql)
   - [golang-migrate](#golang-migrate)
   - [redis](#redis)
+- [Testing](#testing)
+  - [Unit Testing and Acceptance Testing](#unit-testing-and-acceptance-testing)
+  - [Dependency Injection](#dependency-injection)
 - [References](#references)
 
-<a name="readme-top"></a>
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Design Considerations
 
@@ -90,6 +95,8 @@ Combining N-tier architecture with microservices involves separating concerns wi
 | **Data Validation and Sanitization**                  | Ensuring incoming request data adheres to expected formats and rules.<br/>Removing or escaping potentially harmful data to prevent injection attacks.              |
 | **Session Management**                                | Maintaining user session state across multiple requests.<br/>Handling session creation, expiration, and validation.                                                |
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 ### Logging and Monitoring
 
 | **Information**             | **Use Case (Software Engineers)**                                                                                                                   | **Use Case (DevOps)**                                                                                                                                             |
@@ -109,7 +116,7 @@ Combining N-tier architecture with microservices involves separating concerns wi
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-#### Custom Headers: `Correlation-ID` & `Request-ID`
+#### Custom Headers: `Correlation-ID` and `Request-ID`
 
 - **`Correlation-ID`**
   - **Purpose:** Used to trace and correlate a series of related requests across multiple services. It helps in understanding the journey of a particular transaction or user action through the system.
@@ -143,6 +150,8 @@ Storing token details in Redis does not violate the statelessness principle of J
 
 4. **Token Revocation**: When using Redis for storing tokens (or token blacklists), it is typically for the purpose of token revocation. This is an added security measure that doesn't conflict with JWT statelessness. The tokens remain self-contained, but there is an additional mechanism to invalidate them if necessary.
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 #### What are Access and Refresh Tokens?
 
 **Access Tokens** are short-term keys that grant users access to specific resources or data, typically valid for a short period (e.g., 15 minutes). When users log in, they receive an access token, which is included in their requests to access protected resources.
@@ -166,6 +175,8 @@ Storing token details in Redis does not violate the statelessness principle of J
 5. **Using Cookies for Tokens:**
    To keep things secure and simple, access and refresh tokens are stored in cookies. Cookies are small pieces of data stored on the user's browser. Marking these cookies as HTTP-only ensures they are not accessible via JavaScript, adding an extra layer of security.
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 #### Managing Security Threats: CSRF and XSS Attacks
 
 **Cross-Site Request Forgery (CSRF):**
@@ -182,6 +193,8 @@ XSS attacks involve injecting malicious scripts into web pages viewed by other u
 - **Escaping User Input:** Properly escape any user input rendered in the HTML to prevent the execution of malicious scripts.
 - **Content Security Policy (CSP):** Implementing a CSP restricts the sources from which scripts, styles, and other resources can be loaded, preventing unauthorized script execution.
 - **HTTP-Only Cookies:** Storing tokens in HTTP-only cookies ensures they are not accessible via JavaScript, preventing malicious scripts from stealing tokens.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 #### Security Implementation Details
 
@@ -235,6 +248,8 @@ XSS attacks involve injecting malicious scripts into web pages viewed by other u
    - Use SameSite and HTTP-only cookies.
    - Implement CSRF tokens for form submissions and API requests using fetch or Axios.
    - Escape user input and enforce a Content Security Policy (CSP).
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 #### Diagram: Token Workflow
 
@@ -338,6 +353,38 @@ TTL key
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+# Testing
+
+```sh
+go test -cover
+```
+
+## Unit Testing and Acceptance Testing
+
+| Aspect              | Unit Testing                        | Acceptance Testing                          |
+| ------------------- | ----------------------------------- | ------------------------------------------- |
+| **Purpose**         | Verify individual units/components  | Verify the entire system meets requirements |
+| **Scope**           | Small, isolated pieces of code      | Entire application or major features        |
+| **Nature**          | Typically automated, quick to run   | Can be automated or manual, longer to run   |
+| **Examples**        | Testing a single function or method | Testing end-to-end user scenarios           |
+| **Tools**           | Go `testing` package                | godog                                       |
+| **Characteristics** | White-box testing, high frequency   | Black-box testing, less frequent            |
+
+[User Stories] become [Acceptance Tests] which is [Behavior Driven Development] "Doing the RIGHT thing."
+
+[Code Functionality] becomes [Unit Testing] which is [Test Driven Development] "Doing the THING right."
+
+## Dependency Injection
+
+Dependency Injection (DI) is a design pattern that achieves Inversion of Control (IoC) by allowing components to receive their dependencies from an external source rather than creating them internally. In Go, DI is typically implemented by passing dependencies as parameters to functions or struct constructors. This approach decouples application components, making them more modular, easier to test, and maintain. DI allows replacing real implementations of dependencies with mock versions during testing, ensuring components can be tested in isolation.
+
+- **Promotes Loose Coupling**: DI promotes loose coupling and modularity.
+- **Defines Clear Contracts**: Interfaces define clear contracts for components.
+- **Encapsulates Related Data**: Structs encapsulate related data and behaviors.
+- **Enables Effective Mocking**: Together, these concepts enable effective mocking and testing in Go.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 # References
 
 - [go-project-layout](https://appliedgo.com/blog/go-project-layout)
@@ -347,6 +394,7 @@ TTL key
 - [Should I use UUID as well as ID](https://dba.stackexchange.com/questions/115766/should-i-use-uuid-as-well-as-id)
 - [Why your software should use UUIDs](https://devforth.io/blog/why-your-software-should-use-uuids/)
 - [Hypertext Transfer Protocol (HTTP) Field Name Registry](https://www.iana.org/assignments/http-fields/http-fields.xhtml)
+- [learn-go-with-tests](https://quii.gitbook.io/learn-go-with-tests)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

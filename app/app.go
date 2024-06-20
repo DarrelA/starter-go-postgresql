@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/DarrelA/starter-go-postgresql/configs"
-	pgdb "github.com/DarrelA/starter-go-postgresql/db/pgdb"
+	"github.com/DarrelA/starter-go-postgresql/db"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/middlewares"
 	"github.com/gofiber/fiber/v2"
@@ -15,7 +15,9 @@ var (
 	authService = fiber.New()
 )
 
-func StartApp() {
+func StartApp(rdbms db.RDBMS) {
+	pgdb := rdbms
+
 	app.Mount("/auth", authService)
 
 	// Middlewares
@@ -30,7 +32,7 @@ func StartApp() {
 	authService.Use(middlewares.CorrelationAndRequestID)
 	authService.Use(middlewares.LogRequest)
 
-	pgdb.ConnectPostgres()
+	pgdb.Connect()
 	redisDb.ConnectRedis()
 	authServiceRouter(authService)
 
@@ -40,7 +42,9 @@ func StartApp() {
 	}
 }
 
-func CloseConnections() {
-	pgdb.DisconnectPostgres()
+func CloseConnections(rdbms db.RDBMS) {
+	pgdb := rdbms
+
+	pgdb.Disconnect()
 	redisDb.DisconnectRedis()
 }

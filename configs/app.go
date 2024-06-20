@@ -64,7 +64,7 @@ func initLogSettings() {
 	}
 }
 
-type DBConfig struct {
+type PostgresDBConfig struct {
 	Username     string
 	Password     string
 	Host         string
@@ -74,10 +74,10 @@ type DBConfig struct {
 	PoolMaxConns string
 }
 
-var PGDB DBConfig
+var PGDB PostgresDBConfig
 
 func initDBSettings() {
-	PGDB = DBConfig{
+	PGDB = PostgresDBConfig{
 		Username:     os.Getenv("POSTGRES_USER"),
 		Password:     os.Getenv("POSTGRES_PASSWORD"),
 		Host:         os.Getenv("POSTGRES_HOST"),
