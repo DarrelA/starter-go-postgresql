@@ -16,7 +16,7 @@ func CorrelationAndRequestID(c *fiber.Ctx) error {
 	if correlationID == "" {
 		id, err := uuid.NewV7()
 		if err != nil {
-			log.Err(err).Msg("correlationID_uuid_error: ")
+			log.Error().Err(err).Msg("correlationID_uuid_error: ")
 			return fiber.ErrUnprocessableEntity
 		}
 
@@ -27,7 +27,7 @@ func CorrelationAndRequestID(c *fiber.Ctx) error {
 	if requestID == "" {
 		id, err := uuid.NewV7()
 		if err != nil {
-			log.Err(err).Msg("requestID_uuid_error")
+			log.Error().Err(err).Msg("requestID_uuid_error")
 			return fiber.ErrUnprocessableEntity
 		}
 

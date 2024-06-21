@@ -3,6 +3,7 @@ package app
 import (
 	"github.com/DarrelA/starter-go-postgresql/internal/handlers"
 	"github.com/DarrelA/starter-go-postgresql/internal/middlewares"
+	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -22,7 +23,8 @@ func authServiceRouter(router *fiber.App) {
 
 	v1.All("*", func(c *fiber.Ctx) error {
 		path := c.Path()
-		log.Error().Msg("Invalid Path: " + path)
+		err := errors.NewBadRequestError("Invalid Path: " + path)
+		log.Error().Err(err).Msg("")
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"status":  "fail",
 			"message": "404 - Not Found",

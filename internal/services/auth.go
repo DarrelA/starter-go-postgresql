@@ -22,7 +22,7 @@ func CreateUser(payload users.RegisterInput) (*users.UserResponse, *errors.RestE
 
 	pwSlice, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), 14)
 	if err != nil {
-		log.Error().Msg("bcrypt_error: " + err.Error())
+		log.Error().Err(err).Msg("bcrypt_error")
 		return nil, errors.NewInternalServerError(("something went wrong"))
 	}
 
@@ -66,7 +66,7 @@ func GetUser(user users.LoginInput) (*users.UserResponse, *errors.RestErr) {
 func GetUserByUUID(userUuid string) (*users.User, *errors.RestErr) {
 	uuidPointer, err := uuid.Parse(userUuid)
 	if err != nil {
-		log.Error().Msg("uuid_error: " + err.Error())
+		log.Error().Err(err).Msg("uuid_error")
 		return nil, errors.NewUnprocessableEntityError(("something went wrong"))
 	}
 

@@ -43,7 +43,7 @@ func (db *RedisDB) Disconnect() {
 	if RedisClient != nil {
 		err := RedisClient.Close()
 		if err != nil {
-			log.Error().Msg("error closing Redis database: " + err.Error())
+			log.Error().Err(err).Msg("error closing Redis database")
 		} else {
 			log.Info().Msg("Redis database connection closed")
 		}

@@ -29,7 +29,7 @@ func CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*Token
 
 	id, err := uuid.NewV7()
 	if err != nil {
-		log.Error().Msg("uuid_error: " + err.Error())
+		log.Error().Err(err).Msg("uuid_error")
 		return nil, errors.NewUnprocessableEntityError("something went wrong")
 	}
 	td.TokenUUID = id.String()
@@ -38,14 +38,14 @@ func CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*Token
 
 	decodePrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
 	if err != nil {
-		log.Error().Msg("DecodeString_privateKey_error: " + err.Error())
+		log.Error().Err(err).Msg("DecodeString_privateKey_error")
 		return nil, errors.NewUnprocessableEntityError("something went wrong")
 	}
 
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodePrivateKey)
 
 	if err != nil {
-		log.Error().Msg("ParseRSA_privateKey_error: " + err.Error())
+		log.Error().Err(err).Msg("ParseRSA_privateKey_error")
 		return nil, errors.NewUnprocessableEntityError("something went wrong")
 	}
 
@@ -58,7 +58,7 @@ func CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*Token
 
 	*td.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, atClaims).SignedString(key)
 	if err != nil {
-		log.Error().Msg("sign_key_error: " + err.Error())
+		log.Error().Err(err).Msg("sign_key_error")
 		return nil, errors.NewUnprocessableEntityError("something went wrong")
 	}
 
@@ -68,13 +68,13 @@ func CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*Token
 func ValidateToken(token string, publicKey string) (*TokenDetails, *errors.RestErr) {
 	decodePublicKey, err := base64.StdEncoding.DecodeString(publicKey)
 	if err != nil {
-		log.Error().Msg("DecodeString_publicKey_error: " + err.Error())
+		log.Error().Err(err).Msg("DecodeString_publicKey_error")
 		return nil, errors.NewInternalServerError("something went wrong")
 	}
 
 	key, err := jwt.ParseRSAPublicKeyFromPEM(decodePublicKey)
 	if err != nil {
-		log.Error().Msg("ParseRSA_publicKey_error: " + err.Error())
+		log.Error().Err(err).Msg("ParseRSA_publicKey_error")
 		return nil, errors.NewInternalServerError("something went wrong")
 	}
 
@@ -86,13 +86,14 @@ func ValidateToken(token string, publicKey string) (*TokenDetails, *errors.RestE
 	})
 
 	if err != nil {
-		log.Error().Msg("validate_token_error: " + err.Error())
+		log.Error().Err(err).Msg("validate_token_error")
 		return nil, errors.NewForbiddenError("please login again")
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok || !parsedToken.Valid {
-		log.Error().Msg("validation: invalid_token")
+		err := errors.NewForbiddenError("validation: invalid_token")
+		log.Error().Err(err).Msg("")
 		return nil, errors.NewForbiddenError("please login again")
 	}
 

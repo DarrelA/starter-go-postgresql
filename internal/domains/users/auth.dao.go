@@ -25,7 +25,7 @@ func (user *User) Save() *errors.RestErr {
 	var lastInsertUuid *uuid.UUID
 	err := pgdb.Dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)
 	if err != nil {
-		log.Error().Msg("pgdb_error: " + err.Error())
+		log.Error().Err(err).Msg("pgdb_error")
 		return errors.NewInternalServerError("something went wrong")
 	}
 
@@ -36,7 +36,7 @@ func (user *User) Save() *errors.RestErr {
 func (user *User) GetByEmail() *errors.RestErr {
 	result := pgdb.Dbpool.QueryRow(context.Background(), queryGetUser, user.Email)
 	if err := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email, &user.Password); err != nil {
-		log.Error().Msg("pgdb_error: " + err.Error())
+		log.Error().Err(err).Msg("pgdb_error")
 		return errors.NewInternalServerError("something went wrong")
 	}
 
@@ -46,7 +46,7 @@ func (user *User) GetByEmail() *errors.RestErr {
 func (user *User) GetByUUID() *errors.RestErr {
 	result := pgdb.Dbpool.QueryRow(context.Background(), queryGetUserByID, user.UUID)
 	if err := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email); err != nil {
-		log.Error().Msg("pgdb_error: " + err.Error())
+		log.Error().Err(err).Msg("pgdb_error")
 		return errors.NewInternalServerError("something went wrong")
 	}
 

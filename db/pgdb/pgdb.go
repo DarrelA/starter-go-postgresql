@@ -38,7 +38,7 @@ func (db *PostgresDB) Connect() {
 	var err error
 	Dbpool, err = pgxpool.New(context.Background(), connString)
 	if err != nil {
-		log.Panic().Msg("unable to connect to the database: " + err.Error())
+		log.Panic().Err(err).Msg("unable to connect to the database")
 		panic(err)
 	}
 

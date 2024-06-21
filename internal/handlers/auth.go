@@ -75,7 +75,7 @@ func Login(c *fiber.Ctx) error {
 	).Err()
 
 	if errAccess != nil {
-		log.Error().Msg("redis_error: " + errAccess.Error())
+		log.Error().Err(errAccess).Msg("redis_error")
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": "something went wrong"})
 	}
 
@@ -87,7 +87,7 @@ func Login(c *fiber.Ctx) error {
 	).Err()
 
 	if errRefresh != nil {
-		log.Error().Msg("redis_error: " + errRefresh.Error())
+		log.Error().Err(errRefresh).Msg("redis_error")
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": "something went wrong"})
 	}
 
@@ -194,7 +194,8 @@ func Logout(c *fiber.Ctx) error {
 
 	accessTokenUUID, ok := c.Locals("access_token_uuid").(string) // type assertion
 	if !ok {
-		log.Error().Msg("access_token is not a string or not set")
+		err := errors.NewBadRequestError("access_token is not a string or not set")
+		log.Error().Err(err).Msg("")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "fail", "message": message})
 	}
 

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/utils"
+	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -16,12 +17,14 @@ func LogRequest(c *fiber.Ctx) error {
 
 	request_id, ok := c.Locals("request_id").(string)
 	if !ok {
-		log.Error().Msg("request_id is not a string or not set")
+		err := errors.NewBadRequestError("request_id is not a string or not set")
+		log.Error().Err(err).Msg("")
 	}
 
 	correlation_id, ok := c.Locals("correlation_id").(string)
 	if !ok {
-		log.Error().Msg("correlation_id is not a string or not set")
+		err := errors.NewBadRequestError("correlation_id is not a string or not set")
+		log.Error().Err(err).Msg("")
 	}
 
 	hostname, hostnameErr := os.Hostname()
