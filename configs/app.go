@@ -8,6 +8,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/utils"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
 
 type PostgresDBConfig struct {
@@ -25,11 +26,8 @@ type RedisDBConfig struct {
 }
 
 type JWTConfig struct {
-	Secret                 string
-	Name                   string
 	Path                   string
 	Domain                 string
-	MaxAge                 int
 	Secure                 bool
 	HttpOnly               bool
 	AccessTokenPrivateKey  string
@@ -55,19 +53,22 @@ var (
 	CORSSettings CORSConfig
 )
 
+func init() {
+	loadEnv()
+	loadLogSettings()
+	loadDBSettings()
+	loadRedisSettings()
+	loadJWTConfigs()
+	loadCORSConfigs()
+}
+
 func loadEnv() {
 	env := os.Getenv("APP_ENV")
 	if env == "" {
-		env = "development"
+		log.Fatal().Msg("APP_ENV not set")
 	}
 
 	envBasePath := "configs/"
-
-	godotenv.Load(envBasePath + ".env." + env + ".local")
-	if env != "test" {
-		godotenv.Load(envBasePath + ".env.local")
-	}
-
 	godotenv.Load(envBasePath + ".env." + env)
 	godotenv.Load()
 
@@ -75,9 +76,11 @@ func loadEnv() {
 	if Port == "" {
 		Port = "8080" // Default port
 	}
+
+	log.Info().Msgf("running in %s env using Port %s", strings.ToUpper(env), Port)
 }
 
-func initLogSettings() {
+func loadLogSettings() {
 	logLevel := os.Getenv("LOG_LEVEL")
 
 	// Whichever level is chosen,
@@ -106,19 +109,19 @@ func initLogSettings() {
 	}
 }
 
-func initDBSettings() {
+func loadDBSettings() {
 	PGDB = PostgresDBConfig{
 		Username:     os.Getenv("POSTGRES_USER"),
 		Password:     os.Getenv("POSTGRES_PASSWORD"),
 		Host:         os.Getenv("POSTGRES_HOST"),
 		Port:         os.Getenv("POSTGRES_PORT"),
-		Name:         os.Getenv("POSTGRES_NAME"),
+		Name:         os.Getenv("POSTGRES_DB"),
 		SslMode:      os.Getenv("POSTGRES_SSLMODE"),
 		PoolMaxConns: os.Getenv("POSTGRES_POOL_MAX_CONNS"),
 	}
 }
 
-func initRedisSettings() {
+func loadRedisSettings() {
 	RedisDB = RedisDBConfig{
 		RedisUri: os.Getenv("REDIS_URL"),
 	}
@@ -143,13 +146,4 @@ func loadCORSConfigs() {
 	CORSSettings = CORSConfig{
 		AllowedOrigins: os.Getenv("CORS_ALLOWED_ORIGINS"),
 	}
-}
-
-func init() {
-	loadEnv()
-	initLogSettings()
-	initDBSettings()
-	initRedisSettings()
-	loadJWTConfigs()
-	loadCORSConfigs()
 }
