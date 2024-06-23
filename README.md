@@ -293,7 +293,7 @@ In summary, using access and refresh tokens with Redis, PostgreSQL, and cookies 
 
 1. **Respective `.env` files in `configs` folder**
 2. **`init.sql` script:** Creates initial schemas
-3. **`servers.json` file:** Establishes server connection from pgAdmin to Postgres
+3. **Respective env server `.json` file:** Establishes server connection from pgAdmin to Postgres
 
 ## Generate the Private and Public Keys
 
@@ -310,6 +310,10 @@ In summary, using access and refresh tokens with Redis, PostgreSQL, and cookies 
 # Updating `go.mod`
 go get -u
 go mod tidy
+
+# Remove all unused containers, networks, images (both dangling and unreferenced), and optionally, volumes.
+# If you want to skip the confirmation prompt, you can add the -f flag:
+docker system prune -a --volumes -f
 ```
 
 ## psql
@@ -320,7 +324,12 @@ http://localhost:5050/browser/
 
 # If not using pgAdmin
 docker exec -it postgres bash
-su - postgres
+
+# List all databases
+psql -U user1 -d postgres
+\l
+
+# View table
 psql -U user1 -d pgstarter
 SELECT * FROM users;
 ```
@@ -356,7 +365,10 @@ TTL key
 # Testing
 
 ```sh
+make APP_ENV=test
+
 go test -cover
+go test ./test
 ```
 
 ## Unit Testing and Acceptance Testing

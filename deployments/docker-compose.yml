@@ -6,10 +6,10 @@ services:
     ports:
       - '6500:5432'
     volumes:
-      - progresDB:/var/lib/postgresql/data
+      - progresDB_${APP_ENV}:/var/lib/postgresql/data
       - ../db/pgdb/init.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
-      - ../configs/.env.development # Amend accordingly
+      - ../configs/.env.${APP_ENV}
 
   pgAdmin:
     image: dpage/pgadmin4
@@ -17,9 +17,9 @@ services:
     ports:
       - '5050:80'
     volumes:
-      - ../db/pgdb/servers.json:/pgadmin4/servers.json
+      - ../db/pgdb/servers.${APP_ENV}.json:/pgadmin4/servers.json
     env_file:
-      - ../configs/.env.development # Amend accordingly
+      - ../configs/.env.${APP_ENV}
 
   redis:
     image: redis:alpine
@@ -27,7 +27,7 @@ services:
     ports:
       - '6379:6379'
     volumes:
-      - redisDB:/data
+      - redisDB_${APP_ENV}:/data
 
   app:
     build:
@@ -39,12 +39,18 @@ services:
       - '8080:8080'
     volumes:
       - ./logs:/app/logs
+    environment:
+      - APP_ENV=${APP_ENV}
     env_file:
-      - ../configs/.env.development
+      - ../configs/.env.${APP_ENV}
     depends_on:
       - postgres
       - redis
 
 volumes:
-  redisDB:
-  progresDB:
+  redisDB_development:
+  progresDB_development:
+  redisDB_test:
+  progresDB_test:
+  redisDB_production:
+  progresDB_production:
