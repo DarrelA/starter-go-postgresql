@@ -7,7 +7,7 @@
       "Port": 5432,
       "MaintenanceDB": "pgstarter",
       "Username": "",
-      "password": "",
+      "Password": "",
       "SSLMode": "prefer"
     }
   }

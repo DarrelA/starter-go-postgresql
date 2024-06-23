@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "PG Test Server",
+      "Group": "Test Server",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "mock_db",
+      "Username": "MU",
+      "Password": "MU",
+      "SSLMode": "disable"
+    }
+  }
+}
