@@ -1,5 +1,7 @@
 .DS_Store
 
+build/refresh_token_keys.txt
+
 .env.development
 .env.production
 

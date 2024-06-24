@@ -20,6 +20,8 @@
 - [Setup](#setup)
   - [Handle Initial Files](#handle-initial-files)
   - [Generate the Private and Public Keys](#generate-the-private-and-public-keys)
+    - [Option 1 (MacOS)](#option-1-macos)
+    - [Option 2 (Browser)](#option-2-browser)
 - [Maintenance](#maintenance)
   - [`go.mod` File](#gomod-file)
   - [psql](#psql)
@@ -297,6 +299,15 @@ In summary, using access and refresh tokens with Redis, PostgreSQL, and cookies 
 
 ## Generate the Private and Public Keys
 
+### Option 1 (MacOS)
+
+```sh
+chmod +x build/refresh_token_keygen.sh
+cd build && ./refresh_token_keygen.sh && cd ..
+```
+
+### Option 2 (Browser)
+
 1. [Online RSA Key Generator](https://travistidwell.com/jsencrypt/demo/): Key Size: 2048 bit
 2. [BASE64 Decode and Encode](https://www.base64encode.org/)
 
@@ -365,10 +376,10 @@ TTL key
 # Testing
 
 ```sh
-make APP_ENV=test
+APP_ENV=test make
 
 go test -cover
-go test ./test
+APP_ENV=test go test ./test
 ```
 
 ## Unit Testing and Acceptance Testing
