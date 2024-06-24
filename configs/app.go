@@ -2,6 +2,7 @@ package configs
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -67,10 +68,23 @@ func loadEnv() {
 	if env == "" {
 		log.Fatal().Msg("APP_ENV not set")
 	}
-
 	envBasePath := "configs/"
-	godotenv.Load(envBasePath + ".env." + env)
-	godotenv.Load()
+
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal().Err(err).Msg("error getting current working directory")
+	}
+	log.Debug().Msgf("loading env - current working directory: %s", cwd)
+
+	// Check if the current working directory contains "\test"
+	if strings.Contains(cwd, "\\test") || strings.Contains(cwd, "/test") {
+		envBasePath = "../configs/"
+	}
+
+	// Construct the full path to the .env file
+	envFilePath := filepath.Join(envBasePath, ".env."+env)
+	log.Debug().Msgf("loading environment file: %s", envFilePath)
+	godotenv.Load(envFilePath)
 
 	Port = os.Getenv("APP_PORT")
 	if Port == "" {
