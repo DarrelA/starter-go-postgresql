@@ -1,5 +1,5 @@
 # Define default values
-APP_ENV ?= development
+APP_ENV ?= dev
 
 # Define default target
 all: up

@@ -2,8 +2,8 @@
 
 build/refresh_token_keys.txt
 
-.env.development
-.env.production
+.env.dev
+.env.prod
 
 db/pgdb/servers.json
 

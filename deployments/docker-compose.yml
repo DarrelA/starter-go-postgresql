@@ -48,9 +48,9 @@ services:
       - redis
 
 volumes:
-  redisDB_development:
-  progresDB_development:
+  redisDB_dev:
+  progresDB_dev:
   redisDB_test:
   progresDB_test:
-  redisDB_production:
-  progresDB_production:
+  redisDB_prod:
+  progresDB_prod:
