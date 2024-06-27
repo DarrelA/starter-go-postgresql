@@ -34,7 +34,7 @@ func Deserializer(c *fiber.Ctx) error {
 
 	tokenClaims, err := services.ValidateToken(access_token, jwtCfg.AccessTokenPublicKey)
 	if err != nil {
-		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "message": err.Message})
+		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
 	ctx := context.TODO()
@@ -46,7 +46,7 @@ func Deserializer(c *fiber.Ctx) error {
 
 	user, err := services.GetUserByUUID(user_uuid)
 	if err != nil {
-		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "message": err.Message})
+		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
 	userRecord := &users.UserRecord{

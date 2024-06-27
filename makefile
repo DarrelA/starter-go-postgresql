@@ -33,4 +33,4 @@ bat:
 t:
 	@cd deployments && APP_ENV=$(APP_ENV) docker-compose up -d $(DEPENDENCIES)
 	@cd deployments && APP_ENV=$(APP_ENV) docker-compose run --rm app-test
-	make d
+	make dv
