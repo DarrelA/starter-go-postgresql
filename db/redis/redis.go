@@ -33,6 +33,7 @@ func (db *RedisDB) Connect() {
 	})
 
 	if _, err := RedisClient.Ping(ctx).Result(); err != nil {
+		log.Panic().Err(err).Msg("error connecting to the Redis database")
 		panic(err)
 	}
 

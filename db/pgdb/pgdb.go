@@ -38,7 +38,14 @@ func (db *PostgresDB) Connect() {
 	var err error
 	Dbpool, err = pgxpool.New(context.Background(), connString)
 	if err != nil {
-		log.Panic().Err(err).Msg("unable to connect to the database")
+		log.Panic().Err(err).Msg("unable to create connection pool")
+		panic(err)
+	}
+
+	var greeting string
+	err = Dbpool.QueryRow(context.Background(), "select 'Hello, world!'").Scan(&greeting)
+	if err != nil {
+		log.Panic().Err(err).Msg("QueryRow failed")
 		panic(err)
 	}
 
