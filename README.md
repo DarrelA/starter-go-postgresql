@@ -20,15 +20,17 @@
 - [Setup](#setup)
   - [Handle Initial Files](#handle-initial-files)
   - [Generate the Private and Public Keys](#generate-the-private-and-public-keys)
-    - [Option 1 (MacOS)](#option-1-macos)
+    - [Option 1 (Shell Script)](#option-1-shell-script)
     - [Option 2 (Browser)](#option-2-browser)
 - [Maintenance](#maintenance)
   - [`go.mod` File](#gomod-file)
+  - [Docker](#docker)
   - [psql](#psql)
   - [golang-migrate](#golang-migrate)
   - [redis](#redis)
 - [Testing](#testing)
-  - [Unit Testing and Acceptance Testing](#unit-testing-and-acceptance-testing)
+  - [Unit Testing, Integration Testing, and Acceptance Testing](#unit-testing-integration-testing-and-acceptance-testing)
+    - [Black Box Testing \& White Box Testing](#black-box-testing--white-box-testing)
   - [Dependency Injection](#dependency-injection)
 - [References](#references)
 
@@ -296,10 +298,11 @@ In summary, using access and refresh tokens with Redis, PostgreSQL, and cookies 
 1. **Respective `.env` files in `configs` folder**
 2. **`init.sql` script:** Creates initial schemas
 3. **Respective env server `.json` file:** Establishes server connection from pgAdmin to Postgres
+4. **Run `chmod` command for `.sh` scripts**: See [Option 1 (Shell Script)](#option-1-shell-script) and [Testing](#testing)
 
 ## Generate the Private and Public Keys
 
-### Option 1 (MacOS)
+### Option 1 (Shell Script)
 
 ```sh
 chmod +x build/refresh_token_keygen.sh
@@ -321,10 +324,14 @@ cd build && ./refresh_token_keygen.sh && cd ..
 # Updating `go.mod`
 go get -u
 go mod tidy
+```
 
-# Remove all unused containers, networks, images (both dangling and unreferenced), and optionally, volumes.
+## Docker
+
+```sh
+# Remove all dangling images and unused volumes
 # If you want to skip the confirmation prompt, you can add the -f flag:
-docker system prune -a --volumes -f
+docker image prune -f && docker volume prune -f
 ```
 
 ## psql
@@ -376,26 +383,35 @@ TTL key
 # Testing
 
 ```sh
-APP_ENV=test make
-
-go test -cover
-APP_ENV=test go test ./test
+# makefile defaults to dev env
+make t
 ```
 
-## Unit Testing and Acceptance Testing
+## Unit Testing, Integration Testing, and Acceptance Testing
 
-| Aspect              | Unit Testing                        | Acceptance Testing                          |
-| ------------------- | ----------------------------------- | ------------------------------------------- |
-| **Purpose**         | Verify individual units/components  | Verify the entire system meets requirements |
-| **Scope**           | Small, isolated pieces of code      | Entire application or major features        |
-| **Nature**          | Typically automated, quick to run   | Can be automated or manual, longer to run   |
-| **Examples**        | Testing a single function or method | Testing end-to-end user scenarios           |
-| **Tools**           | Go `testing` package                | godog                                       |
-| **Characteristics** | White-box testing, high frequency   | Black-box testing, less frequent            |
+| Aspect              | Unit Testing                        | Integration Testing                                | Acceptance Testing                          |
+| ------------------- | ----------------------------------- | -------------------------------------------------- | ------------------------------------------- |
+| **Purpose**         | Verify individual units/components  | Verify interaction between components              | Verify the entire system meets requirements |
+| **Scope**           | Small, isolated pieces of code      | Multiple components or subsystems                  | Entire application or major features        |
+| **Nature**          | Typically automated, quick to run   | Typically automated, moderate to run               | Can be automated or manual, longer to run   |
+| **Examples**        | Testing a single function or method | Testing database interaction, API calls            | Testing end-to-end user scenarios           |
+| **Tools**           | Go `testing` package                | Go `testing` package                               | `godog` package                             |
+| **Characteristics** | White-box testing, high frequency   | Mix of white-box and black-box, moderate frequency | Black-box testing, less frequent            |
 
 [User Stories] become [Acceptance Tests] which is [Behavior Driven Development] "Doing the RIGHT thing."
 
 [Code Functionality] becomes [Unit Testing] which is [Test Driven Development] "Doing the THING right."
+
+### Black Box Testing & White Box Testing
+
+| Aspect                 | Black Box Testing                                     | White Box Testing                                           |
+| ---------------------- | ----------------------------------------------------- | ----------------------------------------------------------- |
+| **Knowledge Required** | None about internal code                              | In-depth knowledge of internal code                         |
+| **Focus**              | Functional behavior                                   | Internal logic and structure                                |
+| **Test Basis**         | Requirements, specifications, use cases               | Source code, architecture, internal documentation           |
+| **Techniques**         | Equivalence partitioning, boundary value analysis     | Path testing, loop testing, code coverage analysis          |
+| **Advantages**         | User perspective, identifies discrepancies            | Thorough coverage, optimizes code, identifies hidden errors |
+| **Disadvantages**      | Limited coverage, difficult to identify all scenarios | Time-consuming, requires in-depth knowledge, expensive      |
 
 ## Dependency Injection
 

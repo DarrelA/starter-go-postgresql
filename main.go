@@ -7,8 +7,6 @@ import (
 	"syscall"
 
 	"github.com/DarrelA/starter-go-postgresql/app"
-	"github.com/DarrelA/starter-go-postgresql/configs"
-	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -34,28 +32,18 @@ func main() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
-	var appInstance *fiber.App
-
 	go func() {
 		defer wg.Done()
 		app.CreateDBConnections()
-		appInstance, _ = app.ConfigureAppInstance()
+		app.ConfigureAppInstance()
 	}()
 
 	wg.Wait()
-	go startServer(appInstance)
+	go app.StartServer()
 	waitForShutdown()
 
 	logFile.Close()
 	os.Exit(0)
-}
-
-func startServer(appInstance *fiber.App) {
-	log.Info().Msg("listening at port: " + configs.Port)
-	err := appInstance.Listen(":" + configs.Port)
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to start server")
-	}
 }
 
 func waitForShutdown() {

@@ -36,19 +36,6 @@ func CreateDBConnections() (db.RDBMS, db.InMemoryDB) {
 	return rdbmsInstance, inMemoryDbInstance
 }
 
-func CloseConnections() {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	if err := appInstance.ShutdownWithContext(ctx); err != nil {
-		log.Err(err).Msg("failed to gracefully shutdown the server")
-	}
-
-	cancel()
-	log.Info().Msg("app instance has shutdown")
-
-	rdbmsInstance.Disconnect()
-	inMemoryDbInstance.Disconnect()
-}
-
 // ConfigureAppInstance sets up and configures instances of Fiber for the main app and auth service,
 // including middleware and routing for authentication.
 func ConfigureAppInstance() (*fiber.App, *fiber.App) {
@@ -62,6 +49,27 @@ func ConfigureAppInstance() (*fiber.App, *fiber.App) {
 
 	log.Debug().Msgf("appInstance memory address: %p", appInstance)
 	return appInstance, authServiceInstance
+}
+
+func StartServer() {
+	log.Info().Msg("listening at port: " + configs.Port)
+	err := appInstance.Listen(":" + configs.Port)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to start server")
+	}
+}
+
+func CloseConnections() {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	if err := appInstance.ShutdownWithContext(ctx); err != nil {
+		log.Err(err).Msg("failed to gracefully shutdown the server")
+	}
+
+	cancel()
+	log.Info().Msg("app instance has shutdown")
+
+	rdbmsInstance.Disconnect()
+	inMemoryDbInstance.Disconnect()
 }
 
 func useMiddlewares(authServiceInstance *fiber.App) {
