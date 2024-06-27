@@ -74,7 +74,7 @@ func loadEnv() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("error getting current working directory")
 	}
-	log.Debug().Msgf("loading env - current working directory: %s", cwd)
+	log.Debug().Msgf("@cwd: %s", cwd)
 
 	// Check if the current working directory contains "\test"
 	if strings.Contains(cwd, "\\test") || strings.Contains(cwd, "/test") {
@@ -83,7 +83,7 @@ func loadEnv() {
 
 	// Construct the full path to the .env file
 	envFilePath := filepath.Join(envBasePath, ".env."+env)
-	log.Debug().Msgf("loading environment file: %s", envFilePath)
+	log.Debug().Msgf("loading env file: %s", envFilePath)
 	godotenv.Load(envFilePath)
 
 	Port = os.Getenv("APP_PORT")
