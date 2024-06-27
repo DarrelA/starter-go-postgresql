@@ -47,6 +47,26 @@ services:
       - postgres
       - redis
 
+  app-test:
+    build:
+      context: ..
+      dockerfile: ./deployments/Dockerfile.test
+      target: tester
+    image: starter-go-postgresql-tester
+    container_name: starter-go-postgresql-tester
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./logs:/app/logs
+    environment:
+      - APP_ENV=${APP_ENV}
+    env_file:
+      - ../configs/.env.${APP_ENV}
+    depends_on:
+      - postgres
+      - redis
+    command: sh -c "APP_ENV=${APP_ENV} go test ./test"
+
 volumes:
   redisDB_dev:
   progresDB_dev:
