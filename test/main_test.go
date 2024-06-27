@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/DarrelA/starter-go-postgresql/app"
+	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/DarrelA/starter-go-postgresql/db"
 	"github.com/gofiber/fiber/v2"
 )
@@ -19,6 +20,8 @@ var (
 	appInstance         *fiber.App
 	authServiceInstance *fiber.App
 )
+
+var baseURL = configs.BaseURLs.AuthService
 
 func TestMain(m *testing.M) {
 	// Change to the project root directory from `/test` directory
@@ -54,10 +57,6 @@ func TestMainFunc(t *testing.T) {
 }
 
 func TestFiberHandler(t *testing.T) {
-	// @TODO: Build and load `baseURL` in `configs\app`
-	protocol := "http://"
-	baseURL := "localhost:8080/auth/api"
-
 	input := map[string]string{
 		"first_name": "a",
 		"last_name":  "1",
@@ -67,7 +66,7 @@ func TestFiberHandler(t *testing.T) {
 
 	body, _ := json.Marshal(input)
 
-	req, err := http.NewRequest(http.MethodPost, protocol+baseURL+"/register", bytes.NewBuffer(body))
+	req, err := http.NewRequest(http.MethodPost, baseURL+"/register", bytes.NewBuffer(body))
 	if err != nil {
 		t.Fatalf("failed to create request: %v", err)
 	}

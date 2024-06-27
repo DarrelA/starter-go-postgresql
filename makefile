@@ -10,23 +10,27 @@ up:
 	@cd deployments && APP_ENV=$(APP_ENV) docker-compose up -d $(DEPENDENCIES) app
 
 # Target to bring down the docker-compose services
-down:
+d:
 	@cd deployments && APP_ENV=$(APP_ENV) docker-compose down
 
 # Target to bring down the docker-compose services and named volumes
-down-v:
+dv:
 	@cd deployments && APP_ENV=$(APP_ENV) docker-compose down -v
 
 # Target to rebuild the docker-compose services
-build:
+b:
 	@cd deployments && APP_ENV=$(APP_ENV) docker-compose build
 
 # Target to rebuild the docker-compose services (app and app-test)
-build-app:
+bapp:
 	@cd deployments && APP_ENV=$(APP_ENV) docker-compose build app app-test
+
+# Target to rebuild the docker-compose services (app-test)
+bat:
+	@cd deployments && APP_ENV=$(APP_ENV) docker-compose build app-test
 
 # Target to run tests (excluding app)
 t:
 	@cd deployments && APP_ENV=$(APP_ENV) docker-compose up -d $(DEPENDENCIES)
 	@cd deployments && APP_ENV=$(APP_ENV) docker-compose run --rm app-test
-	make down
+	make d

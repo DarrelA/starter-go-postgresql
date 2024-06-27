@@ -12,6 +12,10 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type BaseURLsConfig struct {
+	AuthService string
+}
+
 type PostgresDBConfig struct {
 	Username     string
 	Password     string
@@ -48,6 +52,7 @@ type CORSConfig struct {
 // Define the variables to hold the configuration
 var (
 	Port         string
+	BaseURLs     BaseURLsConfig
 	PGDB         PostgresDBConfig
 	RedisDB      RedisDBConfig
 	JWTSettings  JWTConfig
@@ -68,12 +73,14 @@ func loadEnv() {
 	if env == "" {
 		log.Fatal().Msg("APP_ENV not set")
 	}
+
 	envBasePath := "configs/"
 
 	cwd, err := os.Getwd()
 	if err != nil {
 		log.Fatal().Err(err).Msg("error getting current working directory")
 	}
+
 	log.Debug().Msgf("@cwd: %s", cwd)
 
 	// Check if the current working directory contains "\test"
@@ -92,6 +99,10 @@ func loadEnv() {
 	}
 
 	log.Info().Msgf("running in %s env using Port %s", strings.ToUpper(env), Port)
+
+	BaseURLs = BaseURLsConfig{
+		AuthService: os.Getenv("PROTOCOL") + os.Getenv("DOMAIN") + Port + os.Getenv("AUTH_SERVICE_PATHNAME"),
+	}
 }
 
 func loadLogSettings() {
