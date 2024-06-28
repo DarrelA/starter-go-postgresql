@@ -1,13 +1,14 @@
 # Define variables
 APP_ENV ?= dev
-DEPENDENCIES ?= postgres pgAdmin redis
+DB ?= postgres redis
+UI ?= pgAdmin
 
 # Define default target
 all: up
 
 # Target to bring up the docker-compose services (excluding app-test)
 up:
-	@cd deployments && APP_ENV=$(APP_ENV) docker-compose up -d $(DEPENDENCIES) app
+	@cd deployments && APP_ENV=$(APP_ENV) docker-compose up -d $(DB) $(UI) app
 
 # Target to bring down the docker-compose services
 d:
@@ -31,6 +32,21 @@ bat:
 
 # Target to run tests (excluding app)
 t:
-	@cd deployments && APP_ENV=$(APP_ENV) docker-compose up -d $(DEPENDENCIES)
+	@cd deployments && APP_ENV=$(APP_ENV) docker-compose up -d $(DB)
 	@cd deployments && APP_ENV=$(APP_ENV) docker-compose run --rm app-test
 	make dv
+
+###############
+# Maintenance #
+###############
+
+# Remove all dangling images and unused volumes
+# If you want to skip the confirmation prompt, you can add the -f flag:
+prune:
+	@docker image prune -f
+	@docker volume prune -f
+
+# Update go.mod
+umod:
+	@go get -u
+	@go mod tidy

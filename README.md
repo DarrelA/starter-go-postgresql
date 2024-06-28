@@ -22,11 +22,8 @@
   - [Generate the Private and Public Keys](#generate-the-private-and-public-keys)
     - [Option 1 (Shell Script)](#option-1-shell-script)
     - [Option 2 (Browser)](#option-2-browser)
-- [Maintenance](#maintenance)
-  - [`go.mod` File](#gomod-file)
-  - [Docker](#docker)
+- [Shell](#shell)
   - [psql](#psql)
-  - [golang-migrate](#golang-migrate)
   - [redis](#redis)
 - [Testing](#testing)
   - [Unit Testing, Integration Testing, and Acceptance Testing](#unit-testing-integration-testing-and-acceptance-testing)
@@ -316,23 +313,7 @@ cd build && ./refresh_token_keygen.sh && cd ..
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-# Maintenance
-
-## `go.mod` File
-
-```sh
-# Updating `go.mod`
-go get -u
-go mod tidy
-```
-
-## Docker
-
-```sh
-# Remove all dangling images and unused volumes
-# If you want to skip the confirmation prompt, you can add the -f flag:
-docker image prune -f && docker volume prune -f
-```
+# Shell
 
 ## psql
 
@@ -350,18 +331,6 @@ psql -U user1 -d postgres
 # View table
 psql -U user1 -d pgstarter
 SELECT * FROM users;
-```
-
-## golang-migrate
-
-```sh
-# To work with the scripts in db/migration folder
-brew install golang-migrate
-migrate create -ext sql -dir db/migration/ -seq init_schema
-
-# Format
-# {version}_{title}.down.sql
-# {version}_{title}.up.sql
 ```
 
 ## redis
