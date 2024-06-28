@@ -1,4 +1,4 @@
-package errors
+package err_rest
 
 import (
 	"fmt"

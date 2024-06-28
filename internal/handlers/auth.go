@@ -11,7 +11,7 @@ import (
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
 	"github.com/DarrelA/starter-go-postgresql/internal/services"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
+	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -21,7 +21,7 @@ func Register(c *fiber.Ctx) error {
 	var payload users.RegisterInput
 
 	if err := c.BodyParser(&payload); err != nil {
-		err := errors.NewBadRequestError("invalid json body")
+		err := err_rest.NewBadRequestError("invalid json body")
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
@@ -37,7 +37,7 @@ func Login(c *fiber.Ctx) error {
 	var payload users.LoginInput
 
 	if err := c.BodyParser(&payload); err != nil {
-		err := errors.NewBadRequestError("invalid json body")
+		err := err_rest.NewBadRequestError("invalid json body")
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
@@ -194,7 +194,7 @@ func Logout(c *fiber.Ctx) error {
 
 	accessTokenUUID, ok := c.Locals("access_token_uuid").(string) // type assertion
 	if !ok {
-		err := errors.NewBadRequestError("access_token is not a string or not set")
+		err := err_rest.NewBadRequestError("access_token is not a string or not set")
 		log.Error().Err(err).Msg("")
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "fail", "message": message})
 	}
