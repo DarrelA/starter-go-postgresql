@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -41,6 +42,9 @@ func (db *PostgresDB) Connect() {
 		log.Panic().Err(err).Msg("unable to create connection pool")
 		panic(err)
 	}
+
+	// Wait for initialization
+	time.Sleep(2 * time.Second)
 
 	var greeting string
 	err = Dbpool.QueryRow(context.Background(), "select 'Hello, world!'").Scan(&greeting)
