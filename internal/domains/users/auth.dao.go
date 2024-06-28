@@ -2,10 +2,12 @@ package users
 
 import (
 	"context"
+	"errors"
 
 	pgdb "github.com/DarrelA/starter-go-postgresql/db/pgdb"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
+	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/rs/zerolog/log"
 )
 
@@ -21,33 +23,39 @@ via a pointer to the `User` struct. The data flow typically starts from
 `users_controller.go`, goes through `users_service.go`, and finally reaches
 `users_dao.go` where it interacts with the database.
 */
-func (user *User) Save() *errors.RestErr {
-	var lastInsertUuid *uuid.UUID
+func (user *User) Save() *err_rest.RestErr {
+	var lastInsertUuid uuid.UUID
 	err := pgdb.Dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == "23505" {
+				return err_rest.NewBadRequestError("email is already taken")
+			}
+		}
 		log.Error().Err(err).Msg("pgdb_error")
-		return errors.NewInternalServerError("something went wrong")
+		return err_rest.NewInternalServerError("something went wrong")
 	}
 
-	user.UUID = lastInsertUuid
+	user.UUID = &lastInsertUuid
 	return nil
 }
 
-func (user *User) GetByEmail() *errors.RestErr {
+func (user *User) GetByEmail() *err_rest.RestErr {
 	result := pgdb.Dbpool.QueryRow(context.Background(), queryGetUser, user.Email)
 	if err := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email, &user.Password); err != nil {
 		log.Error().Err(err).Msg("pgdb_error")
-		return errors.NewInternalServerError("something went wrong")
+		return err_rest.NewInternalServerError("something went wrong")
 	}
 
 	return nil
 }
 
-func (user *User) GetByUUID() *errors.RestErr {
+func (user *User) GetByUUID() *err_rest.RestErr {
 	result := pgdb.Dbpool.QueryRow(context.Background(), queryGetUserByID, user.UUID)
 	if err := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email); err != nil {
 		log.Error().Err(err).Msg("pgdb_error")
-		return errors.NewInternalServerError("something went wrong")
+		return err_rest.NewInternalServerError("something went wrong")
 	}
 
 	return nil

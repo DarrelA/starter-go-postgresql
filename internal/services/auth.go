@@ -2,13 +2,17 @@ package services
 
 import (
 	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/errors"
+	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func CreateUser(payload users.RegisterInput) (*users.UserResponse, *errors.RestErr) {
+func CreateUser(payload users.RegisterInput) (*users.UserResponse, *err_rest.RestErr) {
+	if err := users.ValidateStruct(payload); err != nil {
+		return nil, err
+	}
+
 	newUser := &users.User{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
@@ -16,14 +20,10 @@ func CreateUser(payload users.RegisterInput) (*users.UserResponse, *errors.RestE
 		Password:  payload.Password,
 	}
 
-	if err := newUser.Validate(); err != nil {
-		return nil, err
-	}
-
 	pwSlice, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), 14)
 	if err != nil {
 		log.Error().Err(err).Msg("bcrypt_error")
-		return nil, errors.NewInternalServerError(("something went wrong"))
+		return nil, err_rest.NewInternalServerError(("something went wrong"))
 	}
 
 	// parse from byte to string
@@ -43,14 +43,14 @@ func CreateUser(payload users.RegisterInput) (*users.UserResponse, *errors.RestE
 	return userResponse, nil
 }
 
-func GetUser(user users.LoginInput) (*users.UserResponse, *errors.RestErr) {
+func GetUser(user users.LoginInput) (*users.UserResponse, *err_rest.RestErr) {
 	result := &users.User{Email: user.Email}
 	if err := result.GetByEmail(); err != nil {
 		return nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(user.Password)); err != nil {
-		return nil, errors.NewBadRequestError("invalid credentials")
+		return nil, err_rest.NewBadRequestError("invalid credentials")
 	}
 
 	userResponse := &users.UserResponse{
@@ -63,11 +63,11 @@ func GetUser(user users.LoginInput) (*users.UserResponse, *errors.RestErr) {
 	return userResponse, nil
 }
 
-func GetUserByUUID(userUuid string) (*users.User, *errors.RestErr) {
+func GetUserByUUID(userUuid string) (*users.User, *err_rest.RestErr) {
 	uuidPointer, err := uuid.Parse(userUuid)
 	if err != nil {
 		log.Error().Err(err).Msg("uuid_error")
-		return nil, errors.NewUnprocessableEntityError(("something went wrong"))
+		return nil, err_rest.NewUnprocessableEntityError(("something went wrong"))
 	}
 
 	result := &users.User{UUID: &uuidPointer}
