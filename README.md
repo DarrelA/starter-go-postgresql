@@ -29,6 +29,7 @@
   - [Unit Testing, Integration Testing, and Acceptance Testing](#unit-testing-integration-testing-and-acceptance-testing)
     - [Black Box Testing \& White Box Testing](#black-box-testing--white-box-testing)
   - [Dependency Injection](#dependency-injection)
+  - [Error Handling](#error-handling)
 - [References](#references)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -390,6 +391,12 @@ Dependency Injection (DI) is a design pattern that achieves Inversion of Control
 - **Defines Clear Contracts**: Interfaces define clear contracts for components.
 - **Encapsulates Related Data**: Structs encapsulate related data and behaviors.
 - **Enables Effective Mocking**: Together, these concepts enable effective mocking and testing in Go.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Error Handling
+
+- [Appendix A. PostgreSQL Error Codes](https://www.postgresql.org/docs/current/errcodes-appendix.html)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
