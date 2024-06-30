@@ -12,6 +12,7 @@ import (
 
 func LogRequest(c *fiber.Ctx) error {
 	start := time.Now()
+	err := c.Next()
 	duration := time.Since(start)
 	ip := c.IP()
 
@@ -48,5 +49,5 @@ func LogRequest(c *fiber.Ctx) error {
 		Str("request_id", request_id).
 		Msg("Request is completed")
 
-	return c.Next()
+	return err
 }
