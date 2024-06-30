@@ -82,7 +82,7 @@ func TestRegisterEndpoint(t *testing.T) {
 			case http.StatusInternalServerError:
 				var responseBody err_rest.RestErr
 				if err := json.Unmarshal(responseMap["error"], &responseBody); err != nil {
-					t.Errorf("failed to decode field: %v", err)
+					t.Fatalf("failed to decode field: %v", err)
 				}
 
 				t.Errorf("expected ZERO StatusInternalServerError, but got [%s]", responseBody.Message)

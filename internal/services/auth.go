@@ -44,6 +44,10 @@ func CreateUser(payload users.RegisterInput) (*users.UserResponse, *err_rest.Res
 }
 
 func GetUser(user users.LoginInput) (*users.UserResponse, *err_rest.RestErr) {
+	if err := users.ValidateStruct(user); err != nil {
+		return nil, err
+	}
+
 	result := &users.User{Email: user.Email}
 	if err := result.GetByEmail(); err != nil {
 		return nil, err

@@ -22,6 +22,10 @@ var RegisterInputs = []users.RegisterInput{
 	{FirstName: "Emily", LastName: "Clark", Email: "Emily_Clark@gmail.com", Password: "Password1!"},
 	// email is already taken
 	{FirstName: "emily", LastName: "clark", Email: "emily_clark@gmail.com", Password: "Password1!"},
+	// invalid email (less than 5 characters)
+	{FirstName: "Jamie", LastName: "Tuna", Email: "j@t.com", Password: "Password1!"},
+	// invalid email (more than 64 characters)
+	{FirstName: "Jasmine", LastName: "Worth", Email: "Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiwhenu@gmail.com", Password: "Password1!"},
 	// invalid email format
 	{FirstName: "Oliver", LastName: "Jones", Email: "Oliver_Jones", Password: "Password1!"},
 	// invalid password (too short)
