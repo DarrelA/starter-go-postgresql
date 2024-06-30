@@ -33,7 +33,7 @@ type User struct {
 type RegisterInput struct {
 	FirstName string `json:"first_name" validate:"required,min=2,max=50,alpha"`
 	LastName  string `json:"last_name" validate:"required,min=2,max=50,alpha"`
-	Email     string `json:"email" validate:"required,min=5,max=64,email"`
+	Email     string `json:"email" validate:"required,min=5,max=64,email,alphanum"`
 	Password  string `json:"password" validate:"required,min=8,passwd"`
 }
 
@@ -63,6 +63,7 @@ var validationMessages = map[string]string{
 	"min":      "be at least %s characters long",
 	"max":      "be at most %s characters long",
 	"alpha":    "contain only alphabetic characters",
+	"alphanum": "contain only alphanumeric characters",
 	"email":    "be a valid email address",
 	"passwd":   "contain at least one number, one uppercase letter, one lowercase letter, and one special character",
 }

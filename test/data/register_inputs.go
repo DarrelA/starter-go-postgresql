@@ -8,6 +8,9 @@ var RegisterInputs = []users.RegisterInput{
 	{FirstName: "bing hong", LastName: "tan", Email: "tbh@e.com", Password: "i_heArt_VB"},
 	{FirstName: "jason", LastName: "the consultant", Email: "j@e.com", Password: "I&asked(a)question^at!the*town-hall:_Why@is9the6air~conditioning%so+cold"},
 
+	// invalid email (contains non-alphanumeric characters)
+	{Email: "Carlyn_Daniël@gmail.com", Password: "Password1!"},
+
 	// all empty fields
 	{FirstName: "", LastName: "", Email: "", Password: ""},
 	// empty password only
