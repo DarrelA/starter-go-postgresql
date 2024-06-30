@@ -43,6 +43,7 @@ func (db *PostgresDB) Connect() {
 		panic(err)
 	}
 
+	// @TODO: Perhaps it can be fixed at docker-compose
 	// Wait for initialization
 	time.Sleep(2 * time.Second)
 

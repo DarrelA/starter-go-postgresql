@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/app"
 	"github.com/DarrelA/starter-go-postgresql/db"
@@ -28,6 +29,10 @@ func TestMain(m *testing.M) {
 	rdbmsInstance, inMemoryDbInstance = app.CreateDBConnections()
 	appInstance, authServiceInstance = app.ConfigureAppInstance()
 	go app.StartServer()
+
+	// @TODO: Perhaps it can be fixed at docker-compose
+	// Wait for initialization
+	time.Sleep(2 * time.Second)
 
 	exitVal := m.Run()
 	os.Exit(exitVal)
