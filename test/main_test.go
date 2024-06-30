@@ -33,7 +33,7 @@ func TestMain(m *testing.M) {
 	os.Exit(exitVal)
 }
 
-func TestMainFunc(t *testing.T) {
+func TestAppLogCreation(t *testing.T) {
 	logFilePath := "./deployments/logs/app.log"
 
 	t.Run("test if app.log is writable", func(t *testing.T) {
@@ -54,9 +54,4 @@ func TestMainFunc(t *testing.T) {
 
 		file.Close()
 	})
-}
-
-func TestAuthService(t *testing.T) {
-
-	t.Run("testing /register endpoint", TestRegisterEndpoint)
 }

@@ -18,6 +18,7 @@ func TestRegisterEndpoint(t *testing.T) {
 	// Using a single HTTP client for all requests
 	client := &http.Client{}
 	baseURL := configs.BaseURLs.AuthService
+	endpoint := "/register"
 
 	for _, user := range data_test.RegisterInputs {
 		t.Run(fmt.Sprintf("test inserting [%s %s] into rdbms", user.FirstName, user.LastName), func(t *testing.T) {
@@ -26,7 +27,7 @@ func TestRegisterEndpoint(t *testing.T) {
 				t.Fatalf("failed to marshal json: %v", err)
 			}
 
-			req, err := http.NewRequest(http.MethodPost, baseURL+"/register", bytes.NewBuffer(body))
+			req, err := http.NewRequest(http.MethodPost, baseURL+endpoint, bytes.NewBuffer(body))
 			if err != nil {
 				t.Fatalf("failed to create request: %v", err)
 			}
@@ -45,8 +46,8 @@ func TestRegisterEndpoint(t *testing.T) {
 				t.Errorf("failed to decode response body into map: %v", err)
 			}
 
-			t.Log("test for StatusOK")
-			if resp.StatusCode == http.StatusOK {
+			switch resp.StatusCode {
+			case http.StatusOK:
 				// Extract the "user" field and decode it into UserResponse
 				var responseBody users.UserResponse
 				if err := json.Unmarshal(responseMap["user"], &responseBody); err != nil {
@@ -65,10 +66,8 @@ func TestRegisterEndpoint(t *testing.T) {
 				if responseBody.Email != user.Email {
 					t.Errorf("expected Email to be [%s], but got [%s]", user.Email, responseBody.Email)
 				}
-			}
 
-			t.Log("test for StatusBadRequest")
-			if resp.StatusCode == http.StatusBadRequest {
+			case http.StatusBadRequest:
 				var responseBody err_rest.RestErr
 				if err := json.Unmarshal(responseMap["error"], &responseBody); err != nil {
 					t.Errorf("failed to decode field: %v", err)
@@ -78,17 +77,18 @@ func TestRegisterEndpoint(t *testing.T) {
 					!strings.Contains(responseBody.Message, "email is already taken") {
 					t.Errorf("expected message to contain \"validation error\" or \"email is already taken\", but got [%s]", responseBody.Message)
 				}
-			}
 
 			// Expecting no StatusInternalServerError since client should receive only StatusBadRequest or StatusOK
-			t.Log("test for StatusInternalServerError")
-			if resp.StatusCode == http.StatusInternalServerError {
+			case http.StatusInternalServerError:
 				var responseBody err_rest.RestErr
 				if err := json.Unmarshal(responseMap["error"], &responseBody); err != nil {
 					t.Errorf("failed to decode field: %v", err)
 				}
 
 				t.Errorf("expected ZERO StatusInternalServerError, but got [%s]", responseBody.Message)
+
+			default:
+				t.Errorf("unexpected error [Status Code - %d]: [%s]", resp.StatusCode, responseMap)
 			}
 		})
 	}
