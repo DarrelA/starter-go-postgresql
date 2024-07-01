@@ -20,4 +20,10 @@ VALUES
     'Daniel',
     'Carlyn_Daniel@gmail.com',
     'Password1!'
+  ),
+  (
+    'Emily',
+    'Clark',
+    'Emily_Clark@gmail.com',
+    'Password1!'
   );

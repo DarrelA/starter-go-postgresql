@@ -20,7 +20,7 @@ func TestLoginEndpoint(t *testing.T) {
 	endpoint := "/login"
 
 	for _, user := range data_test.LoginInputs {
-		t.Run(fmt.Sprintf("test login using [%s]", user.Email), func(t *testing.T) {
+		t.Run(fmt.Sprintf("test case for [%s]", user.TestName), func(t *testing.T) {
 			body, err := json.Marshal(user)
 			if err != nil {
 				t.Fatalf("failed to marshal json: %v", err)
@@ -38,6 +38,10 @@ func TestLoginEndpoint(t *testing.T) {
 				t.Fatalf("failed to send request: %v", err)
 			}
 			defer resp.Body.Close()
+
+			if resp.StatusCode != user.ExpectedStatusCode {
+				t.Fatalf("expected Status Code to be [%d], but got [%d]", resp.StatusCode, user.ExpectedStatusCode)
+			}
 
 			// Decode the response body into a temporary map
 			var responseMap map[string]json.RawMessage

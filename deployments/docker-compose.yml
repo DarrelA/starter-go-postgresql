@@ -65,7 +65,7 @@ services:
     depends_on:
       - postgres
       - redis
-    command: sh -c "APP_ENV=${APP_ENV} go test ./test -v"
+    command: sh -c "APP_ENV=${APP_ENV} go test ./test"
 
 volumes:
   redisDB_dev:
