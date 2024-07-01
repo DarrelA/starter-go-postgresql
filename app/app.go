@@ -91,7 +91,7 @@ func useMiddlewares(authServiceInstance *fiber.App) {
 	}))
 
 	authServiceInstance.Use(middlewares.CorrelationAndRequestID)
-	authServiceInstance.Use(middlewares.LogRequest)
+	authServiceInstance.Use(middlewares.LoggerMW)
 
 	log.Info().Msg("applied middlewares to authServiceInstance")
 }

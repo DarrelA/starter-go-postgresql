@@ -11,7 +11,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func LogRequest(c *fiber.Ctx) error {
+func LoggerMW(c *fiber.Ctx) error {
 	start := time.Now()
 	err := c.Next()
 	duration := time.Since(start)
