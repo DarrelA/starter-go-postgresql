@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"runtime/debug"
 	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
@@ -11,6 +12,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/middlewares"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/rs/zerolog/log"
 )
 
@@ -73,6 +75,12 @@ func CloseConnections() {
 }
 
 func useMiddlewares(authServiceInstance *fiber.App) {
+	// Recover middleware to catch panics and handle errors
+	authServiceInstance.Use(recover.New(recover.Config{
+		EnableStackTrace:  true,
+		StackTraceHandler: customStackTraceHandler,
+	}))
+
 	authServiceInstance.Use(cors.New(cors.Config{
 		AllowOrigins:     configs.CORSSettings.AllowedOrigins,
 		AllowMethods:     "GET,POST",
@@ -84,5 +92,27 @@ func useMiddlewares(authServiceInstance *fiber.App) {
 
 	authServiceInstance.Use(middlewares.CorrelationAndRequestID)
 	authServiceInstance.Use(middlewares.LogRequest)
+
 	log.Info().Msg("applied middlewares to authServiceInstance")
+}
+
+func customStackTraceHandler(c *fiber.Ctx, e interface{}) {
+	stackTrace := string(debug.Stack())
+
+	// Log the panic and stack trace
+	if err, ok := e.(error); ok {
+		log.Error().
+			Err(err).
+			Str("stack_trace", stackTrace).
+			Msg("middleware_error")
+	} else {
+		// The Interface method is used to log the panic value itself, which could be of any type.
+		log.Error().
+			Interface("error", e).
+			Str("stack_trace", stackTrace).
+			Msg("middleware_error")
+	}
+
+	c.Status(fiber.StatusServiceUnavailable).
+		JSON(fiber.Map{"status": "fail", "message": "service is unavailable at the moment"})
 }
