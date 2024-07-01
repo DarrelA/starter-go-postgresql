@@ -51,6 +51,7 @@ type CORSConfig struct {
 
 // Define the variables to hold the configuration
 var (
+	Env          string
 	Port         string
 	BaseURLs     BaseURLsConfig
 	PGDB         PostgresDBConfig
@@ -69,8 +70,8 @@ func init() {
 }
 
 func loadEnv() {
-	env := os.Getenv("APP_ENV")
-	if env == "" {
+	Env = os.Getenv("APP_ENV")
+	if Env == "" {
 		log.Fatal().Msg("APP_ENV not set")
 	}
 
@@ -89,7 +90,7 @@ func loadEnv() {
 	}
 
 	// Construct the full path to the .env file
-	envFilePath := filepath.Join(envBasePath, ".env."+env)
+	envFilePath := filepath.Join(envBasePath, ".env."+Env)
 	log.Debug().Msgf("loading env file: %s", envFilePath)
 	godotenv.Load(envFilePath)
 
@@ -98,7 +99,7 @@ func loadEnv() {
 		Port = "8080" // Default port
 	}
 
-	log.Info().Msgf("running in %s env using Port %s", strings.ToUpper(env), Port)
+	log.Info().Msgf("running in %s env using Port %s", strings.ToUpper(Env), Port)
 
 	BaseURLs = BaseURLsConfig{
 		AuthService: os.Getenv("PROTOCOL") + os.Getenv("DOMAIN") + Port + os.Getenv("AUTH_SERVICE_PATHNAME"),

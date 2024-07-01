@@ -4,6 +4,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
@@ -33,21 +34,57 @@ func LogRequest(c *fiber.Ctx) error {
 		log.Fatal().Err(hostnameErr).Msg("failed to get hostname")
 	}
 
-	log.Info().
-		Str("hostname", hostname).
-		Str("method", c.Method()).
-		Str("referer", c.Get("Referer")).
-		Str("url", c.OriginalURL()).
-		Int("status", c.Response().StatusCode()).
-		Str("user_host", c.Get("Host")).
-		Dur("response_time", duration).
-		Int64("latency_ms", duration.Milliseconds()).
-		Str("ip_address", ip).
-		Str("ip_version", utils.GetIPVersion(ip)).
-		Str("user_agent", c.Get("User-Agent")).
-		Str("correlation_id", correlation_id).
-		Str("request_id", request_id).
-		Msg("Request is completed")
+	currentEnv := configs.Env
+
+	switch currentEnv {
+	case "prod":
+		log.Info().
+			Str("hostname", hostname).
+			Str("method", c.Method()).
+			Str("referer", c.Get("Referer")).
+			Str("url", c.OriginalURL()).
+			Int("status", c.Response().StatusCode()).
+			Str("user_host", c.Get("Host")).
+			Dur("response_time", duration).
+			Int64("latency_ms", duration.Milliseconds()).
+			Str("ip_address", ip).
+			Str("ip_version", utils.GetIPVersion(ip)).
+			Str("user_agent", c.Get("User-Agent")).
+			Str("correlation_id", correlation_id).
+			Str("request_id", request_id).
+			Msg("request is completed")
+
+	case "dev":
+		log.Info().
+			Str("method", c.Method()).
+			Str("url", c.OriginalURL()).
+			Int("status", c.Response().StatusCode()).
+			Bytes("request_body", c.Request().Body()).
+			Bytes("response_body", c.Response().Body()).
+			Msgf("request is completed in [%s] env", currentEnv)
+
+	case "test":
+		log.Info().
+			Str("hostname", hostname).
+			Str("method", c.Method()).
+			Str("referer", c.Get("Referer")).
+			Str("url", c.OriginalURL()).
+			Int("status", c.Response().StatusCode()).
+			Bytes("request_body", c.Request().Body()).
+			Bytes("response_body", c.Response().Body()).
+			Str("user_host", c.Get("Host")).
+			Dur("response_time", duration).
+			Int64("latency_ms", duration.Milliseconds()).
+			Str("ip_address", ip).
+			Str("ip_version", utils.GetIPVersion(ip)).
+			Str("user_agent", c.Get("User-Agent")).
+			Str("correlation_id", correlation_id).
+			Str("request_id", request_id).
+			Msgf("request is completed in [%s] env", currentEnv)
+
+	default:
+		log.Info().Msgf("expecting prod, dev or test env but, current the env is [%s]", currentEnv)
+	}
 
 	return err
 }
