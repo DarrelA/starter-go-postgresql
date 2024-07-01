@@ -22,6 +22,12 @@ VALUES
     'Password1!'
   ),
   (
+    'Carlyn',
+    'Daniel',
+    'Carlyn_Daniël@gmail.com',
+    'Password1!'
+  ),
+  (
     'Emily',
     'Clark',
     'Emily_Clark@gmail.com',

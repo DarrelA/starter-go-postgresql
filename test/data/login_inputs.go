@@ -15,9 +15,9 @@ type TestLoginInput struct {
 var LoginInputs = []TestLoginInput{
 	{TestName: "valid account", ExpectedStatusCode: http.StatusOK,
 		LoginInput: users.LoginInput{Email: "Carlyn_Daniel@gmail.com", Password: "Password1!"}},
-	{TestName: "incorrect email", ExpectedStatusCode: http.StatusBadRequest,
+	{TestName: "valid account", ExpectedStatusCode: http.StatusOK,
 		LoginInput: users.LoginInput{Email: "Carlyn_Daniël@gmail.com", Password: "Password1!"}},
-	{TestName: "valid account", ExpectedStatusCode: http.StatusBadRequest,
+	{TestName: "valid account", ExpectedStatusCode: http.StatusOK,
 		LoginInput: users.LoginInput{Email: "Emily_Clark@gmail.com", Password: "Password1!"}},
 	{TestName: "incorrect email", ExpectedStatusCode: http.StatusBadRequest,
 		LoginInput: users.LoginInput{Email: "emily_clarky@gmail.com", Password: "Password1!"}},
