@@ -5,14 +5,49 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
+	"time"
 
+	"github.com/DarrelA/starter-go-postgresql/app"
 	"github.com/DarrelA/starter-go-postgresql/configs"
+	"github.com/DarrelA/starter-go-postgresql/db"
 	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
+	"github.com/DarrelA/starter-go-postgresql/internal/utils"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	data_test "github.com/DarrelA/starter-go-postgresql/test/data"
+	"github.com/gofiber/fiber/v2"
 )
+
+var (
+	rdbmsInstance       db.RDBMS
+	inMemoryDbInstance  db.InMemoryDB
+	appInstance         *fiber.App
+	authServiceInstance *fiber.App
+)
+
+func TestMain(m *testing.M) {
+	// Change to the `/deployments` directory from `/test` directory
+	err := os.Chdir("../deployments")
+	if err != nil {
+		fmt.Println("error changing directory:", err)
+		os.Exit(1)
+	}
+
+	utils.CreateAppLog()
+
+	rdbmsInstance, inMemoryDbInstance = app.CreateDBConnections()
+	appInstance, authServiceInstance = app.ConfigureAppInstance()
+	go app.StartServer()
+
+	// @TODO: Perhaps it can be fixed at docker-compose
+	// Wait for initialization
+	time.Sleep(2 * time.Second)
+
+	exitVal := m.Run()
+	os.Exit(exitVal)
+}
 
 func TestRegisterEndpoint(t *testing.T) {
 	// Using a single HTTP client for all requests

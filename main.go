@@ -7,25 +7,12 @@ import (
 	"syscall"
 
 	"github.com/DarrelA/starter-go-postgresql/app"
-	"github.com/rs/zerolog"
+	"github.com/DarrelA/starter-go-postgresql/internal/utils"
 	"github.com/rs/zerolog/log"
 )
 
 func main() {
-	// Create a logger instance with output to a file
-	logFile, err := os.Create("/app/logs/app.log")
-	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create log file")
-	}
-
-	// Configure logger to write to both file and console
-	log.Logger = zerolog.
-		New(zerolog.
-			MultiLevelWriter(zerolog.ConsoleWriter{Out: os.Stderr}, logFile)).
-		With().
-		Caller().
-		Timestamp().
-		Logger()
+	utils.CreateAppLog()
 
 	// Use `WaitGroup` when you just need to wait for tasks to complete without exchanging data.
 	// Use channels when you need to signal task completion and possibly exchange data.
@@ -42,7 +29,7 @@ func main() {
 	go app.StartServer()
 	waitForShutdown()
 
-	logFile.Close()
+	utils.GetLogFile().Close()
 	os.Exit(0)
 }
 
