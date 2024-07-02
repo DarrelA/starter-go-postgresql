@@ -294,9 +294,8 @@ In summary, using access and refresh tokens with Redis, PostgreSQL, and cookies 
 ## Handle Initial Files
 
 1. **Respective `.env` files in `configs` folder**
-2. **`init.sql` script:** Creates initial schemas
-3. **Respective env server `.json` file:** Establishes server connection from pgAdmin to Postgres
-4. **Run `chmod` command for `.sh` scripts**: See [Option 1 (Shell Script)](#option-1-shell-script) and [Testing](#testing)
+2. **Respective env server `.json` file:** Establishes server connection from pgAdmin to Postgres
+3. **Run `chmod` command for `refresh_token_keygen.sh` scripts**: See [Option 1 (Shell Script)](#option-1-shell-script)
 
 ## Generate the Private and Public Keys
 

@@ -7,7 +7,6 @@ services:
       - '6500:5432'
     volumes:
       - progresDB_${APP_ENV}:/var/lib/postgresql/data
-      - ../db/pgdb/init.${APP_ENV}.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
       - ../configs/.env.${APP_ENV}
 
@@ -51,7 +50,7 @@ services:
     build:
       context: ..
       dockerfile: ./deployments/Dockerfile.test
-      target: tester
+      target: builder # Use the builder stage
     image: starter-go-postgresql-tester
     container_name: starter-go-postgresql-tester
     ports:

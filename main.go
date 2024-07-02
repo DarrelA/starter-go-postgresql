@@ -21,7 +21,10 @@ func main() {
 
 	go func() {
 		defer wg.Done()
+
+		// Functions are running synchronously
 		app.CreateDBConnections()
+		app.SeedDatabase()
 		app.ConfigureAppInstance()
 	}()
 

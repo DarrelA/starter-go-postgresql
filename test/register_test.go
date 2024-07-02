@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"sync"
 	"testing"
-	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/app"
 	"github.com/DarrelA/starter-go-postgresql/configs"
@@ -28,22 +28,20 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	// Change to the `/deployments` directory from `/test` directory
-	err := os.Chdir("../deployments")
-	if err != nil {
-		fmt.Println("error changing directory:", err)
-		os.Exit(1)
-	}
-
 	utils.CreateAppLog()
 
-	rdbmsInstance, inMemoryDbInstance = app.CreateDBConnections()
-	appInstance, authServiceInstance = app.ConfigureAppInstance()
-	go app.StartServer()
+	var wg sync.WaitGroup
+	wg.Add(1)
 
-	// @TODO: Perhaps it can be fixed at docker-compose
-	// Wait for initialization
-	time.Sleep(2 * time.Second)
+	go func() {
+		defer wg.Done()
+		rdbmsInstance, inMemoryDbInstance = app.CreateDBConnections()
+		app.SeedDatabase()
+		appInstance, authServiceInstance = app.ConfigureAppInstance()
+	}()
+
+	wg.Wait()
+	go app.StartServer()
 
 	exitVal := m.Run()
 	os.Exit(exitVal)
