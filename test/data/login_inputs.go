@@ -13,11 +13,11 @@ type TestLoginInput struct {
 }
 
 var LoginInputs = []TestLoginInput{
-	{TestName: "valid account", ExpectedStatusCode: http.StatusOK,
+	{TestName: "valid account 1", ExpectedStatusCode: http.StatusOK,
 		LoginInput: users.LoginInput{Email: "Carlyn_Daniel@gmail.com", Password: "Password1!"}},
-	{TestName: "valid account", ExpectedStatusCode: http.StatusOK,
+	{TestName: "valid account non-ASCII character", ExpectedStatusCode: http.StatusOK,
 		LoginInput: users.LoginInput{Email: "Carlyn_Daniël@gmail.com", Password: "Password1!"}},
-	{TestName: "valid account", ExpectedStatusCode: http.StatusOK,
+	{TestName: "valid account 2", ExpectedStatusCode: http.StatusOK,
 		LoginInput: users.LoginInput{Email: "Emily_Clark@gmail.com", Password: "Password1!"}},
 	{TestName: "incorrect email", ExpectedStatusCode: http.StatusBadRequest,
 		LoginInput: users.LoginInput{Email: "emily_clarky@gmail.com", Password: "Password1!"}},

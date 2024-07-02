@@ -48,6 +48,7 @@ func SeedDatabase() {
 	cwd := utils.LogCWD()
 	utils.ListFiles()
 
+	// @TODO: Refine `docker-compose.yml` to improve handling of `app-test` service command
 	// Check if the current working directory contains "\test"
 	if strings.Contains(cwd, "\\test") || strings.Contains(cwd, "/test") {
 		envBasePath = "../build/sql"

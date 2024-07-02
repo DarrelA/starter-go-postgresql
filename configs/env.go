@@ -79,6 +79,7 @@ func loadEnv() {
 	utils.ListFiles()
 	envBasePath := "configs/"
 
+	// @TODO: Refine `docker-compose.yml` to improve handling of `app-test` service command
 	// Check if the current working directory contains "\test"
 	if strings.Contains(cwd, "\\test") || strings.Contains(cwd, "/test") {
 		envBasePath = "../configs/"
