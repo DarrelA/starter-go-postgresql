@@ -75,14 +75,9 @@ func loadEnv() {
 		log.Fatal().Msg("APP_ENV not set")
 	}
 
+	cwd := utils.LogCWD()
+	utils.ListFiles()
 	envBasePath := "configs/"
-
-	cwd, err := os.Getwd()
-	if err != nil {
-		log.Fatal().Err(err).Msg("error getting current working directory")
-	}
-
-	log.Debug().Msgf("@cwd: %s", cwd)
 
 	// Check if the current working directory contains "\test"
 	if strings.Contains(cwd, "\\test") || strings.Contains(cwd, "/test") {
