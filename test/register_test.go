@@ -54,7 +54,10 @@ func TestRegisterEndpoint(t *testing.T) {
 	endpoint := "/register"
 
 	for _, user := range data_test.RegisterInputs {
-		t.Run(fmt.Sprintf("test inserting [%s %s] into rdbms", user.FirstName, user.LastName), func(t *testing.T) {
+		t.Run(fmt.Sprintf("test case for [%s]: ", user.TestName), func(t *testing.T) {
+			// Extract the RegisterInput for the HTTP request
+			// userRegisterInput := user.RegisterInput
+			// body, err := json.Marshal(userRegisterInput)
 			body, err := json.Marshal(user)
 			if err != nil {
 				t.Fatalf("failed to marshal json: %v", err)
@@ -73,6 +76,10 @@ func TestRegisterEndpoint(t *testing.T) {
 			}
 			defer resp.Body.Close()
 
+			if resp.StatusCode != user.ExpectedStatusCode {
+				t.Fatalf("expected Status Code to be [%d], but got [%d]", user.ExpectedStatusCode, resp.StatusCode)
+			}
+
 			// Decode the response body into a temporary map
 			var responseMap map[string]json.RawMessage
 			if err := json.NewDecoder(resp.Body).Decode(&responseMap); err != nil {
@@ -90,13 +97,13 @@ func TestRegisterEndpoint(t *testing.T) {
 				if responseBody.UUID == nil {
 					t.Errorf("expected UUID to be created for [%s %s], but it is empty", user.FirstName, user.LastName)
 				}
-				if responseBody.FirstName != user.FirstName {
+				if responseBody.FirstName != strings.TrimSpace(strings.ToLower(user.FirstName)) {
 					t.Errorf("expected FirstName to be [%s], but got [%s]", user.FirstName, responseBody.FirstName)
 				}
-				if responseBody.LastName != user.LastName {
+				if responseBody.LastName != strings.TrimSpace(strings.ToLower(user.LastName)) {
 					t.Errorf("expected LastName to be [%s], but got [%s]", user.LastName, responseBody.LastName)
 				}
-				if responseBody.Email != user.Email {
+				if responseBody.Email != strings.TrimSpace(strings.ToLower(user.Email)) {
 					t.Errorf("expected Email to be [%s], but got [%s]", user.Email, responseBody.Email)
 				}
 
