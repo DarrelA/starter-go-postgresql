@@ -12,7 +12,9 @@ import (
 	pgdb "github.com/DarrelA/starter-go-postgresql/db/pgdb"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/middlewares"
+	"github.com/DarrelA/starter-go-postgresql/internal/utils"
 	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
+	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -43,7 +45,8 @@ func CreateDBConnections() (db.RDBMS, db.InMemoryDB) {
 }
 
 func SeedDatabase() {
-	envBasePath := "/root/build/sql"
+	envBasePath := "/root/build"
+	currentEnv := configs.Env
 
 	cwd := envs_utils.LogCWD()
 	envs_utils.ListFiles()
@@ -51,40 +54,26 @@ func SeedDatabase() {
 	// @TODO: Refine `docker-compose.yml` to improve handling of `app-test` service command
 	// Check if the current working directory contains "\test"
 	if strings.Contains(cwd, "\\test") || strings.Contains(cwd, "/test") {
-		envBasePath = "../build/sql"
+		envBasePath = "../build/"
 	}
 
 	db := pgdb.Dbpool
 	ctx := context.Background()
 
-	err := executeSQLFile(ctx, db, envBasePath+"/schema.user.sql")
+	err := executeSQLFile(ctx, db, envBasePath+"/sql"+"/schema.user.sql")
 	if err != nil {
 		log.Fatal().Err(err).Msg("unable to execute schema.user.sql")
 	}
 
 	log.Info().Msg("successfully created extension and table")
 
-	currentEnv := configs.Env
-
 	switch currentEnv {
 	case "dev":
-		err := executeSQLFile(ctx, db, envBasePath+"/seed.user.dev.sql")
-		if err != nil {
-			log.Fatal().Err(err).Msg("unable to execute seed.user.dev.sql")
-		}
-
-		log.Info().Msgf("successfully seeded data in [%s] env", currentEnv)
-
+		saveMultipleUsers(currentEnv, envBasePath)
 	case "test":
-		err := executeSQLFile(ctx, db, envBasePath+"/seed.user.test.sql")
-		if err != nil {
-			log.Fatal().Err(err).Msg("unable to execute seed.user.test.sql")
-		}
-
-		log.Info().Msgf("successfully seeded data in [%s] env", currentEnv)
-
+		saveMultipleUsers(currentEnv, envBasePath)
 	default:
-		log.Info().Msgf("[%s] env will not be seeded with data", currentEnv)
+		log.Info().Msgf("[%s] env will NOT be seeded with data", currentEnv)
 	}
 }
 
@@ -93,10 +82,31 @@ func executeSQLFile(ctx context.Context, db *pgxpool.Pool, filePath string) erro
 	if err != nil {
 		return err
 	}
-
 	// Execute the SQL file
 	_, err = db.Exec(ctx, string(sqlData))
 	return err
+}
+
+func saveMultipleUsers(currentEnv string, envBasePath string) *err_rest.RestErr {
+	userJsonFilePath := "/seed.user." + currentEnv + ".json"
+	users, err := utils.LoadUsersFromJsonFile(envBasePath + "/json" + userJsonFilePath)
+	if err != nil {
+		log.Error().Err(err).Msgf("unable to load [%s]", userJsonFilePath)
+	}
+
+	for i, user := range users {
+		pw, err := user.HashPasswordUsingBcrypt()
+		if err != nil {
+			log.Error().Err(err).Msg("bcrypt_error")
+			return err_rest.NewInternalServerError(("something went wrong"))
+		}
+
+		users[i].Password = pw
+		users[i].Save()
+	}
+
+	log.Info().Msgf("successfully seeded data in [%s] env", currentEnv)
+	return nil
 }
 
 // ConfigureAppInstance sets up and configures instances of Fiber for the main app and auth service,

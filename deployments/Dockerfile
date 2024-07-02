@@ -30,6 +30,7 @@ COPY --from=builder /docker_wd/starter-go-postgresql /root/
 
 # Copy the necessary directories
 COPY build/sql /root/build/sql
+COPY build/json /root/build/json
 
 # Set the working directory for the container
 WORKDIR /root/
