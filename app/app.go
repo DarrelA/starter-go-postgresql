@@ -94,6 +94,13 @@ func saveMultipleUsers(currentEnv string, envBasePath string) *err_rest.RestErr 
 		log.Error().Err(err).Msgf("unable to load [%s]", userJsonFilePath)
 	}
 
+	// Verify data in users table by checking for returned errors
+	hasData := users[0].GetByEmail()
+	if hasData == nil {
+		log.Info().Msgf("[%s] env already has seeded data", currentEnv)
+		return nil
+	}
+
 	for i, user := range users {
 		pw, err := user.HashPasswordUsingBcrypt()
 		if err != nil {
