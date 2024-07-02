@@ -3,8 +3,8 @@
 - [Setup](#setup)
   - [Handle Initial Files](#handle-initial-files)
   - [Generate the Private and Public Keys](#generate-the-private-and-public-keys)
-    - [Option 1 (Shell Script)](#option-1-shell-script)
-    - [Option 2 (Browser)](#option-2-browser)
+    - [Shell Script](#shell-script)
+    - [Browser Method](#browser-method)
 - [Shell](#shell)
   - [testing](#testing)
   - [psql](#psql)
@@ -16,18 +16,20 @@
 
 1. **Respective `.env` files in `configs` folder**
 2. **Respective env server `.json` file:** Establishes server connection from pgAdmin to Postgres
-3. **Run `chmod` command for `refresh_token_keygen.sh` scripts**: See [Option 1 (Shell Script)](#option-1-shell-script)
+3. **Run `chmod` command for the shell script(s)**
 
 ## Generate the Private and Public Keys
 
-### Option 1 (Shell Script)
+### Shell Script
 
 ```sh
-chmod +x build/refresh_token_keygen.sh
+# generate keys in base64
+# alternatively use the browser method
+chmod +x build/scripts/refresh_token_keygen.sh
 cd build && ./refresh_token_keygen.sh && cd ..
 ```
 
-### Option 2 (Browser)
+### Browser Method
 
 1. [Online RSA Key Generator](https://travistidwell.com/jsencrypt/demo/): Key Size: 2048 bit
 2. [BASE64 Decode and Encode](https://www.base64encode.org/)
