@@ -12,7 +12,7 @@ import (
 	pgdb "github.com/DarrelA/starter-go-postgresql/db/pgdb"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/middlewares"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils"
+	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -45,8 +45,8 @@ func CreateDBConnections() (db.RDBMS, db.InMemoryDB) {
 func SeedDatabase() {
 	envBasePath := "/root/build/sql"
 
-	cwd := utils.LogCWD()
-	utils.ListFiles()
+	cwd := envs_utils.LogCWD()
+	envs_utils.ListFiles()
 
 	// @TODO: Refine `docker-compose.yml` to improve handling of `app-test` service command
 	// Check if the current working directory contains "\test"

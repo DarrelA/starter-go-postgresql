@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DarrelA/starter-go-postgresql/internal/utils"
+	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -75,8 +75,8 @@ func loadEnv() {
 		log.Fatal().Msg("APP_ENV not set")
 	}
 
-	cwd := utils.LogCWD()
-	utils.ListFiles()
+	cwd := envs_utils.LogCWD()
+	envs_utils.ListFiles()
 	envBasePath := "configs/"
 
 	// @TODO: Refine `docker-compose.yml` to improve handling of `app-test` service command
@@ -152,16 +152,16 @@ func loadRedisSettings() {
 func loadJWTConfigs() {
 	JWTSettings.Path = os.Getenv("JWT_PATH")
 	JWTSettings.Domain = os.Getenv("JWT_DOMAIN")
-	utils.LoadEnvVariableBool("JWT_SECURE", &JWTSettings.Secure)
-	utils.LoadEnvVariableBool("JWT_HTTPONLY", &JWTSettings.HttpOnly)
+	envs_utils.LoadEnvVariableBool("JWT_SECURE", &JWTSettings.Secure)
+	envs_utils.LoadEnvVariableBool("JWT_HTTPONLY", &JWTSettings.HttpOnly)
 	JWTSettings.AccessTokenPrivateKey = os.Getenv("ACCESS_TOKEN_PRIVATE_KEY")
 	JWTSettings.AccessTokenPublicKey = os.Getenv("ACCESS_TOKEN_PUBLIC_KEY")
-	utils.LoadEnvVariableDuration("ACCESS_TOKEN_EXPIRED_IN", &JWTSettings.AccessTokenExpiredIn)
-	utils.LoadEnvVariableInt("ACCESS_TOKEN_MAXAGE", &JWTSettings.AccessTokenMaxAge)
+	envs_utils.LoadEnvVariableDuration("ACCESS_TOKEN_EXPIRED_IN", &JWTSettings.AccessTokenExpiredIn)
+	envs_utils.LoadEnvVariableInt("ACCESS_TOKEN_MAXAGE", &JWTSettings.AccessTokenMaxAge)
 	JWTSettings.RefreshTokenPrivateKey = os.Getenv("REFRESH_TOKEN_PRIVATE_KEY")
 	JWTSettings.RefreshTokenPublicKey = os.Getenv("REFRESH_TOKEN_PUBLIC_KEY")
-	utils.LoadEnvVariableDuration("REFRESH_TOKEN_EXPIRED_IN", &JWTSettings.RefreshTokenExpiredIn)
-	utils.LoadEnvVariableInt("REFRESH_TOKEN_MAXAGE", &JWTSettings.RefreshTokenMaxAge)
+	envs_utils.LoadEnvVariableDuration("REFRESH_TOKEN_EXPIRED_IN", &JWTSettings.RefreshTokenExpiredIn)
+	envs_utils.LoadEnvVariableInt("REFRESH_TOKEN_MAXAGE", &JWTSettings.RefreshTokenMaxAge)
 }
 
 func loadCORSConfigs() {

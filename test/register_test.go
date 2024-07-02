@@ -14,7 +14,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/DarrelA/starter-go-postgresql/db"
 	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils"
+	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	data_test "github.com/DarrelA/starter-go-postgresql/test/data"
 	"github.com/gofiber/fiber/v2"
@@ -28,7 +28,7 @@ var (
 )
 
 func TestMain(m *testing.M) {
-	utils.CreateAppLog()
+	envs_utils.CreateAppLog()
 
 	var wg sync.WaitGroup
 	wg.Add(1)

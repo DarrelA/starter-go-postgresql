@@ -7,12 +7,12 @@ import (
 	"syscall"
 
 	"github.com/DarrelA/starter-go-postgresql/app"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils"
+	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
 	"github.com/rs/zerolog/log"
 )
 
 func main() {
-	utils.CreateAppLog()
+	envs_utils.CreateAppLog()
 
 	// Use `WaitGroup` when you just need to wait for tasks to complete without exchanging data.
 	// Use channels when you need to signal task completion and possibly exchange data.
@@ -32,7 +32,7 @@ func main() {
 	go app.StartServer()
 	waitForShutdown()
 
-	utils.GetLogFile().Close()
+	envs_utils.GetLogFile().Close()
 	os.Exit(0)
 }
 
