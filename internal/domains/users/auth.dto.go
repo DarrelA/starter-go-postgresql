@@ -72,12 +72,18 @@ var validationMessages = map[string]string{
 For each validation error, the corresponding user-friendly message is fetched from the validationMessages map.
 If a tag does not have a predefined message, a default message "be valid" is used.
 The message is constructed using the field name and the user-friendly message.
+
+Pass the payload by reference
 */
-func ValidateStruct[T any](payload T) *err_rest.RestErr {
+func ValidateStruct[T any](payload *T) *err_rest.RestErr {
 	var validationErrors []string
 
 	// Pre-process the input if it is of type *RegisterInput
-	if input, ok := any(&payload).(*RegisterInput); ok {
+	// Convert the type of &payload (pointer to T) to interface{} using any(&payload).
+	// This allows us to use type assertion to check if the payload is of type *RegisterInput.
+	// If the assertion is successful (ok is true), preProcessInput can be called to
+	// perform specific pre-processing for RegisterInput fields (e.g., trimming and converting to lowercase).
+	if input, ok := any(payload).(*RegisterInput); ok {
 		preProcessInput(input)
 	}
 
