@@ -10,6 +10,7 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/rs/zerolog/log"
+	"golang.org/x/crypto/bcrypt"
 )
 
 var (
@@ -18,12 +19,16 @@ var (
 	queryGetUserByID = "SELECT user_uuid, first_name, last_name, email FROM users WHERE user_uuid=$1;"
 )
 
-/*
-This function saves a new user to the database. The user's data is provided
-via a pointer to the `User` struct. The data flow typically starts from
-`users_controller.go`, goes through `users_service.go`, and finally reaches
-`users_dao.go` where it interacts with the database.
-*/
+// Create a method of the `User` type
+func (user *User) HashPasswordUsingBcrypt() (string, *err_rest.RestErr) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
+	if err != nil {
+		log.Error().Err(err).Msg("bcrypt_error")
+		return "", err_rest.NewInternalServerError("something went wrong")
+	}
+	return string(hashedPassword), nil
+}
+
 func (user *User) Save() *err_rest.RestErr {
 	var lastInsertUuid uuid.UUID
 	err := pgdb.Dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)

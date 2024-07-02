@@ -9,6 +9,7 @@
   - [testing](#testing)
   - [psql](#psql)
   - [redis](#redis)
+- [Future Implementations Consideration](#future-implementations-consideration)
 
 # Setup
 
@@ -27,6 +28,9 @@
 # alternatively use the browser method
 chmod +x build/scripts/refresh_token_keygen.sh
 cd build && ./refresh_token_keygen.sh && cd ..
+
+# install postgres extension
+chmod +x build/scripts/init-db.install-plpython.sh
 ```
 
 ### Browser Method
@@ -76,5 +80,13 @@ GET key
 # Check the remaining time to live (TTL) of a key
 TTL key
 ```
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+# Future Implementations Consideration
+
+- [Using postgresql extension to hash using bcrypt algorithm](https://www.postgresql.org/docs/current/plpython.html)
+
+> PL/Python is only available as an “untrusted” language, meaning it does not offer any way of restricting what users can do in it and is therefore named `plpython3u`. A trusted variant `plpython` might become available in the future if a secure execution mechanism is developed in Python. The writer of a function in untrusted PL/Python must take care that the function cannot be used to do anything unwanted, since it will be able to do anything that could be done by a user logged in as the database administrator. Only superusers can create functions in untrusted languages such as `plpython3u`.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>

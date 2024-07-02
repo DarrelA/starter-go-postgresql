@@ -20,14 +20,13 @@ func CreateUser(payload users.RegisterInput) (*users.UserResponse, *err_rest.Res
 		Password:  payload.Password,
 	}
 
-	pwSlice, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), 14)
+	pw, err := newUser.HashPasswordUsingBcrypt()
 	if err != nil {
 		log.Error().Err(err).Msg("bcrypt_error")
 		return nil, err_rest.NewInternalServerError(("something went wrong"))
 	}
 
-	// parse from byte to string
-	newUser.Password = string(pwSlice[:])
+	newUser.Password = pw
 
 	if err := newUser.Save(); err != nil {
 		return nil, err
