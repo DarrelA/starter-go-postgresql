@@ -2,7 +2,7 @@
 FROM golang:latest AS builder
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /docker_wd
 
 # Copy the go.mod and go.sum files to download dependencies
 # Copying these files separately allows Docker to cache the downloaded modules
@@ -13,20 +13,23 @@ RUN go mod download
 COPY . .
 
 # Remove the /test directory to keep the build context small
-RUN rm -rf /app/test
+RUN rm -rf /docker_wd/test
 
 # Build the application
 # -o flag sets the output binary name
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o starter-go-postgresql .
 
-# Stage 2: Start from a smaller base image for the final image
+# Stage 2: Create a smaller image for the final binary
 FROM alpine:latest
 
 # Add any necessary runtime dependencies for your application here
 # RUN apk --no-cache add <dependencies>
 
 # Copy the pre-built binary file from the builder stage
-COPY --from=builder /app/starter-go-postgresql /root/
+COPY --from=builder /docker_wd/starter-go-postgresql /root/
+
+# Copy the necessary directories
+COPY build/sql /root/build/sql
 
 # Set the working directory for the container
 WORKDIR /root/

@@ -1,8 +1,8 @@
 # Stage 1: Build the Go binary
-FROM golang:latest AS tester
+FROM golang:latest AS builder
 
 # Set the working directory inside the container
-WORKDIR /app
+WORKDIR /docker_wd
 
 # Copy the go.mod and go.sum files to download dependencies
 # Copying these files separately allows Docker to cache the downloaded modules
@@ -22,8 +22,11 @@ FROM alpine:latest
 # Add any necessary runtime dependencies for your application here
 # RUN apk --no-cache add <dependencies>
 
-# Copy the pre-built binary file from the tester stage
-COPY --from=tester /app/starter-go-postgresql-test /root/
+# Copy the pre-built binary file from the builder stage
+COPY --from=builder /docker_wd/starter-go-postgresql-test /root/
+
+# Copy the necessary directories
+COPY build/sql /root/build/sql
 
 # Set the working directory for the container
 WORKDIR /root/
