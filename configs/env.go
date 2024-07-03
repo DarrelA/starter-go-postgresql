@@ -13,7 +13,8 @@ import (
 )
 
 type BaseURLsConfig struct {
-	AuthService string
+	AuthServicePathName string
+	AuthService         string
 }
 
 type PostgresDBConfig struct {
@@ -98,7 +99,8 @@ func loadEnv() {
 	log.Info().Msgf("running in %s env using Port %s", strings.ToUpper(Env), Port)
 
 	BaseURLs = BaseURLsConfig{
-		AuthService: os.Getenv("PROTOCOL") + os.Getenv("DOMAIN") + Port + os.Getenv("AUTH_SERVICE_PATHNAME"),
+		AuthServicePathName: os.Getenv("AUTH_SERVICE_PATHNAME"),
+		AuthService:         os.Getenv("PROTOCOL") + os.Getenv("DOMAIN") + Port + os.Getenv("AUTH_SERVICE_PATHNAME"),
 	}
 }
 

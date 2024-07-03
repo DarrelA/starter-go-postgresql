@@ -18,11 +18,10 @@ import (
 var jwtCfg = configs.JWTSettings
 
 func Register(c *fiber.Ctx) error {
-	var payload users.RegisterInput
-
-	if err := c.BodyParser(&payload); err != nil {
-		err := err_rest.NewBadRequestError("invalid json body")
-		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
+	payload, ok := c.Locals("register_payload").(users.RegisterInput)
+	if !ok {
+		err := err_rest.NewBadRequestError("register_payload is not of type users.RegisterInput")
+		log.Error().Err(err).Msg("type_error")
 	}
 
 	result, err := services.CreateUser(payload)
@@ -34,11 +33,10 @@ func Register(c *fiber.Ctx) error {
 }
 
 func Login(c *fiber.Ctx) error {
-	var payload users.LoginInput
-
-	if err := c.BodyParser(&payload); err != nil {
-		err := err_rest.NewBadRequestError("invalid json body")
-		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
+	payload, ok := c.Locals("login_payload").(users.LoginInput)
+	if !ok {
+		err := err_rest.NewBadRequestError("login_payload is not of type users.RegisterInput")
+		log.Error().Err(err).Msg("type_error")
 	}
 
 	user, err := services.GetUser(payload)
