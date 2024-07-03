@@ -36,23 +36,21 @@ up:
 
 # Target to bring down the docker-compose services
 d:
-	@cd deployments && $(VARS) docker-compose down
+	@cd deployments && APP_ENV=$(APP_ENV) docker-compose down
 
-# Target to bring down the docker-compose services and named volumes
+# Target to bring down the docker-compose services, named volumes, and remove unused containers
 dv:
-	@cd deployments && $(VARS) docker-compose down -v
+	@cd deployments && APP_ENV=$(APP_ENV) docker-compose down -v
+	@docker container prune -f
 
 # Target to rebuild the docker-compose app service
 wa:
 	@cd deployments && $(VARS) docker-compose build app
 
-# Target to rebuild the docker-compose app-test service
+# Target to rebuild the docker-compose app-test service & run test
 wat:
 	@cd deployments && $(VARS) docker-compose build app-test --build-arg APP_ENV=$(APP_ENV)
-
-# Target to run tests (app-test)
-t:
-	@cd deployments && $(VARS) docker-compose run --rm app-test
+	@cd deployments && $(VARS) docker-compose run app-test
 	make dv
 
 # Echo variables
