@@ -12,25 +12,11 @@ RUN go mod download
 # Copy the source code into the container
 COPY . .
 
-# Build the application
-# -o flag sets the output binary name
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o starter-go-postgresql-test .
+# Set the build argument for the environment
+ARG APP_ENV
+ENV APP_ENV=${APP_ENV}
 
-# Stage 2: Create a smaller image for the final binary
-FROM alpine:latest
+# @TODO: Figure how to compile test binary (go test -c)
 
-# Add any necessary runtime dependencies for your application here
-# RUN apk --no-cache add <dependencies>
-
-# Copy the pre-built binary file from the builder stage
-COPY --from=builder /docker_wd/starter-go-postgresql-test /root/
-
-# Copy the necessary directories
-COPY build/sql /root/build/sql
-COPY build/json /root/build/json
-
-# Set the working directory for the container
-WORKDIR /root/
-
-# Run the binary when the container starts
-CMD ["./starter-go-postgresql-test"]
+# Run the tests directly when the container starts using the environment variable
+ENTRYPOINT ["sh", "-c", "echo Running test in APP_ENV=${APP_ENV} && APP_ENV=${APP_ENV} go test ./test"]

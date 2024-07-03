@@ -3,9 +3,9 @@
 #####################
 
 APP_ENV ?= dev
-DB ?= postgres redis
-UI ?= pgAdmin
-VARS ?= APP_ENV=$(APP_ENV) POSTGRES_DB=$(POSTGRES_DB) POSTGRES_USER=$(POSTGRES_USER) 
+DB = postgres redis
+UI = pgAdmin
+VARS = APP_ENV=$(APP_ENV) POSTGRES_DB=$(POSTGRES_DB) POSTGRES_USER=$(POSTGRES_USER) 
 
 #####################
 #    Env Configs    #
@@ -42,21 +42,16 @@ d:
 dv:
 	@cd deployments && $(VARS) docker-compose down -v
 
-# Target to rebuild the docker-compose services
-b:
-	@cd deployments && $(VARS) docker-compose build
+# Target to rebuild the docker-compose app service
+wa:
+	@cd deployments && $(VARS) docker-compose build app
 
-# Target to rebuild the docker-compose services (app and app-test)
-bapp:
-	@cd deployments && $(VARS) docker-compose build app app-test
+# Target to rebuild the docker-compose app-test service
+wat:
+	@cd deployments && $(VARS) docker-compose build app-test --build-arg APP_ENV=$(APP_ENV)
 
-# Target to rebuild the docker-compose services (app-test)
-bat:
-	@cd deployments && $(VARS) docker-compose build app-test
-
-# Target to run tests (excluding app)
+# Target to run tests (app-test)
 t:
-	@cd deployments && $(VARS) docker-compose up -d $(DB)
 	@cd deployments && $(VARS) docker-compose run --rm app-test
 	make dv
 

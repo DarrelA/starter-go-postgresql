@@ -16,8 +16,12 @@ COPY . .
 RUN rm -rf /docker_wd/test
 
 # Build the application
-# -o flag sets the output binary name
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o starter-go-postgresql .
+# CGO_ENABLED=0: Disables CGO, which is appropriate if you want a pure Go binary without C dependencies
+# GOOS=linux: Sets the target OS to Linux
+# go build -a: Forces a rebuild of all packages and their dependencies,
+#              regardless of whether they have changed or not
+# -o starter-go-postgresql.test: Specifies the output file name
+RUN CGO_ENABLED=0 GOOS=linux go build -a -o starter-go-postgresql
 
 # Stage 2: Create a smaller image for the final binary
 FROM alpine:latest
@@ -26,14 +30,14 @@ FROM alpine:latest
 # RUN apk --no-cache add <dependencies>
 
 # Copy the pre-built binary file from the builder stage
-COPY --from=builder /docker_wd/starter-go-postgresql /root/
+COPY --from=builder /docker_wd/starter-go-postgresql /root
 
 # Copy the necessary directories
 COPY build/sql /root/build/sql
 COPY build/json /root/build/json
 
 # Set the working directory for the container
-WORKDIR /root/
+WORKDIR /root
 
 # Run the binary when the container starts
-CMD ["./starter-go-postgresql"]
+ENTRYPOINT ["./starter-go-postgresql"]

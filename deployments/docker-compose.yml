@@ -60,7 +60,6 @@ services:
     build:
       context: ..
       dockerfile: ./deployments/Dockerfile.test
-      target: builder # Use the builder stage
     image: starter-go-postgresql-tester
     container_name: starter-go-postgresql-tester
     ports:
@@ -76,7 +75,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    command: sh -c "APP_ENV=${APP_ENV} go test ./test"
 
 volumes:
   redisDB_dev:
