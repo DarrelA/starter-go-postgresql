@@ -38,12 +38,12 @@ func TestMain(m *testing.M) {
 		rdbmsInstance, inMemoryDbInstance = app.CreateDBConnections()
 		app.SeedDatabase()
 		appInstance, authServiceInstance = app.ConfigureAppInstance()
+		go app.StartServer()
 	}()
 
 	wg.Wait()
-	go app.StartServer()
-
 	exitVal := m.Run()
+	envs_utils.GetLogFile().Close()
 	os.Exit(exitVal)
 }
 

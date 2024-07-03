@@ -26,12 +26,11 @@ func main() {
 		app.CreateDBConnections()
 		app.SeedDatabase()
 		app.ConfigureAppInstance()
+		go app.StartServer()
 	}()
 
 	wg.Wait()
-	go app.StartServer()
 	waitForShutdown()
-
 	envs_utils.GetLogFile().Close()
 	os.Exit(0)
 }

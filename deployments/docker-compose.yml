@@ -9,6 +9,11 @@ services:
       - progresDB_${APP_ENV}:/var/lib/postgresql/data
     env_file:
       - ../configs/.env.${APP_ENV}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -d $POSTGRES_DB -U $POSTGRES_USER']
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   pgAdmin:
     image: dpage/pgadmin4
@@ -27,6 +32,9 @@ services:
       - '6379:6379'
     volumes:
       - redisDB_${APP_ENV}:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   app:
     build:
@@ -43,8 +51,10 @@ services:
     env_file:
       - ../configs/.env.${APP_ENV}
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   app-test:
     build:
@@ -62,8 +72,10 @@ services:
     env_file:
       - ../configs/.env.${APP_ENV}
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
     command: sh -c "APP_ENV=${APP_ENV} go test ./test"
 
 volumes:

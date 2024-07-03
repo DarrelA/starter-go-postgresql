@@ -27,10 +27,7 @@
 # generate keys in base64
 # alternatively use the browser method
 chmod +x build/scripts/refresh_token_keygen.sh
-cd build && ./refresh_token_keygen.sh && cd ..
-
-# install postgres extension
-chmod +x build/scripts/init-db.install-plpython.sh
+cd build/scripts && ./refresh_token_keygen.sh && cd ../..
 ```
 
 ### Browser Method
