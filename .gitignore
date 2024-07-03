@@ -8,3 +8,4 @@ build/refresh_token_keys.txt
 db/pgdb/servers.json
 
 *.log
+*.log.json
