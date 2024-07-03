@@ -45,7 +45,7 @@ services:
     ports:
       - '8080:8080'
     volumes:
-      - ./logs:/app/logs
+      - ./logs:/docker_wd/logs
     environment:
       - APP_ENV=${APP_ENV}
     env_file:
@@ -65,7 +65,8 @@ services:
     ports:
       - '8080:8080'
     volumes:
-      - ./logs:/app/logs
+      - ./logs:/docker_wd/logs
+      - ../test/reports:/docker_wd/test/reports
     environment:
       - APP_ENV=${APP_ENV}
     env_file:

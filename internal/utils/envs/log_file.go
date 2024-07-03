@@ -15,7 +15,7 @@ func CreateAppLog() {
 	var err error
 
 	// Create a logger instance with output to a file
-	logFile, err = os.Create("/app/logs/app.log")
+	logFile, err = os.Create("/docker_wd/logs/app.log")
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to create log file")
 	}

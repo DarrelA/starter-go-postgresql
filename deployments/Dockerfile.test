@@ -16,7 +16,11 @@ COPY . .
 ARG APP_ENV
 ENV APP_ENV=${APP_ENV}
 
-# @TODO: Figure how to compile test binary (go test -c)
+# @TODO: Explore test binary compilation with `go test -c`
 
 # Run the tests directly when the container starts using the environment variable
-ENTRYPOINT ["sh", "-c", "echo Running test in APP_ENV=${APP_ENV} && APP_ENV=${APP_ENV} go test ./test"]
+# @TODO: Explore integration test coverage
+ENTRYPOINT ["sh", "-c", \
+    "echo Running test in APP_ENV=${APP_ENV} && \
+    APP_ENV=${APP_ENV} go test ./test -coverprofile=coverage.out && \
+    go tool cover -html=coverage.out -o /docker_wd/test/reports/coverage.html"]

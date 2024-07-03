@@ -9,3 +9,5 @@ db/pgdb/servers.json
 
 *.log
 *.log.json
+
+test/reports/*.html
