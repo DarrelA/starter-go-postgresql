@@ -13,7 +13,13 @@ import (
 
 func main() {
 	envs_utils.CreateAppLog()
+	startApp()
+	waitForShutdown()
+	envs_utils.GetLogFile().Close()
+	os.Exit(0)
+}
 
+func startApp() {
 	// Use `WaitGroup` when you just need to wait for tasks to complete without exchanging data.
 	// Use channels when you need to signal task completion and possibly exchange data.
 	var wg sync.WaitGroup
@@ -30,9 +36,6 @@ func main() {
 	}()
 
 	wg.Wait()
-	waitForShutdown()
-	envs_utils.GetLogFile().Close()
-	os.Exit(0)
 }
 
 func waitForShutdown() {

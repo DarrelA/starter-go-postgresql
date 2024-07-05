@@ -51,7 +51,7 @@ func SeedDatabase() {
 	cwd := envs_utils.LogCWD()
 	envs_utils.ListFiles()
 
-	// @TODO: Explore test binary compilation with `go test -c`
+	// @TODO: Explore `integration-test-coverage-issue` branch
 	// Check if the current working directory contains "\test"
 	if strings.Contains(cwd, "\\test") || strings.Contains(cwd, "/test") {
 		envBasePath = "../build/"
