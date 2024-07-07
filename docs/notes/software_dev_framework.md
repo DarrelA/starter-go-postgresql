@@ -1,13 +1,8 @@
 <a name="readme-top"></a>
 
-- [System Design](#system-design)
-  - [Requirements](#requirements)
-  - [Model-View-Controller (MVC)](#model-view-controller-mvc)
-  - [N-tier Architecture](#n-tier-architecture)
-  - [Combining Microservices and N-tier Architectures](#combining-microservices-and-n-tier-architectures)
-  - [Middlewares](#middlewares)
-    - [Logging and Monitoring](#logging-and-monitoring)
-      - [Custom Headers: `Correlation-ID` and `Request-ID`](#custom-headers-correlation-id-and-request-id)
+- [Middlewares](#middlewares)
+  - [Logging and Monitoring](#logging-and-monitoring)
+    - [Custom Headers: `Correlation-ID` and `Request-ID`](#custom-headers-correlation-id-and-request-id)
   - [JWT](#jwt)
     - [Implementation of Refresh Token with Redis](#implementation-of-refresh-token-with-redis)
       - [Redis and JWT Statelessness](#redis-and-jwt-statelessness)
@@ -21,60 +16,7 @@
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-# System Design
-
-## Requirements
-
-| No. |                     Feature                      |                                                Reason                                                |
-| :-: | :----------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
-| 1.  | Easy setup using Env files, Docker, and Makefile |                       Simplifies initial setup and environment configuration.                        |
-| 2.  | Ease of maintenance of Go packages using Go Test |                      Ensures code reliability and simplifies testing processes.                      |
-| 3.  |           Model-View-Controller (MVC)            |                                   [🔗](#model-view-controller-mvc)                                   |
-| 4.  |               N-tier Architecture                |                                      [🔗](#n-tier-architecture)                                      |
-| 5.  |    Implementation of Refresh Token with Redis    |                          [🔗](#implementation-of-refresh-token-with-redis)                           |
-| 6.  |                   Middlewares                    |                                          [🔗](#middlewares)                                          |
-| 7.  |     Fiber as a web framework for performance     |                    Optimized for minimal memory allocation and high performance.                     |
-| 8.  |   Internal logging for security using zerolog    | Provides secure and efficient logging mechanisms,</br>including structured logging with JSON output. |
-| 9.  |   A common folder structure for project layout   |                      Facilitates scalability into a microservice architecture.                       |
-
-## Model-View-Controller (MVC)
-
-The Model-View-Controller (MVC) design pattern separates an application into three interconnected components, improving the organization and manageability of the code.
-
-1. **Model:** Manages the data and business logic of the application.
-   - DTO files are located in the `internal/domains` folder.
-2. **View:** Represents the user interface and displays the data.
-   - Refer to the frontend repository.
-3. **Controller:** Acts as an intermediary between the Model and View, processing user input and updating the Model and View accordingly.
-   - Handlers process HTTP requests and are located in `internal/handlers`.
-   - Services contain business logic and are located in `internal/services`.
-   - DAO files are in the `internal/domains` folder for database interactions.
-
-## N-tier Architecture
-
-An N-tier architecture separates each layer or tier of the application both physically and logically, which enhances flexibility and manageability.
-
-1. **Frontend (Presentation Layer):** This is the user interface of the application. In an N-tier setup, you can update or replace the frontend without needing to alter the backend, as long as the interface contract (e.g., APIs) remains consistent.
-
-2. **Backend (Business Logic Layer):** This layer contains the business rules and logic. You can modify or replace this layer as needed without affecting the other tiers, provided the interfaces between the layers don't change.
-
-3. **Database (Data Access Layer):** This layer handles data storage and retrieval. You can switch out databases or change how data is accessed, and as long as you maintain the same data contracts or APIs, the other layers remain unaffected.
-
-Benefits of N-tier architecture include:
-
-1. **Scalability:** Each layer can be scaled independently based on its resource requirements.
-2. **Flexibility:** You can replace or upgrade one layer without significant rework of the others.
-3. **Maintainability:** Smaller, well-defined codebases for each layer are easier to manage and understand.
-
-However, N-tier architecture can also introduce complexity in terms of network latency, configuration, and management. Each layer likely needs to communicate over a network, which can affect performance and add complexity that wouldn't be as prominent in a monolithic architecture.
-
-## Combining Microservices and N-tier Architectures
-
-Combining N-tier architecture with microservices involves separating concerns within an application while decoupling it into independently deployable services. Each microservice can adhere to N-tier principles, enhancing modularity and scalability.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-## Middlewares
+# Middlewares
 
 | **Middleware**                                        | **Use Case(s)**                                                                                                                                                    |
 | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -86,7 +28,7 @@ Combining N-tier architecture with microservices involves separating concerns wi
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-### Logging and Monitoring
+## Logging and Monitoring
 
 | **Information**             | **Use Case (Software Engineers)**                                                                                                                   | **Use Case (DevOps)**                                                                                                                                             |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -105,7 +47,7 @@ Combining N-tier architecture with microservices involves separating concerns wi
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-#### Custom Headers: `Correlation-ID` and `Request-ID`
+### Custom Headers: `Correlation-ID` and `Request-ID`
 
 - **`Correlation-ID`**
   - **Purpose:** Used to trace and correlate a series of related requests across multiple services. It helps in understanding the journey of a particular transaction or user action through the system.
@@ -287,5 +229,6 @@ In summary, using access and refresh tokens with Redis, PostgreSQL, and cookies 
 - [Hypertext Transfer Protocol (HTTP) Field Name Registry](https://www.iana.org/assignments/http-fields/http-fields.xhtml)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="../SOFTWARE_DEV.MD">back to main</a>)</p>
 
 ---
