@@ -6,7 +6,7 @@ import (
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/users"
+	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	service "github.com/DarrelA/starter-go-postgresql/internal/service"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
@@ -44,18 +44,18 @@ func Deserializer(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": message})
 	}
 
-	user, err := service.GetUserByUUID(user_uuid)
+	u, err := service.GetUserByUUID(user_uuid)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	userRecord := &users.UserRecord{
-		UUID:      user.UUID,
-		FirstName: user.FirstName,
-		LastName:  user.LastName,
-		Email:     user.Email,
-		CreatedAt: user.CreatedAt,
-		UpdatedAt: user.UpdatedAt,
+	userRecord := &user.UserRecord{
+		UUID:      u.UUID,
+		FirstName: u.FirstName,
+		LastName:  u.LastName,
+		Email:     u.Email,
+		CreatedAt: u.CreatedAt,
+		UpdatedAt: u.UpdatedAt,
 	}
 
 	c.Locals("user_record", userRecord)

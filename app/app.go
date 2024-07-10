@@ -89,27 +89,27 @@ func executeSQLFile(ctx context.Context, db *pgxpool.Pool, filePath string) erro
 
 func saveMultipleUsers(currentEnv string, envBasePath string) *err_rest.RestErr {
 	userJsonFilePath := "/seed.user." + currentEnv + ".json"
-	users, err := utils.LoadUsersFromJsonFile(envBasePath + "/json" + userJsonFilePath)
+	uu, err := utils.LoadUsersFromJsonFile(envBasePath + "/json" + userJsonFilePath)
 	if err != nil {
 		log.Error().Err(err).Msgf("unable to load [%s]", userJsonFilePath)
 	}
 
 	// Verify data in users table by checking for returned errors
-	hasData := users[0].GetByEmail()
+	hasData := uu[0].GetByEmail()
 	if hasData == nil {
 		log.Info().Msgf("[%s] env already has seeded data", currentEnv)
 		return nil
 	}
 
-	for i, user := range users {
-		pw, err := user.HashPasswordUsingBcrypt()
+	for i, u := range uu {
+		pw, err := u.HashPasswordUsingBcrypt()
 		if err != nil {
 			log.Error().Err(err).Msg("bcrypt_error")
 			return err_rest.NewInternalServerError(("something went wrong"))
 		}
 
-		users[i].Password = pw
-		users[i].Save()
+		uu[i].Password = pw
+		uu[i].Save()
 	}
 
 	log.Info().Msgf("successfully seeded data in [%s] env", currentEnv)

@@ -5,10 +5,10 @@ import (
 	"io"
 	"os"
 
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/users"
+	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 )
 
-func LoadUsersFromJsonFile(filePath string) ([]users.User, error) {
+func LoadUsersFromJsonFile(filePath string) ([]user.User, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
@@ -20,7 +20,7 @@ func LoadUsersFromJsonFile(filePath string) ([]users.User, error) {
 		return nil, err
 	}
 
-	var users []users.User
+	var users []user.User
 	if err := json.Unmarshal(byteValue, &users); err != nil {
 		return nil, err
 	}

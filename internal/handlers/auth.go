@@ -9,7 +9,7 @@ import (
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/users"
+	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	service "github.com/DarrelA/starter-go-postgresql/internal/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
@@ -18,7 +18,7 @@ import (
 var jwtCfg = configs.JWTSettings
 
 func Register(c *fiber.Ctx) error {
-	payload, ok := c.Locals("register_payload").(users.RegisterInput)
+	payload, ok := c.Locals("register_payload").(user.RegisterInput)
 	if !ok {
 		err := err_rest.NewBadRequestError("register_payload is not of type users.RegisterInput")
 		log.Error().Err(err).Msg("type_error")
@@ -33,7 +33,7 @@ func Register(c *fiber.Ctx) error {
 }
 
 func Login(c *fiber.Ctx) error {
-	payload, ok := c.Locals("login_payload").(users.LoginInput)
+	payload, ok := c.Locals("login_payload").(user.LoginInput)
 	if !ok {
 		err := err_rest.NewBadRequestError("login_payload is not of type users.RegisterInput")
 		log.Error().Err(err).Msg("type_error")
