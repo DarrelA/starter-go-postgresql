@@ -9,8 +9,8 @@ import (
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
-	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
-	"github.com/DarrelA/starter-go-postgresql/internal/services"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/users"
+	service "github.com/DarrelA/starter-go-postgresql/internal/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
 )
@@ -24,7 +24,7 @@ func Register(c *fiber.Ctx) error {
 		log.Error().Err(err).Msg("type_error")
 	}
 
-	result, err := services.CreateUser(payload)
+	result, err := service.CreateUser(payload)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
@@ -39,12 +39,12 @@ func Login(c *fiber.Ctx) error {
 		log.Error().Err(err).Msg("type_error")
 	}
 
-	user, err := services.GetUser(payload)
+	user, err := service.GetUser(payload)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	accessTokenDetails, err := services.CreateToken(
+	accessTokenDetails, err := service.CreateToken(
 		user.UUID.String(),
 		jwtCfg.AccessTokenExpiredIn,
 		jwtCfg.AccessTokenPrivateKey,
@@ -53,7 +53,7 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	refreshTokenDetails, err := services.CreateToken(
+	refreshTokenDetails, err := service.CreateToken(
 		user.UUID.String(),
 		jwtCfg.RefreshTokenExpiredIn,
 		jwtCfg.RefreshTokenPrivateKey,
@@ -124,7 +124,7 @@ func RefreshAccessToken(c *fiber.Ctx) error {
 
 	ctx := context.TODO()
 
-	tokenClaims, err := services.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
+	tokenClaims, err := service.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
@@ -134,12 +134,12 @@ func RefreshAccessToken(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": message})
 	}
 
-	user, err := services.GetUserByUUID(user_uuid)
+	user, err := service.GetUserByUUID(user_uuid)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	accessTokenDetails, err := services.CreateToken(
+	accessTokenDetails, err := service.CreateToken(
 		user.UUID.String(),
 		jwtCfg.AccessTokenExpiredIn,
 		jwtCfg.AccessTokenPrivateKey,
@@ -185,7 +185,7 @@ func Logout(c *fiber.Ctx) error {
 
 	ctx := context.TODO()
 
-	tokenClaims, err := services.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
+	tokenClaims, err := service.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}

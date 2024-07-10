@@ -1,7 +1,7 @@
 package services
 
 import (
-	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/users"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"

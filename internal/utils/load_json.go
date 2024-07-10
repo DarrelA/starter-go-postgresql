@@ -5,7 +5,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/users"
 )
 
 func LoadUsersFromJsonFile(filePath string) ([]users.User, error) {

@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/users"
 	"github.com/gofiber/fiber/v2"
 )
 

@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/DarrelA/starter-go-postgresql/internal/handlers"
-	mw "github.com/DarrelA/starter-go-postgresql/internal/middlewares"
+	mw "github.com/DarrelA/starter-go-postgresql/internal/middleware"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"

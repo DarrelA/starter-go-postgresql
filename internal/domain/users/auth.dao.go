@@ -19,7 +19,7 @@ var (
 	queryGetUserByID = "SELECT user_uuid, first_name, last_name, email FROM users WHERE user_uuid=$1;"
 )
 
-// Create a method of the `User` type
+// @TODO: Move logic to more appropriate directory
 func (user *User) HashPasswordUsingBcrypt() (string, *err_rest.RestErr) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), 14)
 	if err != nil {
@@ -29,6 +29,7 @@ func (user *User) HashPasswordUsingBcrypt() (string, *err_rest.RestErr) {
 	return string(hashedPassword), nil
 }
 
+// Create a method of the `User` type
 func (user *User) Save() *err_rest.RestErr {
 	var lastInsertUuid uuid.UUID
 	err := pgdb.Dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)

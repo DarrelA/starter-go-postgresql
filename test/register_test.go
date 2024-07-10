@@ -13,7 +13,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/app"
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/DarrelA/starter-go-postgresql/db"
-	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/users"
 	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	data_test "github.com/DarrelA/starter-go-postgresql/test/data"

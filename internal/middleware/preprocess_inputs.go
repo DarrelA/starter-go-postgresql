@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
-	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/users"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"

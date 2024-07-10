@@ -3,7 +3,7 @@ package data_test
 import (
 	"net/http"
 
-	"github.com/DarrelA/starter-go-postgresql/internal/domains/users"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/users"
 )
 
 type TestRegisterInput struct {

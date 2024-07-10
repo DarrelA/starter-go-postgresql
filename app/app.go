@@ -11,7 +11,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/db"
 	pgdb "github.com/DarrelA/starter-go-postgresql/db/pgdb"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
-	"github.com/DarrelA/starter-go-postgresql/internal/middlewares"
+	mw "github.com/DarrelA/starter-go-postgresql/internal/middleware"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils"
 	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
@@ -168,8 +168,8 @@ func useMiddlewares(authServiceInstance *fiber.App) {
 		MaxAge:           12 * 60 * 60,
 	}))
 
-	authServiceInstance.Use(middlewares.CorrelationAndRequestID)
-	authServiceInstance.Use(middlewares.LoggerMW)
+	authServiceInstance.Use(mw.CorrelationAndRequestID)
+	authServiceInstance.Use(mw.LoggerMW)
 
 	log.Info().Msg("applied middlewares to authServiceInstance")
 }
