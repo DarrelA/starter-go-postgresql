@@ -220,9 +220,12 @@ In summary, using access and refresh tokens with Redis, PostgreSQL, and cookies 
 
 ## [2. Architectural Patterns](./notes/architectural_patterns.md#architectural-patterns)
 
-1. **Hexagonal Architecture**: Also known as Ports and Adapters, this architecture isolates the core logic from external dependencies.
-2. [**Layered Architecture**: Divides the system into layers.](./notes/architectural_patterns.md#layered-architecture)
-3. [**Microservices Architecture**: Structuring applications as a collection of loosely coupled services.](./notes/architectural_patterns.md#microservices-architecture)
+1. [Clean Architecture](./notes/architectural_patterns.md#clean-architecture)
+2. [Hexagonal Architecture](./notes/architectural_patterns.md#hexagonal-architecture)
+3. [CQRS (Command Query Responsibility Segregation)](./notes/architectural_patterns.md#cqrs-command-query-responsibility-segregation)
+4. [Event-Driven Architecture](./notes/architectural_patterns.md#event-driven-architecture)
+5. [Layered Architecture](./notes/architectural_patterns.md#layered-architecture)
+6. [Microservices Architecture](./notes/architectural_patterns.md#microservices-architecture)
 
 ## 3. Design Patterns
 

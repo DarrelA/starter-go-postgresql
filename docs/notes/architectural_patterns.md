@@ -49,7 +49,9 @@
 
 The Model-View-Controller (MVC) design pattern separates an application into three interconnected components, improving the organization and manageability of the code.
 
-- **Model:** Manages the data and business logic of the application.- **View:** Represents the user interface and displays the data.- **Controller:** Acts as an intermediary between the Model and View, processing user input and updating the Model and View accordingly.
+- **Model:** Manages the data and business logic of the application.
+- **View:** Represents the user interface and displays the data.
+- **Controller:** Acts as an intermediary between the Model and View, processing user input and updating the Model and View accordingly.
 
 ## Circular Dependency in MVC
 

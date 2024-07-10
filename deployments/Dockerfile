@@ -21,7 +21,7 @@ RUN rm -rf /docker_wd/test
 # go build -a: Forces a rebuild of all packages and their dependencies,
 #              regardless of whether they have changed or not
 # -o starter-go-postgresql.test: Specifies the output file name
-RUN CGO_ENABLED=0 GOOS=linux go build -a -o starter-go-postgresql
+RUN CGO_ENABLED=0 GOOS=linux go build -a -o starter-go-postgresql github.com/DarrelA/starter-go-postgresql/cmd/auth
 
 # Stage 2: Create a smaller image for the final binary
 FROM alpine:latest
