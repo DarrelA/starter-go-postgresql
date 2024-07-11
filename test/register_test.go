@@ -35,8 +35,8 @@ func TestMain(m *testing.M) {
 
 	go func() {
 		defer wg.Done()
-		rdbmsInstance, inMemoryDbInstance = app.CreateDBConnections()
-		app.SeedDatabase()
+		// rdbmsInstance, inMemoryDbInstance = app.CreateDBConnections()
+		// app.SeedDatabase()
 		appInstance, authServiceInstance = app.ConfigureAppInstance()
 		go app.StartServer()
 	}()

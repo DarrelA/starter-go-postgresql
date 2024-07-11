@@ -2,23 +2,15 @@ package app
 
 import (
 	"context"
-	"os"
 	"runtime/debug"
-	"strings"
 	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/DarrelA/starter-go-postgresql/db"
-	pgdb "github.com/DarrelA/starter-go-postgresql/db/pgdb"
-	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
-	mw "github.com/DarrelA/starter-go-postgresql/internal/middleware"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils"
-	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
+	mw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 )
 
@@ -29,6 +21,7 @@ var (
 	authServiceInstance *fiber.App
 )
 
+/*
 func CreateDBConnections() (db.RDBMS, db.InMemoryDB) {
 	if rdbmsInstance == nil {
 		rdbmsInstance = pgdb.NewDB()
@@ -43,7 +36,9 @@ func CreateDBConnections() (db.RDBMS, db.InMemoryDB) {
 
 	return rdbmsInstance, inMemoryDbInstance
 }
+*/
 
+/*
 func SeedDatabase() {
 	envBasePath := "/root/build"
 	currentEnv := configs.Env
@@ -115,6 +110,7 @@ func saveMultipleUsers(currentEnv string, envBasePath string) *err_rest.RestErr 
 	log.Info().Msgf("successfully seeded data in [%s] env", currentEnv)
 	return nil
 }
+*/
 
 // ConfigureAppInstance sets up and configures instances of Fiber for the main app and auth service,
 // including middleware and routing for authentication.

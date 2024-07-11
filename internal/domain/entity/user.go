@@ -17,6 +17,7 @@ type User struct {
 	UpdatedAt time.Time  `json:"updated_at"`
 }
 
+// @TODO: Perhaps we can move to it mapper
 type RegisterInput struct {
 	FirstName string `json:"first_name" validate:"required,min=2,max=50,alpha"`
 	LastName  string `json:"last_name" validate:"required,min=2,max=50,alpha"`
