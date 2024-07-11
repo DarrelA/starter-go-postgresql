@@ -1,8 +1,8 @@
 package app
 
 import (
-	"github.com/DarrelA/starter-go-postgresql/internal/handlers"
-	mw "github.com/DarrelA/starter-go-postgresql/internal/middleware"
+	mw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware"
+	handlers "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
@@ -15,7 +15,8 @@ func authServiceRouter(router *fiber.App) {
 	v1.Post("/login", mw.PreProcessInputs, handlers.Login)
 	v1.Get("/logout", mw.Deserializer, handlers.Logout)
 	v1.Get("/refresh", handlers.RefreshAccessToken)
-	v1.Get("/users/me", mw.Deserializer, handlers.GetMe)
+	// @TODO: Fix route
+	// v1.Get("/users/me", mw.Deserializer, handlers.GetMe)
 
 	v1.Get("/health", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success"})
