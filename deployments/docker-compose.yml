@@ -21,7 +21,7 @@ services:
     ports:
       - '5050:80'
     volumes:
-      - ../db/pgdb/servers.${APP_ENV}.json:/pgadmin4/servers.json
+      - ../internal/infrastructure/db/postgres/json/servers.${APP_ENV}.json:/pgadmin4/servers.json
     env_file:
       - ../configs/.env.${APP_ENV}
 
