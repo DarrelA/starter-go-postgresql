@@ -7,14 +7,15 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
 	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	service "github.com/DarrelA/starter-go-postgresql/internal/service"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 )
 
 var jwtCfg = configs.JWTSettings
 
-func Deserializer(c *fiber.Ctx) error {
+func Deserializer(c *fiber.Ctx, token service.TokenService, uf factory.UserFactory) error {
 
 	var access_token string
 	authorization := c.Get("Authorization")
@@ -32,7 +33,7 @@ func Deserializer(c *fiber.Ctx) error {
 			JSON(fiber.Map{"status": "fail", "message": message})
 	}
 
-	tokenClaims, err := service.ValidateToken(access_token, jwtCfg.AccessTokenPublicKey)
+	tokenClaims, err := token.ValidateToken(access_token, jwtCfg.AccessTokenPublicKey)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
@@ -44,7 +45,7 @@ func Deserializer(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": message})
 	}
 
-	u, err := service.GetUserByUUID(user_uuid)
+	u, err := uf.GetUserByUUID(user_uuid)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
