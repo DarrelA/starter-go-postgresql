@@ -1,30 +1,39 @@
-package handlers
+package http
 
 import (
 	"context"
 	"time"
 
-	"github.com/redis/go-redis/v9"
-	"github.com/rs/zerolog/log"
-
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
 	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	service "github.com/DarrelA/starter-go-postgresql/internal/service"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
+	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog/log"
 )
+
+type AuthHandler struct {
+	uf factory.UserFactory
+	ts service.TokenService
+}
+
+func NewAuthService(uf factory.UserFactory, ts service.TokenService) *AuthHandler {
+	return &AuthHandler{uf, ts}
+}
 
 var jwtCfg = configs.JWTSettings
 
-func Register(c *fiber.Ctx) error {
+func (ah *AuthHandler) Register(c *fiber.Ctx) error {
 	payload, ok := c.Locals("register_payload").(user.RegisterInput)
 	if !ok {
 		err := err_rest.NewBadRequestError("register_payload is not of type users.RegisterInput")
 		log.Error().Err(err).Msg("type_error")
 	}
 
-	result, err := service.CreateUser(payload)
+	result, err := ah.uf.CreateUser(payload)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
@@ -32,19 +41,19 @@ func Register(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "user": result})
 }
 
-func Login(c *fiber.Ctx) error {
+func (ah *AuthHandler) Login(c *fiber.Ctx) error {
 	payload, ok := c.Locals("login_payload").(user.LoginInput)
 	if !ok {
 		err := err_rest.NewBadRequestError("login_payload is not of type users.RegisterInput")
 		log.Error().Err(err).Msg("type_error")
 	}
 
-	user, err := service.GetUser(payload)
+	user, err := ah.uf.GetUser(payload)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	accessTokenDetails, err := service.CreateToken(
+	accessTokenDetails, err := ah.ts.CreateToken(
 		user.UUID.String(),
 		jwtCfg.AccessTokenExpiredIn,
 		jwtCfg.AccessTokenPrivateKey,
@@ -53,7 +62,7 @@ func Login(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	refreshTokenDetails, err := service.CreateToken(
+	refreshTokenDetails, err := ah.ts.CreateToken(
 		user.UUID.String(),
 		jwtCfg.RefreshTokenExpiredIn,
 		jwtCfg.RefreshTokenPrivateKey,
@@ -114,7 +123,7 @@ func Login(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "access_token": accessTokenDetails.Token})
 }
 
-func RefreshAccessToken(c *fiber.Ctx) error {
+func (ah *AuthHandler) RefreshAccessToken(c *fiber.Ctx) error {
 	message := "please login again"
 	refresh_token := c.Cookies("refresh_token")
 
@@ -124,7 +133,7 @@ func RefreshAccessToken(c *fiber.Ctx) error {
 
 	ctx := context.TODO()
 
-	tokenClaims, err := service.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
+	tokenClaims, err := ah.ts.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
@@ -134,12 +143,12 @@ func RefreshAccessToken(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": message})
 	}
 
-	user, err := service.GetUserByUUID(user_uuid)
+	user, err := ah.uf.GetUserByUUID(user_uuid)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	accessTokenDetails, err := service.CreateToken(
+	accessTokenDetails, err := ah.ts.CreateToken(
 		user.UUID.String(),
 		jwtCfg.AccessTokenExpiredIn,
 		jwtCfg.AccessTokenPrivateKey,
@@ -175,7 +184,7 @@ func RefreshAccessToken(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "access_token": accessTokenDetails.Token})
 }
 
-func Logout(c *fiber.Ctx) error {
+func (ah *AuthHandler) Logout(c *fiber.Ctx) error {
 	message := "please login again"
 	refresh_token := c.Cookies("refresh_token")
 
@@ -185,7 +194,7 @@ func Logout(c *fiber.Ctx) error {
 
 	ctx := context.TODO()
 
-	tokenClaims, err := service.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
+	tokenClaims, err := ah.ts.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}

@@ -1,40 +1,39 @@
-package services
+package service
 
 import (
 	"encoding/base64"
 	"fmt"
 	"time"
 
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/golang-jwt/jwt/v5"
 	uuid "github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
 
-type TokenDetails struct {
-	Token     *string
-	TokenUUID string
-	UserUUID  string
-	ExpiresIn *int64
+type Token struct {
+	t entity.Token
 }
 
-func CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*TokenDetails, *err_rest.RestErr) {
-	now := time.Now().UTC()
-	td := &TokenDetails{
-		ExpiresIn: new(int64),
-		Token:     new(string),
-	}
+func NewUserFactory(t entity.Token) *Token {
+	return &Token{t}
+}
 
-	*td.ExpiresIn = now.Add(ttl).Unix()
+func (t *Token) CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*Token, *err_rest.RestErr) {
+	now := time.Now().UTC()
+	t.t.ExpiresIn = new(int64)
+	t.t.Token = new(string)
+	*t.t.ExpiresIn = now.Add(ttl).Unix()
 
 	id, err := uuid.NewV7()
 	if err != nil {
 		log.Error().Err(err).Msg("uuid_error")
 		return nil, err_rest.NewUnprocessableEntityError("something went wrong")
 	}
-	td.TokenUUID = id.String()
 
-	td.UserUUID = user_uuid
+	t.t.TokenUUID = id.String()
+	t.t.UserUUID = user_uuid
 
 	decodePrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
 	if err != nil {
@@ -51,21 +50,21 @@ func CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*Token
 
 	atClaims := make(jwt.MapClaims)
 	atClaims["sub"] = user_uuid
-	atClaims["token_uuid"] = td.TokenUUID
-	atClaims["exp"] = td.ExpiresIn
+	atClaims["token_uuid"] = t.t.TokenUUID
+	atClaims["exp"] = t.t.ExpiresIn
 	atClaims["iat"] = now.Unix() // Issued at
 	atClaims["nbf"] = now.Unix() // Not before
 
-	*td.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, atClaims).SignedString(key)
+	*t.t.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, atClaims).SignedString(key)
 	if err != nil {
 		log.Error().Err(err).Msg("sign_key_error")
 		return nil, err_rest.NewUnprocessableEntityError("something went wrong")
 	}
 
-	return td, nil
+	return t, nil
 }
 
-func ValidateToken(token string, publicKey string) (*TokenDetails, *err_rest.RestErr) {
+func (t *Token) ValidateToken(token string, publicKey string) (*Token, *err_rest.RestErr) {
 	decodePublicKey, err := base64.StdEncoding.DecodeString(publicKey)
 	if err != nil {
 		log.Error().Err(err).Msg("DecodeString_publicKey_error")
@@ -97,8 +96,10 @@ func ValidateToken(token string, publicKey string) (*TokenDetails, *err_rest.Res
 		return nil, err_rest.NewForbiddenError("please login again")
 	}
 
-	return &TokenDetails{
-		TokenUUID: fmt.Sprint(claims["token_uuid"]),
-		UserUUID:  fmt.Sprint(claims["subs"]),
+	return &Token{
+		t: entity.Token{
+			TokenUUID: fmt.Sprint(claims["token_uuid"]),
+			UserUUID:  fmt.Sprint(claims["subs"]),
+		},
 	}, nil
 }
