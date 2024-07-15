@@ -1,12 +1,15 @@
 package configs
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
 	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
+	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -154,20 +157,68 @@ func loadRedisSettings() {
 func loadJWTConfigs() {
 	JWTSettings.Path = os.Getenv("JWT_PATH")
 	JWTSettings.Domain = os.Getenv("JWT_DOMAIN")
-	envs_utils.LoadEnvVariableBool("JWT_SECURE", &JWTSettings.Secure)
-	envs_utils.LoadEnvVariableBool("JWT_HTTPONLY", &JWTSettings.HttpOnly)
+	loadEnvVariableBool("JWT_SECURE", &JWTSettings.Secure)
+	loadEnvVariableBool("JWT_HTTPONLY", &JWTSettings.HttpOnly)
 	JWTSettings.AccessTokenPrivateKey = os.Getenv("ACCESS_TOKEN_PRIVATE_KEY")
 	JWTSettings.AccessTokenPublicKey = os.Getenv("ACCESS_TOKEN_PUBLIC_KEY")
-	envs_utils.LoadEnvVariableDuration("ACCESS_TOKEN_EXPIRED_IN", &JWTSettings.AccessTokenExpiredIn)
-	envs_utils.LoadEnvVariableInt("ACCESS_TOKEN_MAXAGE", &JWTSettings.AccessTokenMaxAge)
+	loadEnvVariableDuration("ACCESS_TOKEN_EXPIRED_IN", &JWTSettings.AccessTokenExpiredIn)
+	loadEnvVariableInt("ACCESS_TOKEN_MAXAGE", &JWTSettings.AccessTokenMaxAge)
 	JWTSettings.RefreshTokenPrivateKey = os.Getenv("REFRESH_TOKEN_PRIVATE_KEY")
 	JWTSettings.RefreshTokenPublicKey = os.Getenv("REFRESH_TOKEN_PUBLIC_KEY")
-	envs_utils.LoadEnvVariableDuration("REFRESH_TOKEN_EXPIRED_IN", &JWTSettings.RefreshTokenExpiredIn)
-	envs_utils.LoadEnvVariableInt("REFRESH_TOKEN_MAXAGE", &JWTSettings.RefreshTokenMaxAge)
+	loadEnvVariableDuration("REFRESH_TOKEN_EXPIRED_IN", &JWTSettings.RefreshTokenExpiredIn)
+	loadEnvVariableInt("REFRESH_TOKEN_MAXAGE", &JWTSettings.RefreshTokenMaxAge)
 }
 
 func loadCORSConfigs() {
 	CORSSettings = CORSConfig{
 		AllowedOrigins: os.Getenv("CORS_ALLOWED_ORIGINS"),
 	}
+}
+
+func loadEnvVariableInt(envVar string, target *int) {
+	valueStr := os.Getenv(envVar)
+	if valueStr == "" {
+		errMessage := fmt.Sprintf("%s is not set", envVar)
+		err := err_rest.NewInternalServerError(errMessage)
+		log.Error().Err(err).Msg("")
+		return
+	}
+	value, err := strconv.Atoi(valueStr)
+	if err != nil {
+		log.Error().Err(err).Msgf("check JWT config: %s", envVar)
+		return
+	}
+	*target = value
+}
+
+func loadEnvVariableBool(envVar string, target *bool) {
+	valueStr := os.Getenv(envVar)
+	if valueStr == "" {
+		errMessage := fmt.Sprintf("%s is not set", envVar)
+		err := err_rest.NewInternalServerError(errMessage)
+		log.Error().Err(err).Msg("")
+		return
+	}
+	value, err := strconv.ParseBool(valueStr)
+	if err != nil {
+		log.Error().Err(err).Msgf("check JWT config: %s", envVar)
+		return
+	}
+	*target = value
+}
+
+func loadEnvVariableDuration(envVar string, target *time.Duration) {
+	valueStr := os.Getenv(envVar)
+	if valueStr == "" {
+		errMessage := fmt.Sprintf("%s is not set", envVar)
+		err := err_rest.NewInternalServerError(errMessage)
+		log.Error().Err(err).Msg("")
+		return
+	}
+	value, err := time.ParseDuration(valueStr)
+	if err != nil {
+		log.Error().Err(err).Msgf("check JWT config: %s", envVar)
+		return
+	}
+	*target = value
 }
