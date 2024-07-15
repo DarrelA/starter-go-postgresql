@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
+	logger_env "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
@@ -79,8 +79,8 @@ func loadEnv() {
 		log.Fatal().Msg("APP_ENV not set")
 	}
 
-	cwd := envs_utils.LogCWD()
-	envs_utils.ListFiles()
+	cwd := logger_env.LogCWD()
+	logger_env.ListFiles()
 	envBasePath := "configs/"
 
 	// @TODO: Explore `integration-test-coverage-issue` branch

@@ -11,16 +11,16 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/postgres"
 	jwt "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/jwt/service"
+	logger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger/zerolog"
 	"github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http"
-	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
 	"github.com/rs/zerolog/log"
 )
 
 func main() {
-	envs_utils.CreateAppLog()
+	logger.CreateAppLog()
 	startApp()
 	waitForShutdown()
-	envs_utils.GetLogFile().Close()
+	logger.GetLogFile().Close()
 	os.Exit(0)
 }
 

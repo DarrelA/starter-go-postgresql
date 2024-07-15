@@ -7,7 +7,7 @@ import (
 
 	"github.com/DarrelA/starter-go-postgresql/db"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
-	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
+	logger_env "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 )
@@ -29,8 +29,8 @@ func SeedDatabase(dbpool *pgxpool.Pool) {
 	envBasePath := "/root/build"
 	// currentEnv := configs.Env
 
-	cwd := envs_utils.LogCWD()
-	envs_utils.ListFiles()
+	cwd := logger_env.LogCWD()
+	logger_env.ListFiles()
 
 	// @TODO: Explore `integration-test-coverage-issue` branch
 	// Check if the current working directory contains "\test"

@@ -12,7 +12,6 @@ import (
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	data_test "github.com/DarrelA/starter-go-postgresql/test/data"
 )
@@ -27,7 +26,7 @@ var (
 */
 
 func TestMain(m *testing.M) {
-	envs_utils.CreateAppLog()
+	// envs_utils.CreateAppLog()
 
 	var wg sync.WaitGroup
 	wg.Add(1)
@@ -42,7 +41,7 @@ func TestMain(m *testing.M) {
 
 	wg.Wait()
 	exitVal := m.Run()
-	envs_utils.GetLogFile().Close()
+	// envs_utils.GetLogFile().Close()
 	os.Exit(exitVal)
 }
 
