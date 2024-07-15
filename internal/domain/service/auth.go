@@ -8,6 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// @TODO: Perhaps set `c *fiber.Ctx` as a type in entity/framework.go
 type AuthService interface {
 	Register(c *fiber.Ctx) error
 	Login(c *fiber.Ctx) error

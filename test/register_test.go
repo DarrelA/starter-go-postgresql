@@ -10,22 +10,21 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/DarrelA/starter-go-postgresql/app"
 	"github.com/DarrelA/starter-go-postgresql/configs"
-	"github.com/DarrelA/starter-go-postgresql/db"
 	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	data_test "github.com/DarrelA/starter-go-postgresql/test/data"
-	"github.com/gofiber/fiber/v2"
 )
 
+/*
 var (
 	rdbmsInstance       db.RDBMS
 	inMemoryDbInstance  db.InMemoryDB
 	appInstance         *fiber.App
 	authServiceInstance *fiber.App
 )
+*/
 
 func TestMain(m *testing.M) {
 	envs_utils.CreateAppLog()
@@ -37,8 +36,8 @@ func TestMain(m *testing.M) {
 		defer wg.Done()
 		// rdbmsInstance, inMemoryDbInstance = app.CreateDBConnections()
 		// app.SeedDatabase()
-		appInstance, authServiceInstance = app.ConfigureAppInstance()
-		go app.StartServer()
+		// appInstance, authServiceInstance = app.ConfigureAppInstance()
+		// go app.StartServer()
 	}()
 
 	wg.Wait()
