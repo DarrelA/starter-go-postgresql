@@ -15,11 +15,12 @@ import (
 )
 
 /*
-Embedding
-
 DbPool is the database connection pool.
 Package pgxpool is a concurrency-safe connection pool for pgx.
 pgxpool implements a nearly identical interface to pgx connections.
+
+- The `UserRepository` is stateful because it holds a connection to the database (`pgxpool.Pool`). This dependency is injected into the repository to manage database operations.
+- This pattern is useful for managing resources that have a lifecycle, like database connections.
 */
 type UserRepository struct {
 	DbPool *pgxpool.Pool

@@ -1,4 +1,4 @@
-package service
+package jwt
 
 import (
 	"encoding/base64"
@@ -12,19 +12,22 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type Token struct {
-	t entity.Token
+/*
+- The `TokenService` should be a stateless service that performs operations related to tokens. It does not need to manage the lifecycle of the `Token` entity itself but rather uses it.
+- You might inject dependencies into `TokenService` if it interacts with other services or repositories.
+*/
+type TokenService struct{}
+
+func NewTokenService() *TokenService {
+	return &TokenService{}
 }
 
-func NewUserFactory(t entity.Token) *Token {
-	return &Token{t}
-}
-
-func (t *Token) CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*Token, *err_rest.RestErr) {
+func (ts *TokenService) CreateToken(userUuid string, ttl time.Duration, privateKey string) (*entity.Token, *err_rest.RestErr) {
 	now := time.Now().UTC()
-	t.t.ExpiresIn = new(int64)
-	t.t.Token = new(string)
-	*t.t.ExpiresIn = now.Add(ttl).Unix()
+	token := &entity.Token{
+		ExpiresIn: new(int64),
+		Token:     new(string),
+	}
 
 	id, err := uuid.NewV7()
 	if err != nil {
@@ -32,16 +35,17 @@ func (t *Token) CreateToken(user_uuid string, ttl time.Duration, privateKey stri
 		return nil, err_rest.NewUnprocessableEntityError("something went wrong")
 	}
 
-	t.t.TokenUUID = id.String()
-	t.t.UserUUID = user_uuid
+	token.TokenUUID = id.String()
+	token.UserUUID = userUuid
+	*token.ExpiresIn = now.Add(ttl).Unix()
 
-	decodePrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
+	decodedPrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
 	if err != nil {
 		log.Error().Err(err).Msg("DecodeString_privateKey_error")
 		return nil, err_rest.NewUnprocessableEntityError("something went wrong")
 	}
 
-	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodePrivateKey)
+	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
 
 	if err != nil {
 		log.Error().Err(err).Msg("ParseRSA_privateKey_error")
@@ -49,35 +53,35 @@ func (t *Token) CreateToken(user_uuid string, ttl time.Duration, privateKey stri
 	}
 
 	atClaims := make(jwt.MapClaims)
-	atClaims["sub"] = user_uuid
-	atClaims["token_uuid"] = t.t.TokenUUID
-	atClaims["exp"] = t.t.ExpiresIn
+	atClaims["sub"] = userUuid
+	atClaims["token_uuid"] = token.TokenUUID
+	atClaims["exp"] = *token.ExpiresIn
 	atClaims["iat"] = now.Unix() // Issued at
 	atClaims["nbf"] = now.Unix() // Not before
 
-	*t.t.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, atClaims).SignedString(key)
+	*token.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, atClaims).SignedString(key)
 	if err != nil {
 		log.Error().Err(err).Msg("sign_key_error")
 		return nil, err_rest.NewUnprocessableEntityError("something went wrong")
 	}
 
-	return t, nil
+	return token, nil
 }
 
-func (t *Token) ValidateToken(token string, publicKey string) (*Token, *err_rest.RestErr) {
-	decodePublicKey, err := base64.StdEncoding.DecodeString(publicKey)
+func (ts *TokenService) ValidateToken(tokenStr string, publicKey string) (*entity.Token, *err_rest.RestErr) {
+	decodedPublicKey, err := base64.StdEncoding.DecodeString(publicKey)
 	if err != nil {
 		log.Error().Err(err).Msg("DecodeString_publicKey_error")
 		return nil, err_rest.NewInternalServerError("something went wrong")
 	}
 
-	key, err := jwt.ParseRSAPublicKeyFromPEM(decodePublicKey)
+	key, err := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
 	if err != nil {
 		log.Error().Err(err).Msg("ParseRSA_publicKey_error")
 		return nil, err_rest.NewInternalServerError("something went wrong")
 	}
 
-	parsedToken, err := jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
+	parsedToken, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
 			return nil, fmt.Errorf("unexpected method: %s", t.Header["alg"])
 		}
@@ -96,10 +100,8 @@ func (t *Token) ValidateToken(token string, publicKey string) (*Token, *err_rest
 		return nil, err_rest.NewForbiddenError("please login again")
 	}
 
-	return &Token{
-		t: entity.Token{
-			TokenUUID: fmt.Sprint(claims["token_uuid"]),
-			UserUUID:  fmt.Sprint(claims["subs"]),
-		},
+	return &entity.Token{
+		TokenUUID: fmt.Sprint(claims["token_uuid"]),
+		UserUUID:  fmt.Sprint(claims["sub"]),
 	}, nil
 }
