@@ -7,6 +7,11 @@ import (
 	"syscall"
 
 	"github.com/DarrelA/starter-go-postgresql/app"
+	"github.com/DarrelA/starter-go-postgresql/configs"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
+	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/postgres"
+	jwt "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/jwt/service"
+	"github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http"
 	envs_utils "github.com/DarrelA/starter-go-postgresql/internal/utils/envs"
 	"github.com/rs/zerolog/log"
 )
@@ -25,14 +30,32 @@ func startApp() {
 	var wg sync.WaitGroup
 	wg.Add(1)
 
+	// Functions are running synchronously
 	go func() {
 		defer wg.Done()
 
-		// Functions are running synchronously
-		// app.CreateDBConnections()
-		// app.SeedDatabase()
-		app.ConfigureAppInstance()
-		go app.StartServer()
+		// @TODO: Refactor the codes for Redis
+		app.CreateRedisConnection()
+
+		dbpool, err := postgres.NewRDBMS(&configs.PGDB)
+		if err != nil {
+			log.Fatal().Err(err).Msg("failed to connect to the database")
+		}
+
+		// Dependency injection
+		// User
+		userRepo := postgres.NewUserRepository(dbpool)
+		userFactory := factory.NewUserFactory(userRepo)
+
+		// Token
+		tokenService := jwt.NewTokenService()
+
+		// Auth
+		authService := http.NewAuthService(*userFactory, tokenService)
+
+		app.SeedDatabase(dbpool)
+		authServiceInstance := http.NewRouter(tokenService, *userFactory, *authService)
+		go http.StartServer(authServiceInstance)
 	}()
 
 	wg.Wait()
@@ -43,5 +66,6 @@ func waitForShutdown() {
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	<-sigChan // Block until a signal is received
 	log.Debug().Msg("received termination signal, shutting down")
-	app.CloseConnections()
+	//TODO: Decouple Redis
+	// app.CloseConnections()
 }
