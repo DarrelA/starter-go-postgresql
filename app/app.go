@@ -2,11 +2,14 @@ package app
 
 import (
 	"context"
+	"encoding/json"
+	"io"
 	"os"
 	"strings"
 
 	"github.com/DarrelA/starter-go-postgresql/db"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
+	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	logger_env "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
@@ -72,7 +75,7 @@ func executeSQLFile(ctx context.Context, db *pgxpool.Pool, filePath string) erro
 /*
 		func saveMultipleUsers(currentEnv string, envBasePath string) *err_rest.RestErr {
 	userJsonFilePath := "/seed.user." + currentEnv + ".json"
-	uu, err := utils.LoadUsersFromJsonFile(envBasePath + "/json" + userJsonFilePath)
+	uu, err := loadUsersFromJsonFile(envBasePath + "/json" + userJsonFilePath)
 	if err != nil {
 		log.Error().Err(err).Msgf("unable to load [%s]", userJsonFilePath)
 	}
@@ -114,3 +117,23 @@ func CloseConnections() {
 	inMemoryDbInstance.Disconnect()
 }
 */
+
+func loadUsersFromJsonFile(filePath string) ([]user.User, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	byteValue, err := io.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	var users []user.User
+	if err := json.Unmarshal(byteValue, &users); err != nil {
+		return nil, err
+	}
+
+	return users, nil
+}

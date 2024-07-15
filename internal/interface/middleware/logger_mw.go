@@ -1,11 +1,11 @@
 package middlewares
 
 import (
+	"net"
 	"os"
 	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
@@ -48,7 +48,7 @@ func LoggerMW(c *fiber.Ctx) error {
 			Dur("response_time", duration).
 			Int64("latency_ms", duration.Milliseconds()).
 			Str("ip_address", ip).
-			Str("ip_version", utils.GetIPVersion(ip)).
+			Str("ip_version", getIPVersion(ip)).
 			Str("user_agent", c.Get("User-Agent")).
 			Str("correlation_id", correlation_id).
 			Str("request_id", request_id).
@@ -76,7 +76,7 @@ func LoggerMW(c *fiber.Ctx) error {
 			Dur("response_time", duration).
 			Int64("latency_ms", duration.Milliseconds()).
 			Str("ip_address", ip).
-			Str("ip_version", utils.GetIPVersion(ip)).
+			Str("ip_version", getIPVersion(ip)).
 			Str("user_agent", c.Get("User-Agent")).
 			Str("correlation_id", correlation_id).
 			Str("request_id", request_id).
@@ -87,4 +87,17 @@ func LoggerMW(c *fiber.Ctx) error {
 	}
 
 	return err
+}
+
+func getIPVersion(ip string) string {
+	parsedIP := net.ParseIP(ip)
+
+	if parsedIP == nil {
+		return "unknown"
+	}
+	if parsedIP.To4() != nil {
+		return "IPv4"
+	}
+
+	return "IPv6"
 }
