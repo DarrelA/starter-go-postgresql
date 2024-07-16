@@ -9,6 +9,9 @@ import (
 )
 
 // @TODO: Perhaps set `c *fiber.Ctx` as a type in entity/framework.go
+/*
+The `AuthService` interface define the contract for authentication-related operations.
+*/
 type AuthService interface {
 	Register(c *fiber.Ctx) error
 	Login(c *fiber.Ctx) error
@@ -16,6 +19,9 @@ type AuthService interface {
 	Logout(c *fiber.Ctx) error
 }
 
+/*
+The `TokenService` interface define the contract for authentication-related operations.
+*/
 type TokenService interface {
 	CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*entity.Token, *err_rest.RestErr)
 	ValidateToken(token string, publicKey string) (*entity.Token, *err_rest.RestErr)

@@ -9,10 +9,23 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+/*
+The `UserFactory` is responsible for creating and retrieving `User` entities.
+The factory pattern here is used to encapsulate the creation logic,
+including hashing passwords and calling the repository to save or fetch users.
+
+The factory logic is part of the domain layer as it encapsulates domain-specific creation and retrieval logic.
+This is appropriate for the domain layer, as it deals with core business logic.
+*/
 type UserFactory struct {
 	ur repository.UserRepository
 }
 
+/*
+The factory interacts with the UserRepository interface to perform persistence operations.
+This adheres to the principle of dependency inversion,
+where the factory depends on an abstraction rather than a concrete implementation.
+*/
 func NewUserFactory(ur repository.UserRepository) *UserFactory {
 	return &UserFactory{ur}
 }
