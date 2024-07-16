@@ -8,7 +8,7 @@ import (
 
 	"github.com/DarrelA/starter-go-postgresql/app"
 	"github.com/DarrelA/starter-go-postgresql/configs"
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
+	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/postgres"
 	jwt "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/jwt/service"
 	logger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger/zerolog"
@@ -45,7 +45,6 @@ func startApp() {
 		// Dependency injection
 		// User
 		userRepo := postgres.NewUserRepository(dbpool)
-		// @TODO: Ensure interface compliance
 		userFactory := factory.NewUserFactory(userRepo)
 		userService := http.NewUserService()
 
@@ -54,11 +53,10 @@ func startApp() {
 
 		// Auth
 		// @TODO: Ensure interface compliance
-		authService := http.NewAuthService(*userFactory, tokenService)
+		authService := http.NewAuthService(userFactory, tokenService)
 
 		app.SeedDatabase(dbpool)
-		// appServiceInstance := http.NewRouter(tokenService, *userFactory, *authService)
-		appServiceInstance := http.NewRouter(tokenService, *userFactory, *authService, userService)
+		appServiceInstance := http.NewRouter(tokenService, userFactory, *authService, userService)
 		go http.StartServer(appServiceInstance)
 	}()
 
