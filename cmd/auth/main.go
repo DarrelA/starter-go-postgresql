@@ -7,8 +7,8 @@ import (
 	"syscall"
 
 	"github.com/DarrelA/starter-go-postgresql/app"
-	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
+	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/postgres"
 	jwt "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/jwt/service"
 	logger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger/zerolog"
@@ -34,29 +34,44 @@ func startApp() {
 	go func() {
 		defer wg.Done()
 
-		// @TODO: Refactor the codes for Redis
-		app.CreateRedisConnection()
+		envConfig := config.NewTokenService()
+		envConfig.LoadAppConfig()
+		envConfig.LoadLogConfig()
+		envConfig.LoadDBConfig()
+		envConfig.LoadRedisConfig()
+		envConfig.LoadJWTConfig()
+		envConfig.LoadCORSConfig()
 
-		dbpool, err := postgres.NewRDBMS(&configs.PGDB)
-		if err != nil {
-			log.Fatal().Err(err).Msg("failed to connect to the database")
+		if c, ok := envConfig.(*config.EnvConfig); ok {
+			// @TODO: Refactor the codes for Redis
+			app.CreateRedisConnection(c.RedisDBConfig)
+
+			dbpool, err := postgres.NewRDBMS(c.PostgresDBConfig)
+			if err != nil {
+				log.Fatal().Err(err).Msg("failed to connect to the database")
+			}
+			// Dependency injection
+			// User
+			userRepo := postgres.NewUserRepository(dbpool)
+			userFactory := factory.NewUserFactory(c.JWTConfig, userRepo)
+			userService := http.NewUserService()
+
+			// Token
+			tokenService := jwt.NewTokenService()
+
+			// Auth
+			authService := http.NewAuthService(userFactory, tokenService)
+
+			app.SeedDatabase(dbpool)
+			appServiceInstance := http.NewRouter(
+				c,
+				tokenService, userFactory, authService, userService,
+			)
+			go http.StartServer(appServiceInstance, c.Port)
+
+		} else {
+			log.Fatal().Msg("failed to load environment configuration")
 		}
-
-		// Dependency injection
-		// User
-		userRepo := postgres.NewUserRepository(dbpool)
-		userFactory := factory.NewUserFactory(userRepo)
-		userService := http.NewUserService()
-
-		// Token
-		tokenService := jwt.NewTokenService()
-
-		// Auth
-		authService := http.NewAuthService(userFactory, tokenService)
-
-		app.SeedDatabase(dbpool)
-		appServiceInstance := http.NewRouter(tokenService, userFactory, authService, userService)
-		go http.StartServer(appServiceInstance)
 	}()
 
 	wg.Wait()
