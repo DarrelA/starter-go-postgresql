@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/DarrelA/starter-go-postgresql/configs"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/go-playground/validator/v10"
@@ -16,7 +16,12 @@ import (
 )
 
 func PreProcessInputs(c *fiber.Ctx) error {
-	authServicePathName := configs.BaseURLs.AuthServicePathName
+	baseURLsConfig, ok := c.Locals("baseURLsConfig").(*entity.BaseURLsConfig)
+	if !ok {
+		log.Panic().Msg("invalid_baseURLsConfig")
+	}
+
+	authServicePathName := baseURLsConfig.AuthServicePathName
 	endpoint := normalizePath(c.Path())
 
 	switch endpoint {

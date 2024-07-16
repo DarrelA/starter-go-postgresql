@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/DarrelA/starter-go-postgresql/configs"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
@@ -34,7 +33,10 @@ func LoggerMW(c *fiber.Ctx) error {
 		log.Fatal().Err(hostnameErr).Msg("failed to get hostname")
 	}
 
-	currentEnv := configs.Env
+	currentEnv, ok := c.Locals("env").(string)
+	if !ok {
+		log.Panic().Msg("invalid_currentEnv")
+	}
 
 	switch currentEnv {
 	case "prod":
