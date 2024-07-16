@@ -5,19 +5,7 @@ import (
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
-	"github.com/gofiber/fiber/v2"
 )
-
-// @TODO: Perhaps set `c *fiber.Ctx` as a type in entity/framework.go
-/*
-The `AuthService` interface define the contract for authentication-related operations.
-*/
-type AuthService interface {
-	Register(c *fiber.Ctx) error
-	Login(c *fiber.Ctx) error
-	RefreshAccessToken(c *fiber.Ctx) error
-	Logout(c *fiber.Ctx) error
-}
 
 /*
 The `TokenService` interface define the contract for authentication-related operations.
