@@ -48,12 +48,12 @@ func (r *UserRepository) SaveUser(user *entity.User) *err_rest.RestErr {
 		// attempting to access any fields of `pgErr`
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23505" {
-				return err_rest.NewBadRequestError("email is already taken")
+				return err_rest.NewBadRequestError(err_rest.ErrMsgEmailIsAlreadyTaken)
 			}
 		}
 
 		log.Error().Err(err).Msg("pgdb_error")
-		return err_rest.NewInternalServerError("something went wrong")
+		return err_rest.NewInternalServerError(err_rest.ErrMsgSomethingWentWrong)
 	}
 
 	user.UUID = &lastInsertUuid
@@ -70,7 +70,7 @@ func (r *UserRepository) GetUserByEmail(user *entity.User) *err_rest.RestErr {
 		}
 
 		log.Error().Err(err).Msg("pgdb_error")
-		return err_rest.NewInternalServerError("something went wrong")
+		return err_rest.NewInternalServerError(err_rest.ErrMsgSomethingWentWrong)
 	}
 
 	return nil
@@ -80,7 +80,7 @@ func (r *UserRepository) GetUserByUUID(user *entity.User) *err_rest.RestErr {
 	result := r.dbpool.QueryRow(context.Background(), queryGetUserByID, user.UUID)
 	if err := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email); err != nil {
 		log.Error().Err(err).Msg("pgdb_error")
-		return err_rest.NewInternalServerError("something went wrong")
+		return err_rest.NewInternalServerError(err_rest.ErrMsgSomethingWentWrong)
 	}
 
 	return nil

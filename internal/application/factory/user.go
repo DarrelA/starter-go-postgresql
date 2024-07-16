@@ -43,7 +43,7 @@ func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse,
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), 14)
 	if err != nil {
 		log.Error().Err(err).Msg("bcrypt_error")
-		return nil, err_rest.NewInternalServerError("something went wrong")
+		return nil, err_rest.NewInternalServerError(err_rest.ErrMsgSomethingWentWrong)
 	}
 
 	newUser.Password = string(hashedPassword)
@@ -69,7 +69,7 @@ func (uf *UserFactory) GetUser(u dto.LoginInput) (*dto.UserResponse, *err_rest.R
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(u.Password)); err != nil {
-		return nil, err_rest.NewBadRequestError("invalid credentials")
+		return nil, err_rest.NewBadRequestError(err_rest.ErrMsgInvalidCredentials)
 	}
 
 	userResponse := &dto.UserResponse{
@@ -86,7 +86,7 @@ func (uf *UserFactory) GetUserByUUID(userUuid string) (*user.User, *err_rest.Res
 	uuidPointer, err := uuid.Parse(userUuid)
 	if err != nil {
 		log.Error().Err(err).Msg("uuid_error")
-		return nil, err_rest.NewUnprocessableEntityError(("something went wrong"))
+		return nil, err_rest.NewUnprocessableEntityError((err_rest.ErrMsgSomethingWentWrong))
 	}
 
 	result := &user.User{UUID: &uuidPointer}

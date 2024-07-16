@@ -9,6 +9,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
+	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 )
@@ -26,11 +27,9 @@ func Deserializer(ts service.TokenService, uf factory.UserFactory) fiber.Handler
 			access_token = c.Cookies("access_token")
 		}
 
-		message := "please login again"
-
 		if access_token == "" {
 			return c.Status(fiber.StatusUnauthorized).
-				JSON(fiber.Map{"status": "fail", "message": message})
+				JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
 		}
 
 		tokenClaims, err := ts.ValidateToken(access_token, jwtCfg.AccessTokenPublicKey)
@@ -42,7 +41,8 @@ func Deserializer(ts service.TokenService, uf factory.UserFactory) fiber.Handler
 
 		user_uuid, errGetTokenUUID := redisDb.RedisClient.Get(ctx, tokenClaims.TokenUUID).Result()
 		if errGetTokenUUID == redis.Nil {
-			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": message})
+			return c.Status(fiber.StatusForbidden).
+				JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
 		}
 
 		u, err := uf.GetUserByUUID(user_uuid)

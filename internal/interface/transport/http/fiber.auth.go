@@ -84,7 +84,7 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 
 	if errAccess != nil {
 		log.Error().Err(errAccess).Msg("redis_error")
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": "something went wrong"})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgSomethingWentWrong})
 	}
 
 	errRefresh := redisDb.RedisClient.Set(
@@ -96,7 +96,7 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 
 	if errRefresh != nil {
 		log.Error().Err(errRefresh).Msg("redis_error")
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": "something went wrong"})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgSomethingWentWrong})
 	}
 
 	c.Cookie(&fiber.Cookie{
@@ -125,11 +125,10 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 }
 
 func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
-	message := "please login again"
 	refresh_token := c.Cookies("refresh_token")
 
 	if refresh_token == "" {
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": message})
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
 	}
 
 	ctx := context.TODO()
@@ -141,7 +140,7 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 
 	user_uuid, errGetTokenUUID := redisDb.RedisClient.Get(ctx, tokenClaims.TokenUUID).Result()
 	if errGetTokenUUID == redis.Nil {
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": message})
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
 	}
 
 	user, err := ah.uf.GetUserByUUID(user_uuid)
@@ -168,7 +167,7 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 	).Err()
 
 	if errAccess != nil {
-		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": "something went wrong"})
+		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgSomethingWentWrong})
 	}
 
 	c.Cookie(&fiber.Cookie{
@@ -186,11 +185,10 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 }
 
 func (ah *AuthService) Logout(c *fiber.Ctx) error {
-	message := "please login again"
 	refresh_token := c.Cookies("refresh_token")
 
 	if refresh_token == "" {
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": message})
+		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
 	}
 
 	ctx := context.TODO()
@@ -204,7 +202,7 @@ func (ah *AuthService) Logout(c *fiber.Ctx) error {
 	if !ok {
 		err := err_rest.NewBadRequestError("access_token is not a string or not set")
 		log.Error().Err(err).Msg("")
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "fail", "message": message})
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
 	}
 
 	_, errDelTokenUUID := redisDb.RedisClient.Del(ctx, tokenClaims.TokenUUID, accessTokenUUID).Result()
