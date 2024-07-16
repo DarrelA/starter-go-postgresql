@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/golang-jwt/jwt/v5"
 	uuid "github.com/google/uuid"
@@ -18,7 +19,7 @@ import (
 */
 type TokenService struct{}
 
-func NewTokenService() *TokenService {
+func NewTokenService() service.TokenService {
 	return &TokenService{}
 }
 
