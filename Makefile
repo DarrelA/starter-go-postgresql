@@ -12,7 +12,7 @@ VARS = APP_ENV=$(APP_ENV) POSTGRES_DB=$(POSTGRES_DB) POSTGRES_USER=$(POSTGRES_US
 #####################
 
 # Path to the environment-specific .env file
-ENV_FILE=./configs/.env.$(APP_ENV)
+ENV_FILE=./internal/infrastructure/config/.env.$(APP_ENV)
 
 # Check if the environment-specific .env file exists
 ifeq (,$(wildcard $(ENV_FILE)))

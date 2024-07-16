@@ -8,7 +8,7 @@ services:
     volumes:
       - progresDB_${APP_ENV}:/var/lib/postgresql/data
     env_file:
-      - ../configs/.env.${APP_ENV}
+      - ../internal/infrastructure/config/.env.${APP_ENV}
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -d $POSTGRES_DB -U $POSTGRES_USER']
       interval: 5s
@@ -23,7 +23,7 @@ services:
     volumes:
       - ../internal/infrastructure/db/postgres/json/servers.${APP_ENV}.json:/pgadmin4/servers.json
     env_file:
-      - ../configs/.env.${APP_ENV}
+      - ../internal/infrastructure/config/.env.${APP_ENV}
 
   redis:
     image: redis:alpine
@@ -49,7 +49,7 @@ services:
     environment:
       - APP_ENV=${APP_ENV}
     env_file:
-      - ../configs/.env.${APP_ENV}
+      - ../internal/infrastructure/config/.env.${APP_ENV}
     depends_on:
       postgres:
         condition: service_healthy
@@ -70,7 +70,7 @@ services:
     environment:
       - APP_ENV=${APP_ENV}
     env_file:
-      - ../configs/.env.${APP_ENV}
+      - ../internal/infrastructure/config/.env.${APP_ENV}
     depends_on:
       postgres:
         condition: service_healthy
