@@ -3,6 +3,7 @@ package factory
 import (
 	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/repository"
+	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -30,7 +31,7 @@ func NewUserFactory(ur repository.UserRepository) *UserFactory {
 	return &UserFactory{ur}
 }
 
-func (uf *UserFactory) CreateUser(payload user.RegisterInput) (*user.UserResponse, *err_rest.RestErr) {
+func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *err_rest.RestErr) {
 	newUser := &user.User{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
@@ -50,7 +51,7 @@ func (uf *UserFactory) CreateUser(payload user.RegisterInput) (*user.UserRespons
 		return nil, err
 	}
 
-	userResponse := &user.UserResponse{
+	userResponse := &dto.UserResponse{
 		UUID:      newUser.UUID,
 		FirstName: newUser.FirstName,
 		LastName:  newUser.LastName,
@@ -60,7 +61,7 @@ func (uf *UserFactory) CreateUser(payload user.RegisterInput) (*user.UserRespons
 	return userResponse, nil
 }
 
-func (uf *UserFactory) GetUser(u user.LoginInput) (*user.UserResponse, *err_rest.RestErr) {
+func (uf *UserFactory) GetUser(u dto.LoginInput) (*dto.UserResponse, *err_rest.RestErr) {
 	result := &user.User{Email: u.Email}
 	if err := uf.ur.GetUserByEmail(result); err != nil {
 		return nil, err
@@ -70,7 +71,7 @@ func (uf *UserFactory) GetUser(u user.LoginInput) (*user.UserResponse, *err_rest
 		return nil, err_rest.NewBadRequestError("invalid credentials")
 	}
 
-	userResponse := &user.UserResponse{
+	userResponse := &dto.UserResponse{
 		UUID:      result.UUID,
 		FirstName: result.FirstName,
 		LastName:  result.LastName,

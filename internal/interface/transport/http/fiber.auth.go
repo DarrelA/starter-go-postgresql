@@ -6,9 +6,9 @@ import (
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
-	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
+	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
@@ -27,7 +27,7 @@ func NewAuthService(uf factory.UserFactory, ts service.TokenService) *AuthHandle
 var jwtCfg = configs.JWTSettings
 
 func (ah *AuthHandler) Register(c *fiber.Ctx) error {
-	payload, ok := c.Locals("register_payload").(user.RegisterInput)
+	payload, ok := c.Locals("register_payload").(dto.RegisterInput)
 	if !ok {
 		err := err_rest.NewBadRequestError("register_payload is not of type users.RegisterInput")
 		log.Error().Err(err).Msg("type_error")
@@ -42,7 +42,7 @@ func (ah *AuthHandler) Register(c *fiber.Ctx) error {
 }
 
 func (ah *AuthHandler) Login(c *fiber.Ctx) error {
-	payload, ok := c.Locals("login_payload").(user.LoginInput)
+	payload, ok := c.Locals("login_payload").(dto.LoginInput)
 	if !ok {
 		err := err_rest.NewBadRequestError("login_payload is not of type users.RegisterInput")
 		log.Error().Err(err).Msg("type_error")

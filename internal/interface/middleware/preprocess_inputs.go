@@ -8,7 +8,7 @@ import (
 	"unicode"
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
-	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -21,7 +21,7 @@ func PreProcessInputs(c *fiber.Ctx) error {
 
 	switch endpoint {
 	case authServicePathName + "/register":
-		var payload user.RegisterInput
+		var payload dto.RegisterInput
 		if err := parseAndSanitize(c, &payload); err != nil {
 			return err
 		}
@@ -33,7 +33,7 @@ func PreProcessInputs(c *fiber.Ctx) error {
 		c.Locals("register_payload", payload)
 
 	case authServicePathName + "/login":
-		var payload user.LoginInput
+		var payload dto.LoginInput
 		if err := parseAndSanitize(c, &payload); err != nil {
 			return err
 		}

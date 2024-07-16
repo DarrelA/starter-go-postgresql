@@ -6,9 +6,9 @@ import (
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
-	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
+	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/gofiber/fiber/v2"
 	"github.com/redis/go-redis/v9"
 )
@@ -50,7 +50,7 @@ func Deserializer(token service.TokenService, uf factory.UserFactory) fiber.Hand
 			return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 		}
 
-		userRecord := &user.UserRecord{
+		userRecord := &dto.UserRecord{
 			UUID:      u.UUID,
 			FirstName: u.FirstName,
 			LastName:  u.LastName,

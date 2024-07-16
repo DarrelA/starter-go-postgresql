@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
-	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	data_test "github.com/DarrelA/starter-go-postgresql/test/data"
 )
@@ -87,7 +87,7 @@ func TestRegisterEndpoint(t *testing.T) {
 			switch resp.StatusCode {
 			case http.StatusOK:
 				// Extract the "user" field and decode it into UserResponse
-				var responseBody user.UserResponse
+				var responseBody dto.UserResponse
 				if err := json.Unmarshal(responseMap["user"], &responseBody); err != nil {
 					t.Errorf("failed to decode field: %v", err)
 				}
