@@ -4,16 +4,17 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/DarrelA/starter-go-postgresql/configs"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 )
 
 // @TODO: Try to use method receiver with config interface in domain service.
-func NewRDBMS(db *configs.PostgresDBConfig) (*pgxpool.Pool, error) {
+func NewRDBMS(config *entity.PostgresDBConfig) (*pgxpool.Pool, error) {
 	connString := fmt.Sprintf(
 		"user=%s password=%s host=%s port=%s dbname=%s sslmode=%s pool_max_conns=%s",
-		db.Username, db.Password, db.Host, db.Port, db.Name, db.SslMode, db.PoolMaxConns,
+		config.Username, config.Password, config.Host,
+		config.Port, config.Name, config.SslMode, config.PoolMaxConns,
 	)
 
 	var err error
