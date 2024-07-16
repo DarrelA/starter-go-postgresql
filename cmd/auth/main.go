@@ -45,17 +45,21 @@ func startApp() {
 		// Dependency injection
 		// User
 		userRepo := postgres.NewUserRepository(dbpool)
+		// @TODO: Ensure interface compliance
 		userFactory := factory.NewUserFactory(userRepo)
+		userService := http.NewUserService()
 
 		// Token
 		tokenService := jwt.NewTokenService()
 
 		// Auth
+		// @TODO: Ensure interface compliance
 		authService := http.NewAuthService(*userFactory, tokenService)
 
 		app.SeedDatabase(dbpool)
-		authServiceInstance := http.NewRouter(tokenService, *userFactory, *authService)
-		go http.StartServer(authServiceInstance)
+		// appServiceInstance := http.NewRouter(tokenService, *userFactory, *authService)
+		appServiceInstance := http.NewRouter(tokenService, *userFactory, *authService, userService)
+		go http.StartServer(appServiceInstance)
 	}()
 
 	wg.Wait()

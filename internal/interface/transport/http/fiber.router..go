@@ -4,8 +4,9 @@ import (
 	"runtime/debug"
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
+	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
+	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	mw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
@@ -23,9 +24,10 @@ func StartServer(app *fiber.App) {
 }
 
 func NewRouter(
-	token service.TokenService,
+	token domainSvc.TokenService,
 	userFactory factory.UserFactory,
 	authHandler AuthHandler,
+	userService appSvc.UserService,
 ) *fiber.App {
 	log.Info().Msg("creating fiber instances")
 	appInstance := fiber.New()
@@ -47,10 +49,9 @@ func NewRouter(
 
 	authUser := user.Group("/").Use(mw.Deserializer(token, userFactory))
 	authUser.Get("/logout", authHandler.Logout)
+	authUser.Get("/me", userService.GetUserRecord)
 
 	user.Get("/refresh", authHandler.RefreshAccessToken)
-	// @TODO: Fix route
-	// user.Get("/users/me", mw.Deserializer, handlers.GetMe)
 
 	authServiceInstance.Get("/health", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success"})
