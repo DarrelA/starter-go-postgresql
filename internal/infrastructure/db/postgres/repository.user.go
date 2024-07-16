@@ -15,7 +15,7 @@ import (
 )
 
 /*
-DbPool is the database connection pool.
+dbpool is the database connection pool.
 Package pgxpool is a concurrency-safe connection pool for pgx.
 pgxpool implements a nearly identical interface to pgx connections.
 
@@ -23,11 +23,11 @@ pgxpool implements a nearly identical interface to pgx connections.
 - This pattern is useful for managing resources that have a lifecycle, like database connections.
 */
 type UserRepository struct {
-	DbPool *pgxpool.Pool
+	dbpool *pgxpool.Pool
 }
 
 func NewUserRepository(dbpool *pgxpool.Pool) repository.UserRepository {
-	return &UserRepository{DbPool: dbpool}
+	return &UserRepository{dbpool}
 }
 
 var (
@@ -39,7 +39,7 @@ var (
 // Create a method of the `User` type
 func (r *UserRepository) SaveUser(user *entity.User) *err_rest.RestErr {
 	var lastInsertUuid uuid.UUID
-	err := r.DbPool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)
+	err := r.dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)
 
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -61,7 +61,7 @@ func (r *UserRepository) SaveUser(user *entity.User) *err_rest.RestErr {
 }
 
 func (r *UserRepository) GetUserByEmail(user *entity.User) *err_rest.RestErr {
-	err := r.DbPool.QueryRow(context.Background(), queryGetUser, user.Email).
+	err := r.dbpool.QueryRow(context.Background(), queryGetUser, user.Email).
 		Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email, &user.Password)
 
 	if err != nil {
@@ -77,7 +77,7 @@ func (r *UserRepository) GetUserByEmail(user *entity.User) *err_rest.RestErr {
 }
 
 func (r *UserRepository) GetUserByUUID(user *entity.User) *err_rest.RestErr {
-	result := r.DbPool.QueryRow(context.Background(), queryGetUserByID, user.UUID)
+	result := r.dbpool.QueryRow(context.Background(), queryGetUserByID, user.UUID)
 	if err := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email); err != nil {
 		log.Error().Err(err).Msg("pgdb_error")
 		return err_rest.NewInternalServerError("something went wrong")
