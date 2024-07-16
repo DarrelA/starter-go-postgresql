@@ -1,4 +1,4 @@
-package configs
+package config
 
 import (
 	"fmt"
@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	logger_env "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/joho/godotenv"
@@ -15,67 +17,17 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type BaseURLsConfig struct {
-	AuthServicePathName string
-	AuthService         string
+type EnvConfig struct {
+	entity.EnvConfig
 }
 
-type PostgresDBConfig struct {
-	Username     string
-	Password     string
-	Host         string
-	Port         string
-	Name         string
-	SslMode      string
-	PoolMaxConns string
+func NewTokenService() service.LoadEnvConfig {
+	return &EnvConfig{}
 }
 
-type RedisDBConfig struct {
-	RedisUri string
-}
-
-type JWTConfig struct {
-	Path                   string
-	Domain                 string
-	Secure                 bool
-	HttpOnly               bool
-	AccessTokenPrivateKey  string
-	AccessTokenPublicKey   string
-	AccessTokenExpiredIn   time.Duration
-	AccessTokenMaxAge      int
-	RefreshTokenPrivateKey string
-	RefreshTokenPublicKey  string
-	RefreshTokenExpiredIn  time.Duration
-	RefreshTokenMaxAge     int
-}
-
-type CORSConfig struct {
-	AllowedOrigins string
-}
-
-// Define the variables to hold the configuration
-var (
-	Env          string
-	Port         string
-	BaseURLs     BaseURLsConfig
-	PGDB         PostgresDBConfig
-	RedisDB      RedisDBConfig
-	JWTSettings  JWTConfig
-	CORSSettings CORSConfig
-)
-
-func init() {
-	loadEnv()
-	loadLogSettings()
-	loadDBSettings()
-	loadRedisSettings()
-	loadJWTConfigs()
-	loadCORSConfigs()
-}
-
-func loadEnv() {
-	Env = os.Getenv("APP_ENV")
-	if Env == "" {
+func (e *EnvConfig) LoadAppConfig() {
+	e.Env = os.Getenv("APP_ENV")
+	if e.Env == "" {
 		log.Fatal().Msg("APP_ENV not set")
 	}
 
@@ -90,24 +42,33 @@ func loadEnv() {
 	}
 
 	// Construct the full path to the .env file
-	envFilePath := filepath.Join(envBasePath, ".env."+Env)
+	envFilePath := filepath.Join(envBasePath, ".env."+e.Env)
 	log.Debug().Msgf("loading env file: %s", envFilePath)
 	godotenv.Load(envFilePath)
 
-	Port = os.Getenv("APP_PORT")
-	if Port == "" {
-		Port = "8080" // Default port
+	e.Port = os.Getenv("APP_PORT")
+	if e.Port == "" {
+		e.Port = "8080" // Default port
 	}
 
-	log.Info().Msgf("running in %s env using Port %s", strings.ToUpper(Env), Port)
+	log.Info().Msgf("running in %s env using Port %s", strings.ToUpper(e.Env), e.Port)
 
-	BaseURLs = BaseURLsConfig{
+	/*
+		1.	Embedding `entity.EnvConfig`: In the `config` package, EnvConfig struct embeds the `entity.EnvConfig` struct.
+				This means EnvConfig includes all fields and methods of `entity.EnvConfig` by default.
+		2.	Pointer Initialization: Since `BaseURLsConfig` in `entity.EnvConfig` is a pointer (`*BaseURLsConfig`),
+				you need to initialize it using `&entity.BaseURLsConfig{}` to allocate memory and assign values.
+		3.	Correct Typing: The correct way to initialize a struct field from another package is to use the full type name, in this case, `entity.BaseURLsConfig`.
+	*/
+	e.BaseURLsConfig = &entity.BaseURLsConfig{
 		AuthServicePathName: os.Getenv("AUTH_SERVICE_PATHNAME"),
-		AuthService:         os.Getenv("PROTOCOL") + os.Getenv("DOMAIN") + Port + os.Getenv("AUTH_SERVICE_PATHNAME"),
+		AuthService: os.Getenv("PROTOCOL") +
+			os.Getenv("DOMAIN") + e.Port +
+			os.Getenv("AUTH_SERVICE_PATHNAME"),
 	}
 }
 
-func loadLogSettings() {
+func (e *EnvConfig) LoadLogConfig() {
 	logLevel := os.Getenv("LOG_LEVEL")
 
 	// Whichever level is chosen,
@@ -136,8 +97,8 @@ func loadLogSettings() {
 	}
 }
 
-func loadDBSettings() {
-	PGDB = PostgresDBConfig{
+func (e *EnvConfig) LoadDBConfig() {
+	e.PostgresDBConfig = &entity.PostgresDBConfig{
 		Username:     os.Getenv("POSTGRES_USER"),
 		Password:     os.Getenv("POSTGRES_PASSWORD"),
 		Host:         os.Getenv("POSTGRES_HOST"),
@@ -148,29 +109,40 @@ func loadDBSettings() {
 	}
 }
 
-func loadRedisSettings() {
-	RedisDB = RedisDBConfig{
+func (e *EnvConfig) LoadRedisConfig() {
+	e.RedisDBConfig = &entity.RedisDBConfig{
 		RedisUri: os.Getenv("REDIS_URL"),
 	}
 }
 
-func loadJWTConfigs() {
-	JWTSettings.Path = os.Getenv("JWT_PATH")
-	JWTSettings.Domain = os.Getenv("JWT_DOMAIN")
-	loadEnvVariableBool("JWT_SECURE", &JWTSettings.Secure)
-	loadEnvVariableBool("JWT_HTTPONLY", &JWTSettings.HttpOnly)
-	JWTSettings.AccessTokenPrivateKey = os.Getenv("ACCESS_TOKEN_PRIVATE_KEY")
-	JWTSettings.AccessTokenPublicKey = os.Getenv("ACCESS_TOKEN_PUBLIC_KEY")
-	loadEnvVariableDuration("ACCESS_TOKEN_EXPIRED_IN", &JWTSettings.AccessTokenExpiredIn)
-	loadEnvVariableInt("ACCESS_TOKEN_MAXAGE", &JWTSettings.AccessTokenMaxAge)
-	JWTSettings.RefreshTokenPrivateKey = os.Getenv("REFRESH_TOKEN_PRIVATE_KEY")
-	JWTSettings.RefreshTokenPublicKey = os.Getenv("REFRESH_TOKEN_PUBLIC_KEY")
-	loadEnvVariableDuration("REFRESH_TOKEN_EXPIRED_IN", &JWTSettings.RefreshTokenExpiredIn)
-	loadEnvVariableInt("REFRESH_TOKEN_MAXAGE", &JWTSettings.RefreshTokenMaxAge)
+func (e *EnvConfig) LoadJWTConfig() {
+	/*
+		Ensure that `JWTConfig` is properly initialized to avoid `nil` pointer dereference errors.
+		This check verifies if `JWTConfig` is `nil`, and if it is,
+		initializes it with a new instance of `entity.JWTConfig`.
+		This is crucial before attempting to access or modify any fields within `JWTConfig`,
+		ensuring that subsequent dereference operations are safe.
+	*/
+	if e.JWTConfig == nil {
+		e.JWTConfig = &entity.JWTConfig{}
+	}
+
+	e.JWTConfig.Path = os.Getenv("JWT_PATH")
+	e.JWTConfig.Domain = os.Getenv("JWT_DOMAIN")
+	loadEnvVariableBool("JWT_SECURE", &e.JWTConfig.Secure)
+	loadEnvVariableBool("JWT_HTTPONLY", &e.JWTConfig.HttpOnly)
+	e.JWTConfig.AccessTokenPrivateKey = os.Getenv("ACCESS_TOKEN_PRIVATE_KEY")
+	e.JWTConfig.AccessTokenPublicKey = os.Getenv("ACCESS_TOKEN_PUBLIC_KEY")
+	loadEnvVariableDuration("ACCESS_TOKEN_EXPIRED_IN", &e.JWTConfig.AccessTokenExpiredIn)
+	loadEnvVariableInt("ACCESS_TOKEN_MAXAGE", &e.JWTConfig.AccessTokenMaxAge)
+	e.JWTConfig.RefreshTokenPrivateKey = os.Getenv("REFRESH_TOKEN_PRIVATE_KEY")
+	e.JWTConfig.RefreshTokenPublicKey = os.Getenv("REFRESH_TOKEN_PUBLIC_KEY")
+	loadEnvVariableDuration("REFRESH_TOKEN_EXPIRED_IN", &e.JWTConfig.RefreshTokenExpiredIn)
+	loadEnvVariableInt("REFRESH_TOKEN_MAXAGE", &e.JWTConfig.RefreshTokenMaxAge)
 }
 
-func loadCORSConfigs() {
-	CORSSettings = CORSConfig{
+func (e *EnvConfig) LoadCORSConfig() {
+	e.CORSConfig = &entity.CORSConfig{
 		AllowedOrigins: os.Getenv("CORS_ALLOWED_ORIGINS"),
 	}
 }
