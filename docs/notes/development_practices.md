@@ -7,7 +7,7 @@
 - [Testing](#testing)
   - [Unit Testing, Integration Testing, and Acceptance Testing](#unit-testing-integration-testing-and-acceptance-testing)
     - [Black Box Testing \& White Box Testing](#black-box-testing--white-box-testing)
-- [Error Handling](#error-handling)
+- [References](#references)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -77,7 +77,7 @@ Dependency Injection (DI) is a design pattern that achieves Inversion of Control
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-# Error Handling
+# References
 
 - [Appendix A. PostgreSQL Error Codes](https://www.postgresql.org/docs/current/errcodes-appendix.html)
 - [What is Test Driven Development (TDD)?](https://www.geeksforgeeks.org/test-driven-development-tdd/)

@@ -272,15 +272,19 @@ Microservices Architecture is an architectural style that structures an applicat
 
 # References
 
+- [DDD, Hexagonal, Onion, Clean, CQRS, … How I put it all together](https://herbertograca.com/2017/11/16/explicit-architecture-01-ddd-hexagonal-onion-clean-cqrs-how-i-put-it-all-together/)
 - [Moving Towards Domain Driven Design in Go](https://www.calhoun.io/moving-towards-domain-driven-design-in-go/)
 - [GopherCon 2018: Kat Zien - How Do You Structure Your Go Apps](https://www.youtube.com/watch?v=oL6JBUk6tj0)
 - [Golang UK Conference 2016 - Marcus Olsson - Building an enterprise service in Go](https://www.youtube.com/watch?v=twcDf_Y2gXY)
 - [Go and a Package Focused Design](https://blog.gopheracademy.com/advent-2016/go-and-package-focused-design/)
 - [Hexagonal Architecture](https://fideloper.com/hexagonal-architecture)
 - [Hexagonal Architecture and Domain-Driven Design (DDD)](https://prbpedro.substack.com/p/hexagonal-architecture-and-domain)
+- [Understanding Hexagonal, Clean, Onion, and Traditional Layered Architectures: A Deep Dive](https://romanglushach.medium.com/understanding-hexagonal-clean-onion-and-traditional-layered-architectures-a-deep-dive-c0f93b8a1b96)
+- [Building RESTful API with Hexagonal Architecture in Go](https://dev.to/bagashiz/building-restful-api-with-hexagonal-architecture-in-go-1mij)
 - [Modern Business Software in Go](https://threedots.tech/series/modern-business-software-in-go)
 - [WTF Dial is an example web application written in Go](https://github.com/benbjohnson/wtf)
 - [go-kit/kit - A standard library for microservices](https://github.com/go-kit/kit)
+- [Juan Manuel Garrido de Paz - Articles on Hexagonal Architecture](https://jmgarridopaz.github.io/content/articles.html)
 - [Design Patterns Architecture](https://www.geeksforgeeks.org/design-patterns-architecture/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
