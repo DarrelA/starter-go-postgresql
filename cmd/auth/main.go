@@ -52,11 +52,10 @@ func startApp() {
 		tokenService := jwt.NewTokenService()
 
 		// Auth
-		// @TODO: Ensure interface compliance
 		authService := http.NewAuthService(userFactory, tokenService)
 
 		app.SeedDatabase(dbpool)
-		appServiceInstance := http.NewRouter(tokenService, userFactory, *authService, userService)
+		appServiceInstance := http.NewRouter(tokenService, userFactory, authService, userService)
 		go http.StartServer(appServiceInstance)
 	}()
 

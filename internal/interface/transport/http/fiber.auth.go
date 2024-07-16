@@ -6,8 +6,9 @@ import (
 
 	"github.com/DarrelA/starter-go-postgresql/configs"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
+	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
+	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
@@ -15,18 +16,18 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type AuthHandler struct {
+type AuthService struct {
 	uf factory.UserFactory
-	ts service.TokenService
+	ts domainSvc.TokenService
 }
 
-func NewAuthService(uf factory.UserFactory, ts service.TokenService) *AuthHandler {
-	return &AuthHandler{uf, ts}
+func NewAuthService(uf factory.UserFactory, ts domainSvc.TokenService) appSvc.AuthService {
+	return &AuthService{uf, ts}
 }
 
 var jwtCfg = configs.JWTSettings
 
-func (ah *AuthHandler) Register(c *fiber.Ctx) error {
+func (ah *AuthService) Register(c *fiber.Ctx) error {
 	payload, ok := c.Locals("register_payload").(dto.RegisterInput)
 	if !ok {
 		err := err_rest.NewBadRequestError("register_payload is not of type users.RegisterInput")
@@ -41,7 +42,7 @@ func (ah *AuthHandler) Register(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "user": result})
 }
 
-func (ah *AuthHandler) Login(c *fiber.Ctx) error {
+func (ah *AuthService) Login(c *fiber.Ctx) error {
 	payload, ok := c.Locals("login_payload").(dto.LoginInput)
 	if !ok {
 		err := err_rest.NewBadRequestError("login_payload is not of type users.RegisterInput")
@@ -123,7 +124,7 @@ func (ah *AuthHandler) Login(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "access_token": accessTokenDetails.Token})
 }
 
-func (ah *AuthHandler) RefreshAccessToken(c *fiber.Ctx) error {
+func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 	message := "please login again"
 	refresh_token := c.Cookies("refresh_token")
 
@@ -184,7 +185,7 @@ func (ah *AuthHandler) RefreshAccessToken(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "access_token": accessTokenDetails.Token})
 }
 
-func (ah *AuthHandler) Logout(c *fiber.Ctx) error {
+func (ah *AuthService) Logout(c *fiber.Ctx) error {
 	message := "please login again"
 	refresh_token := c.Cookies("refresh_token")
 

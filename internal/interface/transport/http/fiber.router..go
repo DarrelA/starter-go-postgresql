@@ -26,7 +26,7 @@ func StartServer(app *fiber.App) {
 func NewRouter(
 	token domainSvc.TokenService,
 	userFactory factory.UserFactory,
-	authHandler AuthHandler,
+	authService appSvc.AuthService,
 	userService appSvc.UserService,
 ) *fiber.App {
 	log.Info().Msg("creating fiber instances")
@@ -44,14 +44,14 @@ func NewRouter(
 	})
 
 	user := v1.Group("/users")
-	user.Post("/register", mw.PreProcessInputs, authHandler.Register)
-	user.Post("/login", mw.PreProcessInputs, authHandler.Login)
+	user.Post("/register", mw.PreProcessInputs, authService.Register)
+	user.Post("/login", mw.PreProcessInputs, authService.Login)
 
 	authUser := user.Group("/").Use(mw.Deserializer(token, userFactory))
-	authUser.Get("/logout", authHandler.Logout)
+	authUser.Get("/logout", authService.Logout)
 	authUser.Get("/me", userService.GetUserRecord)
 
-	user.Get("/refresh", authHandler.RefreshAccessToken)
+	user.Get("/refresh", authService.RefreshAccessToken)
 
 	authServiceInstance.Get("/health", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success"})
