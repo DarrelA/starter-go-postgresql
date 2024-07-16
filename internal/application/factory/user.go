@@ -1,7 +1,7 @@
 package factory
 
 import (
-	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/repository"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
@@ -20,7 +20,8 @@ The factory logic is part of the domain layer as it encapsulates domain-specific
 This is appropriate for the domain layer, as it deals with core business logic.
 */
 type UserFactory struct {
-	ur repository.UserRepository
+	JWTConfig *entity.JWTConfig
+	ur        repository.UserRepository
 }
 
 /*
@@ -28,12 +29,16 @@ The factory interacts with the `UserRepository` interface to perform persistence
 This adheres to the principle of dependency inversion,
 where the factory depends on an abstraction rather than a concrete implementation.
 */
-func NewUserFactory(ur repository.UserRepository) factory.UserFactory {
-	return &UserFactory{ur}
+func NewUserFactory(JWTConfig *entity.JWTConfig, ur repository.UserRepository) factory.UserFactory {
+	return &UserFactory{JWTConfig, ur}
+}
+
+func (uf *UserFactory) GetJWTConfig() *entity.JWTConfig {
+	return uf.JWTConfig
 }
 
 func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *err_rest.RestErr) {
-	newUser := &user.User{
+	newUser := &entity.User{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
 		Email:     payload.Email,
@@ -63,7 +68,7 @@ func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse,
 }
 
 func (uf *UserFactory) GetUser(u dto.LoginInput) (*dto.UserResponse, *err_rest.RestErr) {
-	result := &user.User{Email: u.Email}
+	result := &entity.User{Email: u.Email}
 	if err := uf.ur.GetUserByEmail(result); err != nil {
 		return nil, err
 	}
@@ -82,14 +87,14 @@ func (uf *UserFactory) GetUser(u dto.LoginInput) (*dto.UserResponse, *err_rest.R
 	return userResponse, nil
 }
 
-func (uf *UserFactory) GetUserByUUID(userUuid string) (*user.User, *err_rest.RestErr) {
+func (uf *UserFactory) GetUserByUUID(userUuid string) (*entity.User, *err_rest.RestErr) {
 	uuidPointer, err := uuid.Parse(userUuid)
 	if err != nil {
 		log.Error().Err(err).Msg("uuid_error")
 		return nil, err_rest.NewUnprocessableEntityError((err_rest.ErrMsgSomethingWentWrong))
 	}
 
-	result := &user.User{UUID: &uuidPointer}
+	result := &entity.User{UUID: &uuidPointer}
 
 	if err := uf.ur.GetUserByUUID(result); err != nil {
 		return nil, err
