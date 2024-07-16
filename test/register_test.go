@@ -10,7 +10,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/DarrelA/starter-go-postgresql/configs"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	data_test "github.com/DarrelA/starter-go-postgresql/test/data"
@@ -48,7 +47,7 @@ func TestMain(m *testing.M) {
 func TestRegisterEndpoint(t *testing.T) {
 	// Using a single HTTP client for all requests
 	client := &http.Client{}
-	baseURL := configs.BaseURLs.AuthService
+	baseURL := "@TODO: Fix tests"
 	endpoint := "/register"
 
 	for _, newUser := range data_test.RegisterInputs {
