@@ -3,10 +3,10 @@ package http
 import (
 	"runtime/debug"
 
-	"github.com/DarrelA/starter-go-postgresql/configs"
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
+	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
 	mw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
@@ -15,15 +15,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func StartServer(app *fiber.App) {
-	log.Info().Msg("listening at port: " + configs.Port)
-	err := app.Listen(":" + configs.Port)
+func StartServer(app *fiber.App, port string) {
+	log.Info().Msg("listening at port: " + port)
+	err := app.Listen(":" + port)
 	if err != nil {
 		log.Fatal().Err(err).Msg("failed to start server")
 	}
 }
 
 func NewRouter(
+	envConfig *config.EnvConfig,
 	tokenService domainSvc.TokenService,
 	userFactory factory.UserFactory,
 	authService appSvc.AuthService,
@@ -35,7 +36,7 @@ func NewRouter(
 	appInstance.Mount("/auth", authServiceInstance)
 
 	log.Info().Msg("connecting middlewares")
-	useMiddlewares(authServiceInstance)
+	useMiddlewares(authServiceInstance, envConfig)
 
 	log.Info().Msg("setting up routes")
 	v1 := authServiceInstance.Group("/api/v1", func(c *fiber.Ctx) error { // middleware for /api/v1
@@ -73,15 +74,21 @@ func NewRouter(
 	return appInstance
 }
 
-func useMiddlewares(authServiceInstance *fiber.App) {
+func useMiddlewares(authServiceInstance *fiber.App, envConfig *config.EnvConfig) {
 	// Recover middleware to catch panics and handle errors
 	authServiceInstance.Use(recover.New(recover.Config{
 		EnableStackTrace:  true,
 		StackTraceHandler: customStackTraceHandler,
 	}))
 
+	authServiceInstance.Use(func(c *fiber.Ctx) error {
+		c.Locals("baseURLsConfig", envConfig.BaseURLsConfig)
+		c.Locals("env", envConfig.Env)
+		return c.Next()
+	})
+
 	authServiceInstance.Use(cors.New(cors.Config{
-		AllowOrigins:     configs.CORSSettings.AllowedOrigins,
+		AllowOrigins:     envConfig.CORSConfig.AllowedOrigins,
 		AllowMethods:     "GET,POST",
 		AllowHeaders:     "Content-Type",
 		ExposeHeaders:    "Content-Length",
