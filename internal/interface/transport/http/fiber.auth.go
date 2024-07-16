@@ -4,7 +4,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/DarrelA/starter-go-postgresql/configs"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
@@ -24,8 +23,6 @@ type AuthService struct {
 func NewAuthService(uf factory.UserFactory, ts domainSvc.TokenService) appSvc.AuthService {
 	return &AuthService{uf, ts}
 }
-
-var jwtCfg = configs.JWTSettings
 
 func (ah *AuthService) Register(c *fiber.Ctx) error {
 	payload, ok := c.Locals("register_payload").(dto.RegisterInput)
@@ -54,10 +51,11 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
+	jwtConfig := ah.uf.GetJWTConfig()
 	accessTokenDetails, err := ah.ts.CreateToken(
 		user.UUID.String(),
-		jwtCfg.AccessTokenExpiredIn,
-		jwtCfg.AccessTokenPrivateKey,
+		jwtConfig.AccessTokenExpiredIn,
+		jwtConfig.AccessTokenPrivateKey,
 	)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
@@ -65,8 +63,8 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 
 	refreshTokenDetails, err := ah.ts.CreateToken(
 		user.UUID.String(),
-		jwtCfg.RefreshTokenExpiredIn,
-		jwtCfg.RefreshTokenPrivateKey,
+		jwtConfig.RefreshTokenExpiredIn,
+		jwtConfig.RefreshTokenPrivateKey,
 	)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
@@ -103,10 +101,10 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 		Name:     "access_token",
 		Value:    *accessTokenDetails.Token,
 		Path:     "/",
-		Domain:   jwtCfg.Domain,
-		MaxAge:   jwtCfg.AccessTokenMaxAge * 60,
-		Secure:   jwtCfg.Secure,
-		HTTPOnly: jwtCfg.HttpOnly,
+		Domain:   jwtConfig.Domain,
+		MaxAge:   jwtConfig.AccessTokenMaxAge * 60,
+		Secure:   jwtConfig.Secure,
+		HTTPOnly: jwtConfig.HttpOnly,
 		SameSite: "strict",
 	})
 
@@ -114,10 +112,10 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 		Name:     "refresh_token",
 		Value:    *refreshTokenDetails.Token,
 		Path:     "/",
-		Domain:   jwtCfg.Domain,
-		MaxAge:   jwtCfg.RefreshTokenMaxAge * 60,
-		Secure:   jwtCfg.Secure,
-		HTTPOnly: jwtCfg.HttpOnly,
+		Domain:   jwtConfig.Domain,
+		MaxAge:   jwtConfig.RefreshTokenMaxAge * 60,
+		Secure:   jwtConfig.Secure,
+		HTTPOnly: jwtConfig.HttpOnly,
 		SameSite: "strict",
 	})
 
@@ -133,7 +131,8 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 
 	ctx := context.TODO()
 
-	tokenClaims, err := ah.ts.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
+	jwtConfig := ah.uf.GetJWTConfig()
+	tokenClaims, err := ah.ts.ValidateToken(refresh_token, jwtConfig.RefreshTokenPublicKey)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
@@ -150,8 +149,8 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 
 	accessTokenDetails, err := ah.ts.CreateToken(
 		user.UUID.String(),
-		jwtCfg.AccessTokenExpiredIn,
-		jwtCfg.AccessTokenPrivateKey,
+		jwtConfig.AccessTokenExpiredIn,
+		jwtConfig.AccessTokenPrivateKey,
 	)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
@@ -174,10 +173,10 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 		Name:     "access_token",
 		Value:    *accessTokenDetails.Token,
 		Path:     "/",
-		Domain:   jwtCfg.Domain,
-		MaxAge:   jwtCfg.AccessTokenMaxAge * 60,
-		Secure:   jwtCfg.Secure,
-		HTTPOnly: jwtCfg.HttpOnly,
+		Domain:   jwtConfig.Domain,
+		MaxAge:   jwtConfig.AccessTokenMaxAge * 60,
+		Secure:   jwtConfig.Secure,
+		HTTPOnly: jwtConfig.HttpOnly,
 		SameSite: "strict",
 	})
 
@@ -193,7 +192,8 @@ func (ah *AuthService) Logout(c *fiber.Ctx) error {
 
 	ctx := context.TODO()
 
-	tokenClaims, err := ah.ts.ValidateToken(refresh_token, jwtCfg.RefreshTokenPublicKey)
+	jwtConfig := ah.uf.GetJWTConfig()
+	tokenClaims, err := ah.ts.ValidateToken(refresh_token, jwtConfig.RefreshTokenPublicKey)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}

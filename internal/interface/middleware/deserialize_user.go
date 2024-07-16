@@ -4,8 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/DarrelA/starter-go-postgresql/configs"
-	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
+	db "github.com/DarrelA/starter-go-postgresql/db/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
@@ -14,9 +13,9 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-var jwtCfg = configs.JWTSettings
-
-func Deserializer(ts service.TokenService, uf factory.UserFactory) fiber.Handler {
+func Deserializer(
+	ts service.TokenService,
+	uf factory.UserFactory) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var access_token string
 		authorization := c.Get("Authorization")
@@ -32,14 +31,14 @@ func Deserializer(ts service.TokenService, uf factory.UserFactory) fiber.Handler
 				JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
 		}
 
-		tokenClaims, err := ts.ValidateToken(access_token, jwtCfg.AccessTokenPublicKey)
+		tokenClaims, err := ts.ValidateToken(access_token, uf.GetJWTConfig().AccessTokenPublicKey)
 		if err != nil {
 			return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 		}
 
 		ctx := context.TODO()
 
-		user_uuid, errGetTokenUUID := redisDb.RedisClient.Get(ctx, tokenClaims.TokenUUID).Result()
+		user_uuid, errGetTokenUUID := db.RedisClient.Get(ctx, tokenClaims.TokenUUID).Result()
 		if errGetTokenUUID == redis.Nil {
 			return c.Status(fiber.StatusForbidden).
 				JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
