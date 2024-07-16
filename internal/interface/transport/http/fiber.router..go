@@ -24,7 +24,7 @@ func StartServer(app *fiber.App) {
 }
 
 func NewRouter(
-	token domainSvc.TokenService,
+	tokenService domainSvc.TokenService,
 	userFactory factory.UserFactory,
 	authService appSvc.AuthService,
 	userService appSvc.UserService,
@@ -47,7 +47,7 @@ func NewRouter(
 	user.Post("/register", mw.PreProcessInputs, authService.Register)
 	user.Post("/login", mw.PreProcessInputs, authService.Login)
 
-	authUser := user.Group("/").Use(mw.Deserializer(token, userFactory))
+	authUser := user.Group("/").Use(mw.Deserializer(tokenService, userFactory))
 	authUser.Get("/logout", authService.Logout)
 	authUser.Get("/me", userService.GetUserRecord)
 

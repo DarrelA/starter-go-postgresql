@@ -15,7 +15,7 @@ import (
 
 var jwtCfg = configs.JWTSettings
 
-func Deserializer(token service.TokenService, uf factory.UserFactory) fiber.Handler {
+func Deserializer(ts service.TokenService, uf factory.UserFactory) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var access_token string
 		authorization := c.Get("Authorization")
@@ -33,7 +33,7 @@ func Deserializer(token service.TokenService, uf factory.UserFactory) fiber.Hand
 				JSON(fiber.Map{"status": "fail", "message": message})
 		}
 
-		tokenClaims, err := token.ValidateToken(access_token, jwtCfg.AccessTokenPublicKey)
+		tokenClaims, err := ts.ValidateToken(access_token, jwtCfg.AccessTokenPublicKey)
 		if err != nil {
 			return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 		}

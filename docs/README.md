@@ -304,6 +304,7 @@ In summary, using access and refresh tokens with Redis, PostgreSQL, and cookies 
 - [golang-standards/project-layout](https://github.com/golang-standards/project-layout)
 - [A Makefile/Dockerfile example for Go projects](https://github.com/thockin/go-build-template)
 - [Ashley McNamara + Brian Ketelsen. Go best practices.](https://www.youtube.com/watch?v=MzTcsI6tn-0)
+- [Avoid package names like base, util, or common](https://dave.cheney.net/2019/01/08/avoid-package-names-like-base-util-or-common)
 - [Go best practices, six years in](https://peter.bourgon.org/go-best-practices-2016/)
 - [Common CRUD Design in Go](https://www.gobeyond.dev/crud/)
 - [Difference Between Architectural Style, Architectural Patterns and Design Patterns](https://www.geeksforgeeks.org/difference-between-architectural-style-architectural-patterns-and-design-patterns/)
