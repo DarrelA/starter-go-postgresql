@@ -23,9 +23,9 @@ func NewTokenService() service.TokenService {
 	return &TokenService{}
 }
 
-func (ts *TokenService) CreateToken(userUuid string, ttl time.Duration, privateKey string) (*entity.Token, *err_rest.RestErr) {
+func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateKey string) (*entity.Token, *err_rest.RestErr) {
 	now := time.Now().UTC()
-	token := &entity.Token{
+	t := &entity.Token{
 		ExpiresIn: new(int64),
 		Token:     new(string),
 	}
@@ -36,9 +36,9 @@ func (ts *TokenService) CreateToken(userUuid string, ttl time.Duration, privateK
 		return nil, err_rest.NewUnprocessableEntityError("something went wrong")
 	}
 
-	token.TokenUUID = id.String()
-	token.UserUUID = userUuid
-	*token.ExpiresIn = now.Add(ttl).Unix()
+	t.TokenUUID = id.String()
+	t.UserUUID = userUUID
+	*t.ExpiresIn = now.Add(ttl).Unix()
 
 	decodedPrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
 	if err != nil {
@@ -53,20 +53,21 @@ func (ts *TokenService) CreateToken(userUuid string, ttl time.Duration, privateK
 		return nil, err_rest.NewUnprocessableEntityError("something went wrong")
 	}
 
-	atClaims := make(jwt.MapClaims)
-	atClaims["sub"] = userUuid
-	atClaims["token_uuid"] = token.TokenUUID
-	atClaims["exp"] = *token.ExpiresIn
-	atClaims["iat"] = now.Unix() // Issued at
-	atClaims["nbf"] = now.Unix() // Not before
+	atClaims := jwt.MapClaims{
+		"sub":        userUUID,
+		"token_uuid": t.TokenUUID,
+		"exp":        *t.ExpiresIn,
+		"iat":        now.Unix(), // Issued at
+		"nbf":        now.Unix(), // Not before
+	}
 
-	*token.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, atClaims).SignedString(key)
+	*t.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, atClaims).SignedString(key)
 	if err != nil {
 		log.Error().Err(err).Msg("sign_key_error")
 		return nil, err_rest.NewUnprocessableEntityError("something went wrong")
 	}
 
-	return token, nil
+	return t, nil
 }
 
 func (ts *TokenService) ValidateToken(tokenStr string, publicKey string) (*entity.Token, *err_rest.RestErr) {
