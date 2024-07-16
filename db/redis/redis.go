@@ -3,13 +3,13 @@ package db
 import (
 	"context"
 
-	"github.com/DarrelA/starter-go-postgresql/configs"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 )
 
 type RedisDB struct {
-	configs.RedisDBConfig
+	config *entity.RedisDBConfig
 }
 
 var (
@@ -18,18 +18,17 @@ var (
 )
 
 // NewDB creates a new RedisDB instance with loaded config
-func NewDB() *RedisDB {
+func NewDB(config *entity.RedisDBConfig) *RedisDB {
 	return &RedisDB{
-		RedisDBConfig: configs.RedisDB,
+		config: config,
 	}
 }
 
-func (db *RedisDB) Connect() {
-	dbCfg := configs.RedisDB
+func (db *RedisDB) Connect(config *entity.RedisDBConfig) {
 	ctx = context.TODO()
 
 	RedisClient = redis.NewClient(&redis.Options{
-		Addr: dbCfg.RedisUri,
+		Addr: config.RedisUri,
 	})
 
 	if _, err := RedisClient.Ping(ctx).Result(); err != nil {

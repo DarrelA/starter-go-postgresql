@@ -2,14 +2,12 @@ package app
 
 import (
 	"context"
-	"encoding/json"
-	"io"
 	"os"
 	"strings"
 
 	"github.com/DarrelA/starter-go-postgresql/db"
 	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
-	user "github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	logger_env "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
@@ -19,12 +17,11 @@ var (
 	inMemoryDbInstance db.InMemoryDB
 )
 
-func CreateRedisConnection() db.InMemoryDB {
+func CreateRedisConnection(config *entity.RedisDBConfig) db.InMemoryDB {
 	if inMemoryDbInstance == nil {
-		inMemoryDbInstance = redisDb.NewDB()
+		inMemoryDbInstance = redisDb.NewDB(config)
+		inMemoryDbInstance.Connect(config)
 	}
-
-	inMemoryDbInstance.Connect()
 	return inMemoryDbInstance
 }
 
@@ -118,6 +115,7 @@ func CloseConnections() {
 }
 */
 
+/*
 func loadUsersFromJsonFile(filePath string) ([]user.User, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -137,3 +135,4 @@ func loadUsersFromJsonFile(filePath string) ([]user.User, error) {
 
 	return users, nil
 }
+*/
