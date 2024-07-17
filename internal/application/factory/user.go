@@ -3,7 +3,7 @@ package factory
 import (
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/repository"
+	repository "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/google/uuid"

@@ -6,7 +6,6 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/DarrelA/starter-go-postgresql/app"
 	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/postgres"
@@ -44,30 +43,29 @@ func startApp() {
 		envConfig.LoadCORSConfig()
 
 		if c, ok := envConfig.(*config.EnvConfig); ok {
-			redisClient, err := redis.Connect(c.RedisDBConfig)
+			redisUserRepo, err := redis.Connect(c.RedisDBConfig)
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to connect to redis")
 			}
 
-			dbpool, err := postgres.NewRDBMS(c.PostgresDBConfig)
+			postgresUserRepo, err := postgres.Connect(c.PostgresDBConfig)
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to connect to postgres")
 			}
 			// Dependency injection
 			// User
-			userRepo := postgres.NewUserRepository(dbpool)
-			userFactory := factory.NewUserFactory(c.JWTConfig, userRepo)
+			userFactory := factory.NewUserFactory(c.JWTConfig, postgresUserRepo)
 			userService := http.NewUserService()
 
 			// Token
 			tokenService := jwt.NewTokenService()
 
 			// Auth
-			authService := http.NewAuthService(redisClient, userFactory, tokenService)
+			authService := http.NewAuthService(redisUserRepo, userFactory, tokenService)
 
-			app.SeedDatabase(dbpool)
+			// app.SeedDatabase(postgresUserRepo)
 			appServiceInstance := http.NewRouter(
-				c, redisClient,
+				c, redisUserRepo,
 				tokenService, userFactory, authService, userService,
 			)
 			go http.StartServer(appServiceInstance, c.Port)
