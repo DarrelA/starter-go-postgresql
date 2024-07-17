@@ -10,6 +10,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/postgres"
+	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/redis"
 	jwt "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/jwt/service"
 	logger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger/zerolog"
 	"github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http"
@@ -43,12 +44,14 @@ func startApp() {
 		envConfig.LoadCORSConfig()
 
 		if c, ok := envConfig.(*config.EnvConfig); ok {
-			// @TODO: Refactor the codes for Redis
-			app.CreateRedisConnection(c.RedisDBConfig)
+			redisClient, err := redis.Connect(c.RedisDBConfig)
+			if err != nil {
+				log.Fatal().Err(err).Msg("failed to connect to redis")
+			}
 
 			dbpool, err := postgres.NewRDBMS(c.PostgresDBConfig)
 			if err != nil {
-				log.Fatal().Err(err).Msg("failed to connect to the database")
+				log.Fatal().Err(err).Msg("failed to connect to postgres")
 			}
 			// Dependency injection
 			// User
@@ -60,11 +63,11 @@ func startApp() {
 			tokenService := jwt.NewTokenService()
 
 			// Auth
-			authService := http.NewAuthService(userFactory, tokenService)
+			authService := http.NewAuthService(redisClient, userFactory, tokenService)
 
 			app.SeedDatabase(dbpool)
 			appServiceInstance := http.NewRouter(
-				c,
+				c, redisClient,
 				tokenService, userFactory, authService, userService,
 			)
 			go http.StartServer(appServiceInstance, c.Port)

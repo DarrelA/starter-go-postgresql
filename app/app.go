@@ -5,25 +5,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/DarrelA/starter-go-postgresql/db"
-	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	logger_env "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 )
-
-var (
-	inMemoryDbInstance db.InMemoryDB
-)
-
-func CreateRedisConnection(config *entity.RedisDBConfig) db.InMemoryDB {
-	if inMemoryDbInstance == nil {
-		inMemoryDbInstance = redisDb.NewDB(config)
-		inMemoryDbInstance.Connect(config)
-	}
-	return inMemoryDbInstance
-}
 
 func SeedDatabase(dbpool *pgxpool.Pool) {
 	envBasePath := "/root/build"
