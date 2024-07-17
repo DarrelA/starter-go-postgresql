@@ -1,21 +1,21 @@
 package middlewares
 
 import (
-	"context"
 	"strings"
 
-	db "github.com/DarrelA/starter-go-postgresql/db/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
+	repository "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
-	"github.com/redis/go-redis/v9"
 )
 
 func Deserializer(
+	r repository.UserRepository,
 	ts service.TokenService,
-	uf factory.UserFactory) fiber.Handler {
+	uf factory.UserFactory,
+) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var access_token string
 		authorization := c.Get("Authorization")
@@ -36,15 +36,13 @@ func Deserializer(
 			return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 		}
 
-		ctx := context.TODO()
-
-		user_uuid, errGetTokenUUID := db.RedisClient.Get(ctx, tokenClaims.TokenUUID).Result()
-		if errGetTokenUUID == redis.Nil {
+		userUuid, errGetTokenUUID := r.GetUserUUID(tokenClaims.TokenUUID)
+		if errGetTokenUUID != nil {
 			return c.Status(fiber.StatusForbidden).
 				JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
 		}
 
-		u, err := uf.GetUserByUUID(user_uuid)
+		u, err := uf.GetUserByUUID(userUuid)
 		if err != nil {
 			return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 		}
