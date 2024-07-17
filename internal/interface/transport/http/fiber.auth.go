@@ -1,27 +1,30 @@
 package http
 
 import (
-	"context"
 	"time"
 
-	redisDb "github.com/DarrelA/starter-go-postgresql/db/redis"
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
+	repository "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/gofiber/fiber/v2"
-	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 )
 
 type AuthService struct {
+	r  repository.UserRepository
 	uf factory.UserFactory
 	ts domainSvc.TokenService
 }
 
-func NewAuthService(uf factory.UserFactory, ts domainSvc.TokenService) appSvc.AuthService {
-	return &AuthService{uf, ts}
+func NewAuthService(
+	r repository.UserRepository,
+	uf factory.UserFactory,
+	ts domainSvc.TokenService,
+) appSvc.AuthService {
+	return &AuthService{r, uf, ts}
 }
 
 func (ah *AuthService) Register(c *fiber.Ctx) error {
@@ -70,27 +73,22 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	ctx := context.TODO()
-	timeNow := time.Now()
-
-	errAccess := redisDb.RedisClient.Set(
-		ctx,
+	errAccess := ah.r.SetUserUUID(
 		accessTokenDetails.TokenUUID,
 		user.UUID.String(),
-		time.Unix(*accessTokenDetails.ExpiresIn, 0).Sub(timeNow),
-	).Err()
+		*accessTokenDetails.ExpiresIn,
+	)
 
 	if errAccess != nil {
 		log.Error().Err(errAccess).Msg("redis_error")
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgSomethingWentWrong})
 	}
 
-	errRefresh := redisDb.RedisClient.Set(
-		ctx,
+	errRefresh := ah.r.SetUserUUID(
 		refreshTokenDetails.TokenUUID,
 		user.UUID.String(),
-		time.Unix(*refreshTokenDetails.ExpiresIn, 0).Sub(timeNow),
-	).Err()
+		*refreshTokenDetails.ExpiresIn,
+	)
 
 	if errRefresh != nil {
 		log.Error().Err(errRefresh).Msg("redis_error")
@@ -129,20 +127,19 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
 	}
 
-	ctx := context.TODO()
-
 	jwtConfig := ah.uf.GetJWTConfig()
 	tokenClaims, err := ah.ts.ValidateToken(refresh_token, jwtConfig.RefreshTokenPublicKey)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	user_uuid, errGetTokenUUID := redisDb.RedisClient.Get(ctx, tokenClaims.TokenUUID).Result()
-	if errGetTokenUUID == redis.Nil {
-		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
+	userUuid, errGetTokenUUID := ah.r.GetUserUUID(tokenClaims.TokenUUID)
+	if errGetTokenUUID != nil {
+		return c.Status(fiber.StatusForbidden).
+			JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
 	}
 
-	user, err := ah.uf.GetUserByUUID(user_uuid)
+	user, err := ah.uf.GetUserByUUID(userUuid)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
@@ -156,16 +153,14 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	timeNow := time.Now()
-
-	errAccess := redisDb.RedisClient.Set(
-		ctx,
+	errAccess := ah.r.SetUserUUID(
 		accessTokenDetails.TokenUUID,
 		user.UUID.String(),
-		time.Unix(*accessTokenDetails.ExpiresIn, 0).Sub(timeNow),
-	).Err()
+		*accessTokenDetails.ExpiresIn,
+	)
 
 	if errAccess != nil {
+		log.Error().Err(errAccess).Msg("redis_error")
 		return c.Status(fiber.StatusUnprocessableEntity).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgSomethingWentWrong})
 	}
 
@@ -190,8 +185,6 @@ func (ah *AuthService) Logout(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
 	}
 
-	ctx := context.TODO()
-
 	jwtConfig := ah.uf.GetJWTConfig()
 	tokenClaims, err := ah.ts.ValidateToken(refresh_token, jwtConfig.RefreshTokenPublicKey)
 	if err != nil {
@@ -205,7 +198,7 @@ func (ah *AuthService) Logout(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "fail", "message": err_rest.ErrMsgPleaseLoginAgain})
 	}
 
-	_, errDelTokenUUID := redisDb.RedisClient.Del(ctx, tokenClaims.TokenUUID, accessTokenUUID).Result()
+	_, errDelTokenUUID := ah.r.DelUserUUID(tokenClaims.TokenUUID, accessTokenUUID)
 	if errDelTokenUUID != nil {
 		return c.Status(fiber.StatusBadGateway).
 			JSON(fiber.Map{"status": "fail", "message": errDelTokenUUID.Error()})
