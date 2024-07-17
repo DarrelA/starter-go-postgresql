@@ -42,7 +42,9 @@ func startApp() {
 		envConfig.LoadJWTConfig()
 		envConfig.LoadCORSConfig()
 
+		// Dependency injection
 		if c, ok := envConfig.(*config.EnvConfig); ok {
+			//Redis
 			redisDB, err := redis.Connect(c.RedisDBConfig)
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to connect to redis")
@@ -50,14 +52,16 @@ func startApp() {
 
 			redisUserRepo := redis.NewUserRepository(redisDB.RedisClient)
 
+			// Postgres
 			postgresDB, err := postgres.Connect(c.PostgresDBConfig)
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to connect to postgres")
 			}
 
 			postgresUserRepo := postgres.NewUserRepository(postgresDB.Dbpool)
+			postgresSeedRepo := postgres.NewSeedRepository(postgresDB.Dbpool, c.Env)
+			postgresSeedRepo.Seed(postgresUserRepo)
 
-			// Dependency injection
 			// User
 			userFactory := factory.NewUserFactory(c.JWTConfig, postgresUserRepo)
 			userService := http.NewUserService()
@@ -68,7 +72,6 @@ func startApp() {
 			// Auth
 			authService := http.NewAuthService(redisUserRepo, userFactory, tokenService)
 
-			// app.SeedDatabase(postgresUserRepo)
 			appServiceInstance := http.NewRouter(
 				c, redisUserRepo,
 				tokenService, userFactory, authService, userService,
