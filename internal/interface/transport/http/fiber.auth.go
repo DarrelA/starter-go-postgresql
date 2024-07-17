@@ -5,7 +5,7 @@ import (
 
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
-	repository "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
+	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
@@ -14,13 +14,13 @@ import (
 )
 
 type AuthService struct {
-	r  repository.UserRepository
+	r  r.RedisUserRepository
 	uf factory.UserFactory
 	ts domainSvc.TokenService
 }
 
 func NewAuthService(
-	r repository.UserRepository,
+	r r.RedisUserRepository,
 	uf factory.UserFactory,
 	ts domainSvc.TokenService,
 ) appSvc.AuthService {

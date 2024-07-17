@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
-	repository "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
+	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
@@ -12,7 +12,7 @@ import (
 )
 
 func Deserializer(
-	r repository.UserRepository,
+	r r.RedisUserRepository,
 	ts service.TokenService,
 	uf factory.UserFactory,
 ) fiber.Handler {

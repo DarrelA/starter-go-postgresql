@@ -3,7 +3,7 @@ package factory
 import (
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
-	repository "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
+	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/google/uuid"
@@ -21,15 +21,15 @@ This is appropriate for the domain layer, as it deals with core business logic.
 */
 type UserFactory struct {
 	JWTConfig *entity.JWTConfig
-	ur        repository.UserRepository
+	ur        r.PostgresUserRepository
 }
 
 /*
-The factory interacts with the `UserRepository` interface to perform persistence operations.
+The factory interacts with the `PostgresUserRepository` interface to perform persistence operations.
 This adheres to the principle of dependency inversion,
 where the factory depends on an abstraction rather than a concrete implementation.
 */
-func NewUserFactory(JWTConfig *entity.JWTConfig, ur repository.UserRepository) factory.UserFactory {
+func NewUserFactory(JWTConfig *entity.JWTConfig, ur r.PostgresUserRepository) factory.UserFactory {
 	return &UserFactory{JWTConfig, ur}
 }
 

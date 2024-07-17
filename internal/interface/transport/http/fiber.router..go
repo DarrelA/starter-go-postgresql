@@ -5,7 +5,7 @@ import (
 
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
-	repository "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
+	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
 	mw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware"
@@ -26,7 +26,7 @@ func StartServer(app *fiber.App, port string) {
 
 func NewRouter(
 	envConfig *config.EnvConfig,
-	redisRepo repository.UserRepository,
+	redisRepo r.RedisUserRepository,
 	tokenService domainSvc.TokenService,
 	userFactory factory.UserFactory,
 	authService appSvc.AuthService,

@@ -3,10 +3,9 @@ package postgres
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	repository "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
+	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
 	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -15,53 +14,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-/*
-dbpool is the database connection pool.
-Package pgxpool is a concurrency-safe connection pool for pgx.
-pgxpool implements a nearly identical interface to pgx connections.
-
-- The `PostgresDB` is stateful because it holds a connection to the database (`pgxpool.Pool`). This dependency is injected into the repository to manage database operations.
-- This pattern is useful for managing resources that have a lifecycle, like database connections.
-*/
-type PostgresDB struct {
-	PostgresDBConfig *entity.PostgresDBConfig
-	dbpool           *pgxpool.Pool
+type PostgresUserRepository struct {
+	dbpool *pgxpool.Pool
 }
 
-func Connect(PostgresDBConfig *entity.PostgresDBConfig) (repository.UserRepository, error) {
-	connString := fmt.Sprintf(
-		"user=%s password=%s host=%s port=%s dbname=%s sslmode=%s pool_max_conns=%s",
-		PostgresDBConfig.Username, PostgresDBConfig.Password,
-		PostgresDBConfig.Host, PostgresDBConfig.Port,
-		PostgresDBConfig.Name, PostgresDBConfig.SslMode,
-		PostgresDBConfig.PoolMaxConns,
-	)
-
-	var err error
-	dbpool, err := pgxpool.New(context.Background(), connString)
-	if err != nil {
-		log.Error().Err(err).Msg("unable to create connection pool")
-		panic(err)
-	}
-
-	var greeting string
-	err = dbpool.QueryRow(context.Background(), "select 'Hello, world!'").Scan(&greeting)
-	if err != nil {
-		log.Error().Err(err).Msg("QueryRow failed")
-		panic(err)
-	}
-
-	log.Info().Msg("successfully connected to the Postgres database")
-	return &PostgresDB{PostgresDBConfig, dbpool}, nil
+func NewUserRepository(dbpool *pgxpool.Pool) r.PostgresUserRepository {
+	return &PostgresUserRepository{dbpool}
 }
-
-// @TODO: Fix Disconnect()
-// func Disconnect(dbpool *pgxpool.Pool) {
-// 	if dbpool != nil {
-// 		dbpool.Close()
-// 		log.Info().Msg("PostgreSQL database connection closed")
-// 	}
-// }
 
 var (
 	queryInsertUser  = "INSERT INTO users(first_name, last_name, email, password) VALUES ($1, $2, $3, $4) RETURNING user_uuid;"
@@ -70,9 +29,9 @@ var (
 )
 
 // Create a method of the `User` type
-func (p *PostgresDB) SaveUser(user *entity.User) *err_rest.RestErr {
+func (ur PostgresUserRepository) SaveUser(user *entity.User) *err_rest.RestErr {
 	var lastInsertUuid uuid.UUID
-	err := p.dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)
+	err := ur.dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)
 
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -93,8 +52,8 @@ func (p *PostgresDB) SaveUser(user *entity.User) *err_rest.RestErr {
 	return nil
 }
 
-func (p *PostgresDB) GetUserByEmail(user *entity.User) *err_rest.RestErr {
-	err := p.dbpool.QueryRow(context.Background(), queryGetUser, user.Email).
+func (ur PostgresUserRepository) GetUserByEmail(user *entity.User) *err_rest.RestErr {
+	err := ur.dbpool.QueryRow(context.Background(), queryGetUser, user.Email).
 		Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email, &user.Password)
 
 	if err != nil {
@@ -109,8 +68,8 @@ func (p *PostgresDB) GetUserByEmail(user *entity.User) *err_rest.RestErr {
 	return nil
 }
 
-func (p *PostgresDB) GetUserByUUID(user *entity.User) *err_rest.RestErr {
-	result := p.dbpool.QueryRow(context.Background(), queryGetUserByID, user.UUID)
+func (ur PostgresUserRepository) GetUserByUUID(user *entity.User) *err_rest.RestErr {
+	result := ur.dbpool.QueryRow(context.Background(), queryGetUserByID, user.UUID)
 	if err := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email); err != nil {
 		log.Error().Err(err).Msg("pgdb_error")
 		return err_rest.NewInternalServerError(err_rest.ErrMsgSomethingWentWrong)

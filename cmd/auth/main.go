@@ -43,15 +43,20 @@ func startApp() {
 		envConfig.LoadCORSConfig()
 
 		if c, ok := envConfig.(*config.EnvConfig); ok {
-			redisUserRepo, err := redis.Connect(c.RedisDBConfig)
+			redisDB, err := redis.Connect(c.RedisDBConfig)
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to connect to redis")
 			}
 
-			postgresUserRepo, err := postgres.Connect(c.PostgresDBConfig)
+			redisUserRepo := redis.NewUserRepository(redisDB.RedisClient)
+
+			postgresDB, err := postgres.Connect(c.PostgresDBConfig)
 			if err != nil {
 				log.Fatal().Err(err).Msg("failed to connect to postgres")
 			}
+
+			postgresUserRepo := postgres.NewUserRepository(postgresDB.Dbpool)
+
 			// Dependency injection
 			// User
 			userFactory := factory.NewUserFactory(c.JWTConfig, postgresUserRepo)
