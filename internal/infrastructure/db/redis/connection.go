@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 
+	"github.com/DarrelA/starter-go-postgresql/internal/application/repository"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
@@ -13,7 +14,13 @@ type RedisDB struct {
 	RedisClient   *redis.Client
 }
 
-func Connect(redisDBConfig *entity.RedisDBConfig) (*RedisDB, error) {
+// Connection is a struct to hold the return values from the `Connect` function.
+type Connection struct {
+	InMemoryDB repository.InMemoryDB
+	RedisDB    *RedisDB
+}
+
+func Connect(redisDBConfig *entity.RedisDBConfig) Connection {
 	// @TODO: Switch to `context.Background()`?
 	ctx := context.TODO()
 	redisClient := redis.NewClient(&redis.Options{Addr: redisDBConfig.RedisUri})
@@ -23,17 +30,17 @@ func Connect(redisDBConfig *entity.RedisDBConfig) (*RedisDB, error) {
 	}
 
 	log.Info().Msg("successfully connected to the Redis database")
-	return &RedisDB{RedisDBConfig: redisDBConfig, RedisClient: redisClient}, nil
+	redisDB := &RedisDB{RedisDBConfig: redisDBConfig, RedisClient: redisClient}
+	return Connection{InMemoryDB: redisDB, RedisDB: redisDB}
 }
 
-// @TODO: Fix Disconnect()
-// func (db *RedisDB) Disconnect() {
-// 	if RedisClient != nil {
-// 		err := RedisClient.Close()
-// 		if err != nil {
-// 			log.Error().Err(err).Msg("error closing Redis database")
-// 		} else {
-// 			log.Info().Msg("Redis database connection closed")
-// 		}
-// 	}
-// }
+func (r *RedisDB) Disconnect() {
+	if r != nil {
+		err := r.RedisClient.Close()
+		if err != nil {
+			log.Error().Err(err).Msg("error closing Redis database")
+		} else {
+			log.Info().Msg("Redis database connection closed")
+		}
+	}
+}
