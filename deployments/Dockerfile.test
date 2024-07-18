@@ -17,7 +17,7 @@ ARG APP_ENV
 ENV APP_ENV=${APP_ENV}
 
 # Run the tests directly when the container starts using the environment variable
-# @TODO: Explore `integration-test-coverage-issue` branch
+# @TODO: Explore test binary compilation with `go test -c`
 ENTRYPOINT ["sh", "-c", \
     "echo Running test in APP_ENV=${APP_ENV} && \
     APP_ENV=${APP_ENV} go test ./... -coverprofile=coverage.out && \

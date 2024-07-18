@@ -35,7 +35,7 @@ func (e *EnvConfig) LoadAppConfig() {
 	logger_env.ListFiles()
 	envBasePath := "configs/"
 
-	// @TODO: Explore `integration-test-coverage-issue` branch
+	// @TODO: Explore test binary compilation with `go test -c`
 	// Check if the current working directory contains "\test"
 	if strings.Contains(cwd, "\\test") || strings.Contains(cwd, "/test") {
 		envBasePath = "../configs/"
