@@ -60,7 +60,7 @@ The Model-View-Controller (MVC) design pattern separates an application into thr
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-![interest_on_technical_debt](/assets/interest_on_technical_debt.svg)
+![interest_on_technical_debt](/docs/assets/interest_on_technical_debt.svg)
 
 # Clean Architecture
 
@@ -81,7 +81,7 @@ Clean Architecture is a software design philosophy introduced by Robert C. Marti
 - **Interface Adapters**: Converters that interface the use cases and entities to external parts of the system.
 - **Frameworks and Drivers**: The external agents like the web, UI, database, and frameworks.
 
-![clean_architecture](/assets/clean_architecture.jpeg)
+![clean_architecture](/docs/assets/clean_architecture.jpeg)
 
 # Hexagonal Architecture
 
@@ -107,7 +107,7 @@ Hexagonal Architecture, also known as Ports and Adapters, is a design pattern in
 - **Testability**: The core can be tested independently of external systems, improving test coverage and reliability.
 - **Flexibility**: Adapters can be swapped or modified without affecting the core logic, allowing for easy integration with different technologies.
 
-![https://docs.google.com/drawings/d/1E_hx5B4czRVFVhGJbrbPDlb_JFxJC8fYB86OMzZuAhg/edit](/assets/hexagonal_architecture_shodiq_muhammad.svg)
+![https://docs.google.com/drawings/d/1E_hx5B4czRVFVhGJbrbPDlb_JFxJC8fYB86OMzZuAhg/edit](/docs/assets/hexagonal_architecture_shodiq_muhammad.svg)
 
 # CQRS (Command Query Responsibility Segregation)
 
@@ -217,7 +217,7 @@ CQRS with Polyglot Persistence combines these two concepts. In this approach, th
   - The client can then make a separate `GET` request to the URL provided in the `Content-Location` header to retrieve the created entity.
   - This `GET` request is handled by the read side of the system, which queries the read model to return the current state of the entity.
 
-![cqrs_polyglot_persistence](/assets/cqrs_polyglot_persistence.webp)
+![cqrs_polyglot_persistence](/docs/assets/cqrs_polyglot_persistence.webp)
 
 # Event-Driven Architecture
 

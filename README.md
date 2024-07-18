@@ -26,11 +26,11 @@
 ```sh
 # generate keys in base64
 # alternatively use the browser method
-chmod +x build/scripts/refresh_token_keygen.sh
+chmod +x deployment/build/scripts/refresh_token_keygen.sh
 cd build/scripts && ./refresh_token_keygen.sh && cd ../..
 
 # Format app.log
-chmod +x build/scripts/format_app_log.sh
+chmod +x deployment/build/scripts/format_app_log.sh
 ```
 
 ### Browser Method

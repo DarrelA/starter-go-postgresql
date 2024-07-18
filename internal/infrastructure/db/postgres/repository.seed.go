@@ -23,7 +23,7 @@ type PostgresSeedRepository struct {
 }
 
 func NewSeedRepository(dbpool *pgxpool.Pool, env string) r.PostgresSeedRepository {
-	envBasePath := "/root/build"
+	envBasePath := "/root/deployment/build"
 
 	cwd := logger_env.LogCWD()
 	logger_env.ListFiles()

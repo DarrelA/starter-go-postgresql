@@ -39,7 +39,7 @@ services:
   app:
     build:
       context: ..
-      dockerfile: ./deployments/Dockerfile
+      dockerfile: ./deployment/Dockerfile
     image: starter-go-postgresql
     container_name: starter-go-postgresql
     ports:
@@ -59,14 +59,14 @@ services:
   app-test:
     build:
       context: ..
-      dockerfile: ./deployments/Dockerfile.test
+      dockerfile: ./deployment/Dockerfile.test
     image: starter-go-postgresql-tester
     container_name: starter-go-postgresql-tester
     ports:
       - '8080:8080'
     volumes:
       - ./logs:/docker_wd/logs
-      - ../test/reports:/docker_wd/test/reports
+      - ../testdata/reports:/docker_wd/test/reports
     environment:
       - APP_ENV=${APP_ENV}
     env_file:
