@@ -9,11 +9,11 @@ import (
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
-	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
+	repo "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
+	password "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/bcrypt"
 	logger_env "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type PostgresSeedRepository struct {
@@ -22,7 +22,7 @@ type PostgresSeedRepository struct {
 	envBasePath string
 }
 
-func NewSeedRepository(dbpool *pgxpool.Pool, env string) r.PostgresSeedRepository {
+func NewSeedRepository(dbpool *pgxpool.Pool, env string) repo.PostgresSeedRepository {
 	envBasePath := "/root/deployment/build"
 
 	cwd := logger_env.LogCWD()
@@ -52,7 +52,7 @@ func NewSeedRepository(dbpool *pgxpool.Pool, env string) r.PostgresSeedRepositor
 	return &PostgresSeedRepository{dbpool, env, envBasePath}
 }
 
-func (sr PostgresSeedRepository) Seed(ur r.PostgresUserRepository) {
+func (sr PostgresSeedRepository) Seed(ur repo.PostgresUserRepository) {
 	currentEnv := sr.env
 	switch currentEnv {
 	case "dev":
@@ -67,7 +67,7 @@ func (sr PostgresSeedRepository) Seed(ur r.PostgresUserRepository) {
 func saveMultipleUsers(
 	currentEnv string,
 	envBasePath string,
-	ur r.PostgresUserRepository,
+	ur repo.PostgresUserRepository,
 ) *restDomainErr.RestErr {
 	userJsonFilePath := "/seed.user." + currentEnv + ".json"
 	uu, err := loadUsersFromJsonFile(envBasePath + "/json" + userJsonFilePath)
@@ -83,12 +83,8 @@ func saveMultipleUsers(
 	}
 
 	for i, u := range uu {
-		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 14)
-		if err != nil {
-			log.Error().Err(err).Msg("bcrypt_error")
-		}
-
-		uu[i].Password = string(hashedPassword)
+		hashedPassword, _ := password.HashPassword(u.Password)
+		uu[i].Password = hashedPassword
 		ur.SaveUser(uu[i])
 	}
 

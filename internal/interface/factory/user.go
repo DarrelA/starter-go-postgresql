@@ -6,11 +6,11 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
-	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
+	repo "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
+	password "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/bcrypt"
 	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
-	"golang.org/x/crypto/bcrypt"
 )
 
 /*
@@ -23,7 +23,7 @@ This is appropriate for the domain layer, as it deals with core business logic.
 */
 type UserFactory struct {
 	JWTConfig *entity.JWTConfig
-	ur        r.PostgresUserRepository
+	ur        repo.PostgresUserRepository
 }
 
 /*
@@ -31,7 +31,7 @@ The factory interacts with the `PostgresUserRepository` interface to perform per
 This adheres to the principle of dependency inversion,
 where the factory depends on an abstraction rather than a concrete implementation.
 */
-func NewUserFactory(JWTConfig *entity.JWTConfig, ur r.PostgresUserRepository) factory.UserFactory {
+func NewUserFactory(JWTConfig *entity.JWTConfig, ur repo.PostgresUserRepository) factory.UserFactory {
 	return &UserFactory{JWTConfig, ur}
 }
 
@@ -47,13 +47,12 @@ func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse,
 		Password:  payload.Password,
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), 14)
+	hashedPassword, err := password.HashPassword(newUser.Password)
 	if err != nil {
-		log.Error().Err(err).Msg("bcrypt_error")
 		return nil, restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
 	}
 
-	newUser.Password = string(hashedPassword)
+	newUser.Password = hashedPassword
 
 	if err := uf.ur.SaveUser(newUser); err != nil {
 		return nil, err
@@ -75,8 +74,8 @@ func (uf *UserFactory) GetUser(u dto.LoginInput) (*dto.UserResponse, *restDomain
 		return nil, err
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(u.Password)); err != nil {
-		return nil, restInterfaceErr.NewBadRequestError(errConst.ErrMsgInvalidCredentials)
+	if err := password.VerifyPassword(result.Password, u.Password); err != nil {
+		return nil, restInterfaceErr.NewBadRequestError(err.Error())
 	}
 
 	userResponse := &dto.UserResponse{

@@ -7,7 +7,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
-	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
+	repo "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
 	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -20,7 +20,7 @@ type PostgresUserRepository struct {
 	dbpool *pgxpool.Pool
 }
 
-func NewUserRepository(dbpool *pgxpool.Pool) r.PostgresUserRepository {
+func NewUserRepository(dbpool *pgxpool.Pool) repo.PostgresUserRepository {
 	return &PostgresUserRepository{dbpool}
 }
 
