@@ -8,7 +8,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
 	rp "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
 	rr "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
@@ -16,6 +15,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/redis"
 	jwt "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/jwt/service"
 	logger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger/zerolog"
+	"github.com/DarrelA/starter-go-postgresql/internal/interface/factory"
 	"github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"

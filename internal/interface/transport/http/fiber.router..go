@@ -3,8 +3,8 @@ package http
 import (
 	"runtime/debug"
 
+	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"

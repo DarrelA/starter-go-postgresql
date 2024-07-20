@@ -3,11 +3,11 @@ package middlewares
 import (
 	"strings"
 
-	e "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
+	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
+	dto "github.com/DarrelA/starter-go-postgresql/internal/application/repository/dto"
+	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
-	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -28,7 +28,7 @@ func Deserializer(
 
 		if access_token == "" {
 			return c.Status(fiber.StatusUnauthorized).
-				JSON(fiber.Map{"status": "fail", "message": e.ErrMsgPleaseLoginAgain})
+				JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgPleaseLoginAgain})
 		}
 
 		tokenClaims, err := ts.ValidateToken(access_token, uf.GetJWTConfig().AccessTokenPublicKey)
@@ -39,7 +39,7 @@ func Deserializer(
 		userUuid, errGetTokenUUID := r.GetUserUUID(tokenClaims.TokenUUID)
 		if errGetTokenUUID != nil {
 			return c.Status(fiber.StatusForbidden).
-				JSON(fiber.Map{"status": "fail", "message": e.ErrMsgPleaseLoginAgain})
+				JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgPleaseLoginAgain})
 		}
 
 		u, err := uf.GetUserByUUID(userUuid)

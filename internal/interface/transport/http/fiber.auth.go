@@ -3,12 +3,12 @@ package http
 import (
 	"time"
 
+	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
+	dto "github.com/DarrelA/starter-go-postgresql/internal/application/repository/dto"
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
-	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
 	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
