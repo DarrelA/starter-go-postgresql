@@ -9,7 +9,7 @@ import (
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
 	mw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
+	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -62,7 +62,7 @@ func NewRouter(
 
 	appInstance.All("*", func(c *fiber.Ctx) error {
 		path := c.Path()
-		err := err_rest.NewBadRequestError("Invalid Path: " + path)
+		err := restInterfaceErr.NewBadRequestError("Invalid Path: " + path)
 		log.Error().Err(err).Msg("")
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"status":  "fail",

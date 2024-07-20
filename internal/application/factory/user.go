@@ -2,10 +2,12 @@ package factory
 
 import (
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
+	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/factory"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
+	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
@@ -37,7 +39,7 @@ func (uf *UserFactory) GetJWTConfig() *entity.JWTConfig {
 	return uf.JWTConfig
 }
 
-func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *err_rest.RestErr) {
+func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restDomainErr.RestErr) {
 	newUser := &entity.User{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
@@ -48,7 +50,7 @@ func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse,
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.Password), 14)
 	if err != nil {
 		log.Error().Err(err).Msg("bcrypt_error")
-		return nil, err_rest.NewInternalServerError(err_rest.ErrMsgSomethingWentWrong)
+		return nil, restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	newUser.Password = string(hashedPassword)
@@ -67,14 +69,14 @@ func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse,
 	return userResponse, nil
 }
 
-func (uf *UserFactory) GetUser(u dto.LoginInput) (*dto.UserResponse, *err_rest.RestErr) {
+func (uf *UserFactory) GetUser(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr) {
 	result := &entity.User{Email: u.Email}
 	if err := uf.ur.GetUserByEmail(result); err != nil {
 		return nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(result.Password), []byte(u.Password)); err != nil {
-		return nil, err_rest.NewBadRequestError(err_rest.ErrMsgInvalidCredentials)
+		return nil, restInterfaceErr.NewBadRequestError(errConst.ErrMsgInvalidCredentials)
 	}
 
 	userResponse := &dto.UserResponse{
@@ -87,11 +89,11 @@ func (uf *UserFactory) GetUser(u dto.LoginInput) (*dto.UserResponse, *err_rest.R
 	return userResponse, nil
 }
 
-func (uf *UserFactory) GetUserByUUID(userUuid string) (*entity.User, *err_rest.RestErr) {
+func (uf *UserFactory) GetUserByUUID(userUuid string) (*entity.User, *restDomainErr.RestErr) {
 	uuidPointer, err := uuid.Parse(userUuid)
 	if err != nil {
 		log.Error().Err(err).Msg("uuid_error")
-		return nil, err_rest.NewUnprocessableEntityError((err_rest.ErrMsgSomethingWentWrong))
+		return nil, restInterfaceErr.NewUnprocessableEntityError((errConst.ErrMsgSomethingWentWrong))
 	}
 
 	result := &entity.User{UUID: &uuidPointer}

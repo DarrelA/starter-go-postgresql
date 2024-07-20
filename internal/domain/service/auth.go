@@ -4,13 +4,13 @@ import (
 	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
+	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
 )
 
 /*
 The `TokenService` interface define the contract for authentication-related operations.
 */
 type TokenService interface {
-	CreateToken(user_uuid string, ttl time.Duration, privateKey string) (*entity.Token, *err_rest.RestErr)
-	ValidateToken(token string, publicKey string) (*entity.Token, *err_rest.RestErr)
+	CreateToken(userUuid string, ttl time.Duration, privateKey string) (*entity.Token, *restDomainErr.RestErr)
+	ValidateToken(token string, publicKey string) (*entity.Token, *restDomainErr.RestErr)
 }

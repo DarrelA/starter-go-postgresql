@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
+	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -18,13 +18,13 @@ func LoggerMW(c *fiber.Ctx) error {
 
 	request_id, ok := c.Locals("request_id").(string)
 	if !ok {
-		err := err_rest.NewBadRequestError("request_id is not a string or not set")
+		err := restInterfaceErr.NewBadRequestError("request_id is not a string or not set")
 		log.Error().Err(err).Msg("")
 	}
 
 	correlation_id, ok := c.Locals("correlation_id").(string)
 	if !ok {
-		err := err_rest.NewBadRequestError("correlation_id is not a string or not set")
+		err := restInterfaceErr.NewBadRequestError("correlation_id is not a string or not set")
 		log.Error().Err(err).Msg("")
 	}
 

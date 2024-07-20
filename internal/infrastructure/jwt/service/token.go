@@ -6,8 +6,10 @@ import (
 	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
+	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
+	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/golang-jwt/jwt/v5"
 	uuid "github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -23,7 +25,8 @@ func NewTokenService() service.TokenService {
 	return &TokenService{}
 }
 
-func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateKey string) (*entity.Token, *err_rest.RestErr) {
+func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateKey string) (
+	*entity.Token, *restDomainErr.RestErr) {
 	now := time.Now().UTC()
 	t := &entity.Token{
 		ExpiresIn: new(int64),
@@ -33,7 +36,7 @@ func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateK
 	id, err := uuid.NewV7()
 	if err != nil {
 		log.Error().Err(err).Msg("uuid_error")
-		return nil, err_rest.NewUnprocessableEntityError(err_rest.ErrMsgSomethingWentWrong)
+		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	t.TokenUUID = id.String()
@@ -43,14 +46,14 @@ func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateK
 	decodedPrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
 	if err != nil {
 		log.Error().Err(err).Msg("DecodeString_privateKey_error")
-		return nil, err_rest.NewUnprocessableEntityError(err_rest.ErrMsgSomethingWentWrong)
+		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
 
 	if err != nil {
 		log.Error().Err(err).Msg("ParseRSA_privateKey_error")
-		return nil, err_rest.NewUnprocessableEntityError(err_rest.ErrMsgSomethingWentWrong)
+		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	atClaims := jwt.MapClaims{
@@ -64,23 +67,24 @@ func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateK
 	*t.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, atClaims).SignedString(key)
 	if err != nil {
 		log.Error().Err(err).Msg("sign_key_error")
-		return nil, err_rest.NewUnprocessableEntityError(err_rest.ErrMsgSomethingWentWrong)
+		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	return t, nil
 }
 
-func (ts *TokenService) ValidateToken(tokenStr string, publicKey string) (*entity.Token, *err_rest.RestErr) {
+func (ts *TokenService) ValidateToken(tokenStr string, publicKey string) (
+	*entity.Token, *restDomainErr.RestErr) {
 	decodedPublicKey, err := base64.StdEncoding.DecodeString(publicKey)
 	if err != nil {
 		log.Error().Err(err).Msg("DecodeString_publicKey_error")
-		return nil, err_rest.NewInternalServerError(err_rest.ErrMsgSomethingWentWrong)
+		return nil, restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	key, err := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
 	if err != nil {
 		log.Error().Err(err).Msg("ParseRSA_publicKey_error")
-		return nil, err_rest.NewInternalServerError(err_rest.ErrMsgSomethingWentWrong)
+		return nil, restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	parsedToken, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
@@ -92,14 +96,14 @@ func (ts *TokenService) ValidateToken(tokenStr string, publicKey string) (*entit
 
 	if err != nil {
 		log.Error().Err(err).Msg("validate_token_error")
-		return nil, err_rest.NewForbiddenError(err_rest.ErrMsgPleaseLoginAgain)
+		return nil, restInterfaceErr.NewForbiddenError(errConst.ErrMsgPleaseLoginAgain)
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok || !parsedToken.Valid {
-		err := err_rest.NewForbiddenError(err_rest.ErrMsgInvalidToken)
+		err := restInterfaceErr.NewForbiddenError(errConst.ErrMsgInvalidToken)
 		log.Error().Err(err).Msg("")
-		return nil, err_rest.NewForbiddenError(err_rest.ErrMsgPleaseLoginAgain)
+		return nil, restInterfaceErr.NewForbiddenError(errConst.ErrMsgPleaseLoginAgain)
 	}
 
 	return &entity.Token{

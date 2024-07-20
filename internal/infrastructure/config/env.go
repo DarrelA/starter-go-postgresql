@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -11,7 +10,6 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	logger_env "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -150,9 +148,7 @@ func (e *EnvConfig) LoadCORSConfig() {
 func loadEnvVariableInt(envVar string, target *int) {
 	valueStr := os.Getenv(envVar)
 	if valueStr == "" {
-		errMessage := fmt.Sprintf("%s is not set", envVar)
-		err := err_rest.NewInternalServerError(errMessage)
-		log.Error().Err(err).Msg("")
+		log.Error().Msgf("%s is not set", envVar)
 		return
 	}
 	value, err := strconv.Atoi(valueStr)
@@ -166,9 +162,7 @@ func loadEnvVariableInt(envVar string, target *int) {
 func loadEnvVariableBool(envVar string, target *bool) {
 	valueStr := os.Getenv(envVar)
 	if valueStr == "" {
-		errMessage := fmt.Sprintf("%s is not set", envVar)
-		err := err_rest.NewInternalServerError(errMessage)
-		log.Error().Err(err).Msg("")
+		log.Error().Msgf("%s is not set", envVar)
 		return
 	}
 	value, err := strconv.ParseBool(valueStr)
@@ -182,9 +176,7 @@ func loadEnvVariableBool(envVar string, target *bool) {
 func loadEnvVariableDuration(envVar string, target *time.Duration) {
 	valueStr := os.Getenv(envVar)
 	if valueStr == "" {
-		errMessage := fmt.Sprintf("%s is not set", envVar)
-		err := err_rest.NewInternalServerError(errMessage)
-		log.Error().Err(err).Msg("")
+		log.Error().Msgf("%s is not set", envVar)
 		return
 	}
 	value, err := time.ParseDuration(valueStr)

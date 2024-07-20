@@ -5,8 +5,10 @@ import (
 	"errors"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
+	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
+	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -29,7 +31,7 @@ var (
 )
 
 // Create a method of the `User` type
-func (ur PostgresUserRepository) SaveUser(user *entity.User) *err_rest.RestErr {
+func (ur PostgresUserRepository) SaveUser(user *entity.User) *restDomainErr.RestErr {
 	var lastInsertUuid uuid.UUID
 	err := ur.dbpool.QueryRow(context.Background(), queryInsertUser, user.FirstName, user.LastName, user.Email, user.Password).Scan(&lastInsertUuid)
 
@@ -40,39 +42,39 @@ func (ur PostgresUserRepository) SaveUser(user *entity.User) *err_rest.RestErr {
 		// attempting to access any fields of `pgErr`
 		if errors.As(err, &pgErr) {
 			if pgErr.Code == "23505" {
-				return err_rest.NewBadRequestError(err_rest.ErrMsgEmailIsAlreadyTaken)
+				return restInterfaceErr.NewBadRequestError(errConst.ErrMsgEmailIsAlreadyTaken)
 			}
 		}
 
 		log.Error().Err(err).Msg("pgdb_error")
-		return err_rest.NewInternalServerError(err_rest.ErrMsgSomethingWentWrong)
+		return restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	user.UUID = &lastInsertUuid
 	return nil
 }
 
-func (ur PostgresUserRepository) GetUserByEmail(user *entity.User) *err_rest.RestErr {
+func (ur PostgresUserRepository) GetUserByEmail(user *entity.User) *restDomainErr.RestErr {
 	err := ur.dbpool.QueryRow(context.Background(), queryGetUser, user.Email).
 		Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email, &user.Password)
 
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return err_rest.NewBadRequestError("the account has not been registered")
+			return restInterfaceErr.NewBadRequestError("the account has not been registered")
 		}
 
 		log.Error().Err(err).Msg("pgdb_error")
-		return err_rest.NewInternalServerError(err_rest.ErrMsgSomethingWentWrong)
+		return restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	return nil
 }
 
-func (ur PostgresUserRepository) GetUserByUUID(user *entity.User) *err_rest.RestErr {
+func (ur PostgresUserRepository) GetUserByUUID(user *entity.User) *restDomainErr.RestErr {
 	result := ur.dbpool.QueryRow(context.Background(), queryGetUserByID, user.UUID)
 	if err := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email); err != nil {
 		log.Error().Err(err).Msg("pgdb_error")
-		return err_rest.NewInternalServerError(err_rest.ErrMsgSomethingWentWrong)
+		return restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	return nil

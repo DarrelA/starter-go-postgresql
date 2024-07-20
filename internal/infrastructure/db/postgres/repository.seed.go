@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
 	logger_env "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
@@ -68,7 +68,7 @@ func saveMultipleUsers(
 	currentEnv string,
 	envBasePath string,
 	ur r.PostgresUserRepository,
-) *err_rest.RestErr {
+) *restDomainErr.RestErr {
 	userJsonFilePath := "/seed.user." + currentEnv + ".json"
 	uu, err := loadUsersFromJsonFile(envBasePath + "/json" + userJsonFilePath)
 	if err != nil {

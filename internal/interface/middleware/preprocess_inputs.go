@@ -8,8 +8,9 @@ import (
 	"unicode"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
 	dto "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/dto"
-	"github.com/DarrelA/starter-go-postgresql/internal/utils/err_rest"
+	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
@@ -51,7 +52,7 @@ func PreProcessInputs(c *fiber.Ctx) error {
 
 	default:
 		log.Error().Msg("invalid endpoint for PreProcessInputs middleware")
-		err := err_rest.NewBadRequestError("invalid endpoint: " + endpoint)
+		err := restInterfaceErr.NewBadRequestError("invalid endpoint: " + endpoint)
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
@@ -67,7 +68,7 @@ func normalizePath(path string) string {
 
 func parseAndSanitize(c *fiber.Ctx, payload interface{}) error {
 	if err := c.BodyParser(payload); err != nil {
-		err := err_rest.NewBadRequestError("invalid json body")
+		err := restInterfaceErr.NewBadRequestError("invalid json body")
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
@@ -122,7 +123,7 @@ The message is constructed using the field name and the user-friendly message.
 
 Pass the payload by reference
 */
-func validateStruct[T any](payload *T) *err_rest.RestErr {
+func validateStruct[T any](payload *T) *restDomainErr.RestErr {
 	var validationErrors []string
 	err := validate.Struct(payload)
 	if err != nil {
@@ -147,7 +148,7 @@ func validateStruct[T any](payload *T) *err_rest.RestErr {
 		}
 
 		fullMessage := "validation error: " + strings.Join(validationErrors, "\n")
-		return err_rest.NewBadRequestError(fullMessage)
+		return restInterfaceErr.NewBadRequestError(fullMessage)
 	}
 
 	return nil
