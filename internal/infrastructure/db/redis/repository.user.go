@@ -12,23 +12,27 @@ import (
 const errMsgGetUserUUID = "error_GetUserUUID"
 
 type RedisUserRepository struct {
-	redisClient *redis.Client
+	RedisDB *RedisDB
 }
 
-func NewUserRepository(redisClient *redis.Client) r.RedisUserRepository {
-	return &RedisUserRepository{redisClient}
+func NewUserRepository(redisDB *RedisDB) r.RedisUserRepository {
+	return &RedisUserRepository{redisDB}
 }
 
 func (r RedisUserRepository) SetUserUUID(tokenUUID string, userUUID string, expiresIn int64) error {
-	ctx := context.TODO()
+	ctx, cancel := context.WithTimeout(r.RedisDB.RedisCtx, 5*time.Second)
+	defer cancel()
+
 	timeNow := time.Now()
-	err := r.redisClient.Set(ctx, tokenUUID, userUUID, time.Unix(expiresIn, 0).Sub(timeNow)).Err()
+	err := r.RedisDB.RedisClient.Set(ctx, tokenUUID, userUUID, time.Unix(expiresIn, 0).Sub(timeNow)).Err()
 	return err
 }
 
 func (r RedisUserRepository) GetUserUUID(tokenUUID string) (string, error) {
-	ctx := context.TODO()
-	result, err := r.redisClient.Get(ctx, tokenUUID).Result()
+	ctx, cancel := context.WithTimeout(r.RedisDB.RedisCtx, 3*time.Second)
+	defer cancel()
+
+	result, err := r.RedisDB.RedisClient.Get(ctx, tokenUUID).Result()
 
 	if err == redis.Nil {
 		return "", err
@@ -41,6 +45,8 @@ func (r RedisUserRepository) GetUserUUID(tokenUUID string) (string, error) {
 }
 
 func (r RedisUserRepository) DelUserUUID(tokenUUID string, accessTokenUUID string) (int64, error) {
-	ctx := context.TODO()
-	return r.redisClient.Del(ctx, tokenUUID, accessTokenUUID).Result()
+	ctx, cancel := context.WithTimeout(r.RedisDB.RedisCtx, 3*time.Second)
+	defer cancel()
+
+	return r.RedisDB.RedisClient.Del(ctx, tokenUUID, accessTokenUUID).Result()
 }

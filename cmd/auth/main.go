@@ -61,7 +61,7 @@ func initializeDatabases(config *config.EnvConfig) (
 	postgres.Connection, rp.PostgresUserRepository,
 ) {
 	redisConnection := redis.Connect(config.RedisDBConfig)
-	redisUserRepo := redis.NewUserRepository(redisConnection.RedisDB.RedisClient)
+	redisUserRepo := redis.NewUserRepository(redisConnection.RedisDB)
 
 	postgresConnection := postgres.Connect(config.PostgresDBConfig)
 	postgresUserRepo := postgres.NewUserRepository(postgresConnection.PostgresDB.Dbpool)
