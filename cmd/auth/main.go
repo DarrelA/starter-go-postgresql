@@ -14,6 +14,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/postgres"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/redis"
 	jwt "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/jwt/service"
+	envLogger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
 	logger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger/zerolog"
 	"github.com/DarrelA/starter-go-postgresql/internal/interface/factory"
 	"github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http"
@@ -22,7 +23,8 @@ import (
 )
 
 func main() {
-	logger.CreateAppLog()
+	logFile := envLogger.CreateAppLog()
+	logger.NewZeroLogger(logFile)
 	config := initializeEnv()
 	rc, redisUserRepo, pc, postgresUserRepo := initializeDatabases(config)
 
@@ -34,7 +36,7 @@ func main() {
 
 	wg.Wait()
 	waitForShutdown(appServiceInstance, rc, pc)
-	logger.GetLogFile().Close()
+	logFile.Close()
 	os.Exit(0)
 }
 

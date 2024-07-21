@@ -3,23 +3,14 @@ package zerolog
 import (
 	"os"
 
+	repo "github.com/DarrelA/starter-go-postgresql/internal/application/repository"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
-const errMsgCreateLogFileError = "failed to create log file"
+type ZeroLogger struct{}
 
-var logFile *os.File
-
-func CreateAppLog() {
-	var err error
-
-	// Create a logger instance with output to a file
-	logFile, err = os.Create("/docker_wd/logs/app.log")
-	if err != nil {
-		log.Fatal().Err(err).Msg(errMsgCreateLogFileError)
-	}
-
+func NewZeroLogger(logFile *os.File) repo.DBLogger {
 	// Configure logger to write to both file and console
 	log.Logger = zerolog.
 		New(zerolog.
@@ -28,8 +19,6 @@ func CreateAppLog() {
 		Caller().
 		Timestamp().
 		Logger()
-}
 
-func GetLogFile() *os.File {
-	return logFile
+	return &ZeroLogger{}
 }
