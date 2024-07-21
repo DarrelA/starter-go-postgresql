@@ -16,10 +16,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	errMsgInvalidConfig   = "invalid baseURLsConfig"
+	errMsgInvalidEndPoint = "invalid endpoint for PreProcessInputs middleware"
+	errInvalidJSON        = "invalid json body"
+)
+
 func PreProcessInputs(c *fiber.Ctx) error {
 	baseURLsConfig, ok := c.Locals("baseURLsConfig").(*entity.BaseURLsConfig)
 	if !ok {
-		log.Panic().Msg("invalid_baseURLsConfig")
+		log.Panic().Msg(errMsgInvalidConfig)
 	}
 
 	authServicePathName := baseURLsConfig.AuthServicePathName
@@ -51,7 +57,7 @@ func PreProcessInputs(c *fiber.Ctx) error {
 		c.Locals("login_payload", payload)
 
 	default:
-		log.Error().Msg("invalid endpoint for PreProcessInputs middleware")
+		log.Error().Msg(errMsgInvalidEndPoint)
 		err := restInterfaceErr.NewBadRequestError("invalid endpoint: " + endpoint)
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
@@ -68,7 +74,7 @@ func normalizePath(path string) string {
 
 func parseAndSanitize(c *fiber.Ctx, payload interface{}) error {
 	if err := c.BodyParser(payload); err != nil {
-		err := restInterfaceErr.NewBadRequestError("invalid json body")
+		err := restInterfaceErr.NewBadRequestError(errInvalidJSON)
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 

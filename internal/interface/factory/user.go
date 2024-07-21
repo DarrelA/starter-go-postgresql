@@ -91,7 +91,7 @@ func (uf *UserFactory) GetUser(u dto.LoginInput) (*dto.UserResponse, *restDomain
 func (uf *UserFactory) GetUserByUUID(userUuid string) (*entity.User, *restDomainErr.RestErr) {
 	uuidPointer, err := uuid.Parse(userUuid)
 	if err != nil {
-		log.Error().Err(err).Msg("uuid_error")
+		log.Error().Err(err).Msg(errConst.ErrUUIDError)
 		return nil, restInterfaceErr.NewUnprocessableEntityError((errConst.ErrMsgSomethingWentWrong))
 	}
 

@@ -9,6 +9,11 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	errMsgConnectingToDB      = "error connecting to the Redis database"
+	errMsgDisconnectingFromDB = "error closing Redis database"
+)
+
 type RedisDB struct {
 	RedisDBConfig *entity.RedisDBConfig
 	RedisClient   *redis.Client
@@ -25,7 +30,7 @@ func Connect(redisDBConfig *entity.RedisDBConfig) Connection {
 	ctx := context.TODO()
 	redisClient := redis.NewClient(&redis.Options{Addr: redisDBConfig.RedisUri})
 	if _, err := redisClient.Ping(ctx).Result(); err != nil {
-		log.Error().Err(err).Msg("error connecting to the Redis database")
+		log.Error().Err(err).Msg(errMsgConnectingToDB)
 		panic(err)
 	}
 
@@ -38,7 +43,7 @@ func (r *RedisDB) Disconnect() {
 	if r != nil {
 		err := r.RedisClient.Close()
 		if err != nil {
-			log.Error().Err(err).Msg("error closing Redis database")
+			log.Error().Err(err).Msg(errMsgDisconnectingFromDB)
 		} else {
 			log.Info().Msg("Redis database connection closed")
 		}

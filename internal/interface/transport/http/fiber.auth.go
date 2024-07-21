@@ -14,6 +14,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	errMsgRegisterPayload = "register_payload is not of type users.RegisterInput"
+	errMsgLoginPayload    = "login_payload is not of type users.RegisterInput"
+	errMsgAccessTokenUUID = "access_token_uuid is not a string or not set"
+)
+
 type AuthService struct {
 	r  r.RedisUserRepository
 	uf factory.UserFactory
@@ -31,8 +37,8 @@ func NewAuthService(
 func (ah *AuthService) Register(c *fiber.Ctx) error {
 	payload, ok := c.Locals("register_payload").(dto.RegisterInput)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError("register_payload is not of type users.RegisterInput")
-		log.Error().Err(err).Msg("type_error")
+		err := restInterfaceErr.NewBadRequestError(errMsgRegisterPayload)
+		log.Error().Err(err).Msg(errConst.ErrTypeError)
 	}
 
 	result, err := ah.uf.CreateUser(payload)
@@ -46,8 +52,8 @@ func (ah *AuthService) Register(c *fiber.Ctx) error {
 func (ah *AuthService) Login(c *fiber.Ctx) error {
 	payload, ok := c.Locals("login_payload").(dto.LoginInput)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError("login_payload is not of type users.RegisterInput")
-		log.Error().Err(err).Msg("type_error")
+		err := restInterfaceErr.NewBadRequestError(errMsgLoginPayload)
+		log.Error().Err(err).Msg(errConst.ErrTypeError)
 	}
 
 	user, err := ah.uf.GetUser(payload)
@@ -81,7 +87,7 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 	)
 
 	if errAccess != nil {
-		log.Error().Err(errAccess).Msg("redis_error")
+		log.Error().Err(errAccess).Msg(errConst.ErrMsgRedisError)
 		return c.Status(fiber.StatusUnprocessableEntity).
 			JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgSomethingWentWrong})
 	}
@@ -93,7 +99,7 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 	)
 
 	if errRefresh != nil {
-		log.Error().Err(errRefresh).Msg("redis_error")
+		log.Error().Err(errRefresh).Msg(errConst.ErrMsgRedisError)
 		return c.Status(fiber.StatusUnprocessableEntity).
 			JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgSomethingWentWrong})
 	}
@@ -165,7 +171,7 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 	)
 
 	if errAccess != nil {
-		log.Error().Err(errAccess).Msg("redis_error")
+		log.Error().Err(errAccess).Msg(errConst.ErrMsgRedisError)
 		return c.Status(fiber.StatusUnprocessableEntity).
 			JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgSomethingWentWrong})
 	}
@@ -201,8 +207,8 @@ func (ah *AuthService) Logout(c *fiber.Ctx) error {
 
 	accessTokenUUID, ok := c.Locals("access_token_uuid").(string) // type assertion
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError("access_token is not a string or not set")
-		log.Error().Err(err).Msg("")
+		err := restInterfaceErr.NewBadRequestError(errMsgAccessTokenUUID)
+		log.Error().Err(err).Msg(errConst.ErrTypeError)
 		return c.Status(fiber.StatusBadRequest).
 			JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgPleaseLoginAgain})
 	}

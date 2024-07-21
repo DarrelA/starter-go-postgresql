@@ -16,6 +16,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const errMsgServiceUnavailable = "service is unavailable at the moment"
+
 func StartServer(app *fiber.App, port string) {
 	log.Info().Msg("listening at port: " + port)
 	err := app.Listen(":" + port)
@@ -120,5 +122,5 @@ func customStackTraceHandler(c *fiber.Ctx, e interface{}) {
 	}
 
 	c.Status(fiber.StatusServiceUnavailable).
-		JSON(fiber.Map{"status": "fail", "message": "service is unavailable at the moment"})
+		JSON(fiber.Map{"status": "fail", "message": errMsgServiceUnavailable})
 }

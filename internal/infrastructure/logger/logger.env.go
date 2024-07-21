@@ -8,6 +8,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	errMsgFailedToGetCallerInfo    = "failed to get caller information"
+	errMsgGetWorkingDirectoryError = "error getting current working directory"
+	errMsgExecutingCmd             = "error executing ls command"
+)
+
 func LogCWD() string {
 	// Get caller information
 	pc, file, line, ok := runtime.Caller(1)
@@ -17,12 +23,12 @@ func LogCWD() string {
 		callerInfo = caller.Name()
 		log.Debug().Msgf("LogCWD() is called by %s (%s:%d)", callerInfo, file, line)
 	} else {
-		log.Debug().Msg("failed to get caller information")
+		log.Debug().Msg(errMsgFailedToGetCallerInfo)
 	}
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		log.Error().Err(err).Msg("error getting current working directory")
+		log.Error().Err(err).Msg(errMsgGetWorkingDirectoryError)
 	}
 
 	log.Debug().Msgf("@cwd: %s", cwd)
@@ -34,7 +40,7 @@ func ListFiles() {
 	cmd := exec.Command("ls")
 	output, err := cmd.Output()
 	if err != nil {
-		log.Error().Err(err).Msg("error executing ls command")
+		log.Error().Err(err).Msg(errMsgExecutingCmd)
 	}
 
 	// Log the output of `ls` command

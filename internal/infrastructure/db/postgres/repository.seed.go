@@ -16,6 +16,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	envBasePath                 = "/root/deployment/build"
+	errMsgUnableReadSchema      = "unable to read %s/sql/schema.user.sql"
+	errMsgUnableToExecuteSchema = "unable to execute schema.user.sql"
+	errMsgUnableToLoadJSONFile  = "unable to load [%s]"
+)
+
 type PostgresSeedRepository struct {
 	dbpool      *pgxpool.Pool
 	env         string
@@ -23,8 +30,7 @@ type PostgresSeedRepository struct {
 }
 
 func NewSeedRepository(dbpool *pgxpool.Pool, env string) repo.PostgresSeedRepository {
-	envBasePath := "/root/deployment/build"
-
+	envBasePath := envBasePath
 	cwd := logger_env.LogCWD()
 	logger_env.ListFiles()
 
@@ -39,16 +45,15 @@ func NewSeedRepository(dbpool *pgxpool.Pool, env string) repo.PostgresSeedReposi
 	// Create `users` table in Postgres
 	sqlData, err := os.ReadFile(envBasePath + "/sql" + "/schema.user.sql")
 	if err != nil {
-		log.Error().Err(err).Msgf("unable to read %s/sql/schema.user.sql", envBasePath)
+		log.Error().Err(err).Msgf(errMsgUnableReadSchema, envBasePath)
 	}
 	_, err = dbpool.Exec(ctx, string(sqlData))
 
 	if err != nil {
-		log.Error().Err(err).Msg("unable to execute schema.user.sql")
+		log.Error().Err(err).Msg(errMsgUnableToExecuteSchema)
 	}
 
 	log.Info().Msg("successfully created extension and table")
-
 	return &PostgresSeedRepository{dbpool, env, envBasePath}
 }
 
@@ -72,7 +77,7 @@ func saveMultipleUsers(
 	userJsonFilePath := "/seed.user." + currentEnv + ".json"
 	uu, err := loadUsersFromJsonFile(envBasePath + "/json" + userJsonFilePath)
 	if err != nil {
-		log.Error().Err(err).Msgf("unable to load [%s]", userJsonFilePath)
+		log.Error().Err(err).Msgf(errMsgUnableToLoadJSONFile, userJsonFilePath)
 	}
 
 	// Verify data in users table by checking for returned errors

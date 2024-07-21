@@ -9,6 +9,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const errMsgGetUserUUID = "error_GetUserUUID"
+
 type RedisUserRepository struct {
 	redisClient *redis.Client
 }
@@ -31,7 +33,7 @@ func (r RedisUserRepository) GetUserUUID(tokenUUID string) (string, error) {
 	if err == redis.Nil {
 		return "", err
 	} else if err != nil {
-		log.Error().Err(err).Msg("error_GetUserUUID")
+		log.Error().Err(err).Msg(errMsgGetUserUUID)
 		return "", err
 	}
 

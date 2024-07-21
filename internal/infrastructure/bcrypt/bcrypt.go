@@ -8,13 +8,13 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const ErrMsgBCryptError = "bcrypt_error"
+const errMsgBCryptError = "bcrypt_error"
 
 func HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
-		log.Error().Err(err).Msg(ErrMsgBCryptError)
-		return "", errors.New(ErrMsgBCryptError)
+		log.Error().Err(err).Msg(errMsgBCryptError)
+		return "", errors.New(errMsgBCryptError)
 	}
 
 	return string(hashedPassword), nil

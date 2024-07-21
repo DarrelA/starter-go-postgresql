@@ -15,6 +15,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	errMsgDecodeStringError = "DecodeString error"
+	errMsgParseRSAKeyError  = "ParseRSA error"
+	errMsgSignKeyError      = "sign key error"
+	errMsgUnexpectedMethod  = "unexpected signing method: %s"
+)
+
 /*
 The `TokenService` should be a stateless service that performs operations related to tokens.
 It does not need to manage the lifecycle of the `Token` entity itself but rather uses it.
@@ -35,7 +42,7 @@ func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateK
 
 	id, err := uuid.NewV7()
 	if err != nil {
-		log.Error().Err(err).Msg("uuid_error")
+		log.Error().Err(err).Msg(errConst.ErrUUIDError)
 		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
 	}
 
@@ -45,14 +52,14 @@ func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateK
 
 	decodedPrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
 	if err != nil {
-		log.Error().Err(err).Msg("DecodeString_privateKey_error")
+		log.Error().Err(err).Msg(errMsgDecodeStringError)
 		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
 
 	if err != nil {
-		log.Error().Err(err).Msg("ParseRSA_privateKey_error")
+		log.Error().Err(err).Msg(errMsgParseRSAKeyError)
 		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
 	}
 
@@ -66,7 +73,7 @@ func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateK
 
 	*t.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, atClaims).SignedString(key)
 	if err != nil {
-		log.Error().Err(err).Msg("sign_key_error")
+		log.Error().Err(err).Msg(errMsgSignKeyError)
 		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
 	}
 
@@ -77,25 +84,25 @@ func (ts *TokenService) ValidateToken(tokenStr string, publicKey string) (
 	*entity.Token, *restDomainErr.RestErr) {
 	decodedPublicKey, err := base64.StdEncoding.DecodeString(publicKey)
 	if err != nil {
-		log.Error().Err(err).Msg("DecodeString_publicKey_error")
+		log.Error().Err(err).Msg(errMsgDecodeStringError)
 		return nil, restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	key, err := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
 	if err != nil {
-		log.Error().Err(err).Msg("ParseRSA_publicKey_error")
+		log.Error().Err(err).Msg(errMsgParseRSAKeyError)
 		return nil, restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
 	}
 
 	parsedToken, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodRSA); !ok {
-			return nil, fmt.Errorf("unexpected method: %s", t.Header["alg"])
+			return nil, fmt.Errorf(errMsgUnexpectedMethod, t.Header["alg"])
 		}
 		return key, nil
 	})
 
 	if err != nil {
-		log.Error().Err(err).Msg("validate_token_error")
+		log.Error().Err(err).Msg(errConst.ErrMsgInvalidToken)
 		return nil, restInterfaceErr.NewForbiddenError(errConst.ErrMsgPleaseLoginAgain)
 	}
 

@@ -5,10 +5,13 @@ import (
 	"os"
 	"time"
 
+	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 )
+
+const errMsgInvalidHostname = "failed to get hostname"
 
 func LoggerMW(c *fiber.Ctx) error {
 	start := time.Now()
@@ -18,24 +21,24 @@ func LoggerMW(c *fiber.Ctx) error {
 
 	request_id, ok := c.Locals("request_id").(string)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError("request_id is not a string or not set")
+		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError)
 		log.Error().Err(err).Msg("")
 	}
 
 	correlation_id, ok := c.Locals("correlation_id").(string)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError("correlation_id is not a string or not set")
+		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError)
 		log.Error().Err(err).Msg("")
 	}
 
 	hostname, hostnameErr := os.Hostname()
 	if hostnameErr != nil {
-		log.Fatal().Err(hostnameErr).Msg("failed to get hostname")
+		log.Fatal().Err(hostnameErr).Msg(errMsgInvalidHostname)
 	}
 
 	currentEnv, ok := c.Locals("env").(string)
 	if !ok {
-		log.Panic().Msg("invalid_currentEnv")
+		log.Panic().Msg(errConst.ErrTypeError)
 	}
 
 	switch currentEnv {

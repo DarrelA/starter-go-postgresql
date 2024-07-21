@@ -10,6 +10,11 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	errMsgCreatingConnectionPool = "unable to create connection pool"
+	errMsgGreetingQuery          = "dbpool.QueryRow failed"
+)
+
 /*
 dbpool is the database connection pool.
 Package pgxpool is a concurrency-safe connection pool for pgx.
@@ -41,14 +46,14 @@ func Connect(postgresDBConfig *entity.PostgresDBConfig) Connection {
 	var err error
 	dbpool, err := pgxpool.New(context.Background(), connString)
 	if err != nil {
-		log.Error().Err(err).Msg("unable to create connection pool")
+		log.Error().Err(err).Msg(errMsgCreatingConnectionPool)
 		panic(err)
 	}
 
 	var greeting string
 	err = dbpool.QueryRow(context.Background(), "select 'Hello, world!'").Scan(&greeting)
 	if err != nil {
-		log.Error().Err(err).Msg("QueryRow failed")
+		log.Error().Err(err).Msg(errMsgGreetingQuery)
 		panic(err)
 	}
 

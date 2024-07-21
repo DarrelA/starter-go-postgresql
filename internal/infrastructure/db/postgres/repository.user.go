@@ -16,6 +16,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const errMsgUnregisteredAcc = "the account has not been registered"
+
 type PostgresUserRepository struct {
 	dbpool *pgxpool.Pool
 }
@@ -46,7 +48,7 @@ func (ur PostgresUserRepository) SaveUser(user *entity.User) *restDomainErr.Rest
 			}
 		}
 
-		log.Error().Err(err).Msg("pgdb_error")
+		log.Error().Err(err).Msg(errConst.ErrMsgPostgresError)
 		return restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
 	}
 
@@ -60,10 +62,10 @@ func (ur PostgresUserRepository) GetUserByEmail(user *entity.User) *restDomainEr
 
 	if err != nil {
 		if err == pgx.ErrNoRows {
-			return restInterfaceErr.NewBadRequestError("the account has not been registered")
+			return restInterfaceErr.NewBadRequestError(errMsgUnregisteredAcc)
 		}
 
-		log.Error().Err(err).Msg("pgdb_error")
+		log.Error().Err(err).Msg(errConst.ErrMsgPostgresError)
 		return restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
 	}
 
@@ -73,7 +75,7 @@ func (ur PostgresUserRepository) GetUserByEmail(user *entity.User) *restDomainEr
 func (ur PostgresUserRepository) GetUserByUUID(user *entity.User) *restDomainErr.RestErr {
 	result := ur.dbpool.QueryRow(context.Background(), queryGetUserByID, user.UUID)
 	if err := result.Scan(&user.UUID, &user.FirstName, &user.LastName, &user.Email); err != nil {
-		log.Error().Err(err).Msg("pgdb_error")
+		log.Error().Err(err).Msg(errConst.ErrMsgPostgresError)
 		return restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
 	}
 

@@ -7,6 +7,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const errMsgCreateLogFileError = "failed to create log file"
+
 var logFile *os.File
 
 func CreateAppLog() {
@@ -15,7 +17,7 @@ func CreateAppLog() {
 	// Create a logger instance with output to a file
 	logFile, err = os.Create("/docker_wd/logs/app.log")
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to create log file")
+		log.Fatal().Err(err).Msg(errMsgCreateLogFileError)
 	}
 
 	// Configure logger to write to both file and console

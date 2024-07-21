@@ -15,6 +15,11 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const (
+	errMsgVarNotSet      = "%s is not set"
+	errMsgCheckJWTConfig = "check JWT config: %s"
+)
+
 type EnvConfig struct {
 	entity.EnvConfig
 }
@@ -26,7 +31,7 @@ func NewTokenService() service.LoadEnvConfig {
 func (e *EnvConfig) LoadAppConfig() {
 	e.Env = os.Getenv("APP_ENV")
 	if e.Env == "" {
-		log.Fatal().Msg("APP_ENV not set")
+		log.Fatal().Msgf(errMsgVarNotSet, "APP_ENV")
 	}
 
 	cwd := logger_env.LogCWD()
@@ -148,12 +153,12 @@ func (e *EnvConfig) LoadCORSConfig() {
 func loadEnvVariableInt(envVar string, target *int) {
 	valueStr := os.Getenv(envVar)
 	if valueStr == "" {
-		log.Error().Msgf("%s is not set", envVar)
+		log.Error().Msgf(errMsgVarNotSet, envVar)
 		return
 	}
 	value, err := strconv.Atoi(valueStr)
 	if err != nil {
-		log.Error().Err(err).Msgf("check JWT config: %s", envVar)
+		log.Error().Err(err).Msgf(errMsgCheckJWTConfig, envVar)
 		return
 	}
 	*target = value
@@ -162,12 +167,12 @@ func loadEnvVariableInt(envVar string, target *int) {
 func loadEnvVariableBool(envVar string, target *bool) {
 	valueStr := os.Getenv(envVar)
 	if valueStr == "" {
-		log.Error().Msgf("%s is not set", envVar)
+		log.Error().Msgf(errMsgVarNotSet, envVar)
 		return
 	}
 	value, err := strconv.ParseBool(valueStr)
 	if err != nil {
-		log.Error().Err(err).Msgf("check JWT config: %s", envVar)
+		log.Error().Err(err).Msgf(errMsgCheckJWTConfig, envVar)
 		return
 	}
 	*target = value
@@ -176,12 +181,12 @@ func loadEnvVariableBool(envVar string, target *bool) {
 func loadEnvVariableDuration(envVar string, target *time.Duration) {
 	valueStr := os.Getenv(envVar)
 	if valueStr == "" {
-		log.Error().Msgf("%s is not set", envVar)
+		log.Error().Msgf(errMsgVarNotSet, envVar)
 		return
 	}
 	value, err := time.ParseDuration(valueStr)
 	if err != nil {
-		log.Error().Err(err).Msgf("check JWT config: %s", envVar)
+		log.Error().Err(err).Msgf(errMsgCheckJWTConfig, envVar)
 		return
 	}
 	*target = value
