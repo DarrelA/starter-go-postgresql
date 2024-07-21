@@ -23,6 +23,8 @@ import (
 )
 
 func main() {
+	envLogger.LogCWD()
+	envLogger.ListFiles()
 	logFile := envLogger.CreateAppLog()
 	logger.NewZeroLogger(logFile)
 	config := initializeEnv()

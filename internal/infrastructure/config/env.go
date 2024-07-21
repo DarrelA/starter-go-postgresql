@@ -2,20 +2,22 @@ package config
 
 import (
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
-	logger_env "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
-	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
 const (
+	dev  = "dev"
+	test = "test"
+	prod = "prod"
+
+	errMsgEnvVarNotSet   = "%s is not set or has an invalid value; only 'dev', 'test', or 'prod' are accepted"
 	errMsgVarNotSet      = "%s is not set"
 	errMsgCheckJWTConfig = "check JWT config: %s"
 )
@@ -30,31 +32,16 @@ func NewTokenService() service.LoadEnvConfig {
 
 func (e *EnvConfig) LoadAppConfig() {
 	e.Env = os.Getenv("APP_ENV")
-	if e.Env == "" {
-		log.Fatal().Msgf(errMsgVarNotSet, "APP_ENV")
+	if e.Env != dev && e.Env != test && e.Env != prod {
+		log.Fatal().Msgf(errMsgEnvVarNotSet, "APP_ENV")
 	}
 
-	cwd := logger_env.LogCWD()
-	logger_env.ListFiles()
-	envBasePath := "configs/"
-
-	// @TODO: Explore test binary compilation with `go test -c`
-	// Check if the current working directory contains "\test"
-	if strings.Contains(cwd, "\\test") || strings.Contains(cwd, "/test") {
-		envBasePath = "../configs/"
-	}
-
-	// Construct the full path to the .env file
-	envFilePath := filepath.Join(envBasePath, ".env."+e.Env)
-	log.Debug().Msgf("loading env file: %s", envFilePath)
-	godotenv.Load(envFilePath)
-
-	e.Port = os.Getenv("APP_PORT")
-	if e.Port == "" {
-		e.Port = "8080" // Default port
-	}
-
+	e.Port = checkEmptyEnvVar("APP_PORT")
 	log.Info().Msgf("running in %s env using Port %s", strings.ToUpper(e.Env), e.Port)
+
+	authServicePathName := checkEmptyEnvVar("AUTH_SERVICE_PATHNAME")
+	protocol := checkEmptyEnvVar("PROTOCOL")
+	domain := checkEmptyEnvVar("DOMAIN")
 
 	/*
 		1.	Embedding `entity.EnvConfig`: In the `config` package, EnvConfig struct embeds the `entity.EnvConfig` struct.
@@ -64,15 +51,13 @@ func (e *EnvConfig) LoadAppConfig() {
 		3.	Correct Typing: The correct way to initialize a struct field from another package is to use the full type name, in this case, `entity.BaseURLsConfig`.
 	*/
 	e.BaseURLsConfig = &entity.BaseURLsConfig{
-		AuthServicePathName: os.Getenv("AUTH_SERVICE_PATHNAME"),
-		AuthService: os.Getenv("PROTOCOL") +
-			os.Getenv("DOMAIN") + e.Port +
-			os.Getenv("AUTH_SERVICE_PATHNAME"),
+		AuthServicePathName: authServicePathName,
+		AuthService:         protocol + domain + e.Port + authServicePathName,
 	}
 }
 
 func (e *EnvConfig) LoadLogConfig() {
-	logLevel := os.Getenv("LOG_LEVEL")
+	logLevel := checkEmptyEnvVar("LOG_LEVEL")
 
 	// Whichever level is chosen,
 	// all logs with a level greater than or equal to that level will be written.
@@ -102,19 +87,19 @@ func (e *EnvConfig) LoadLogConfig() {
 
 func (e *EnvConfig) LoadDBConfig() {
 	e.PostgresDBConfig = &entity.PostgresDBConfig{
-		Username:     os.Getenv("POSTGRES_USER"),
-		Password:     os.Getenv("POSTGRES_PASSWORD"),
-		Host:         os.Getenv("POSTGRES_HOST"),
-		Port:         os.Getenv("POSTGRES_PORT"),
-		Name:         os.Getenv("POSTGRES_DB"),
-		SslMode:      os.Getenv("POSTGRES_SSLMODE"),
-		PoolMaxConns: os.Getenv("POSTGRES_POOL_MAX_CONNS"),
+		Username:     checkEmptyEnvVar("POSTGRES_USER"),
+		Password:     checkEmptyEnvVar("POSTGRES_PASSWORD"),
+		Host:         checkEmptyEnvVar("POSTGRES_HOST"),
+		Port:         checkEmptyEnvVar("POSTGRES_PORT"),
+		Name:         checkEmptyEnvVar("POSTGRES_DB"),
+		SslMode:      checkEmptyEnvVar("POSTGRES_SSLMODE"),
+		PoolMaxConns: checkEmptyEnvVar("POSTGRES_POOL_MAX_CONNS"),
 	}
 }
 
 func (e *EnvConfig) LoadRedisConfig() {
 	e.RedisDBConfig = &entity.RedisDBConfig{
-		RedisUri: os.Getenv("REDIS_URL"),
+		RedisUri: checkEmptyEnvVar("REDIS_URL"),
 	}
 }
 
@@ -130,32 +115,36 @@ func (e *EnvConfig) LoadJWTConfig() {
 		e.JWTConfig = &entity.JWTConfig{}
 	}
 
-	e.JWTConfig.Path = os.Getenv("JWT_PATH")
-	e.JWTConfig.Domain = os.Getenv("JWT_DOMAIN")
+	e.JWTConfig.Path = checkEmptyEnvVar("JWT_PATH")
+	e.JWTConfig.Domain = checkEmptyEnvVar("JWT_DOMAIN")
 	loadEnvVariableBool("JWT_SECURE", &e.JWTConfig.Secure)
 	loadEnvVariableBool("JWT_HTTPONLY", &e.JWTConfig.HttpOnly)
-	e.JWTConfig.AccessTokenPrivateKey = os.Getenv("ACCESS_TOKEN_PRIVATE_KEY")
-	e.JWTConfig.AccessTokenPublicKey = os.Getenv("ACCESS_TOKEN_PUBLIC_KEY")
+	e.JWTConfig.AccessTokenPrivateKey = checkEmptyEnvVar("ACCESS_TOKEN_PRIVATE_KEY")
+	e.JWTConfig.AccessTokenPublicKey = checkEmptyEnvVar("ACCESS_TOKEN_PUBLIC_KEY")
 	loadEnvVariableDuration("ACCESS_TOKEN_EXPIRED_IN", &e.JWTConfig.AccessTokenExpiredIn)
 	loadEnvVariableInt("ACCESS_TOKEN_MAXAGE", &e.JWTConfig.AccessTokenMaxAge)
-	e.JWTConfig.RefreshTokenPrivateKey = os.Getenv("REFRESH_TOKEN_PRIVATE_KEY")
-	e.JWTConfig.RefreshTokenPublicKey = os.Getenv("REFRESH_TOKEN_PUBLIC_KEY")
+	e.JWTConfig.RefreshTokenPrivateKey = checkEmptyEnvVar("REFRESH_TOKEN_PRIVATE_KEY")
+	e.JWTConfig.RefreshTokenPublicKey = checkEmptyEnvVar("REFRESH_TOKEN_PUBLIC_KEY")
 	loadEnvVariableDuration("REFRESH_TOKEN_EXPIRED_IN", &e.JWTConfig.RefreshTokenExpiredIn)
 	loadEnvVariableInt("REFRESH_TOKEN_MAXAGE", &e.JWTConfig.RefreshTokenMaxAge)
 }
 
 func (e *EnvConfig) LoadCORSConfig() {
 	e.CORSConfig = &entity.CORSConfig{
-		AllowedOrigins: os.Getenv("CORS_ALLOWED_ORIGINS"),
+		AllowedOrigins: checkEmptyEnvVar("CORS_ALLOWED_ORIGINS"),
 	}
 }
 
-func loadEnvVariableInt(envVar string, target *int) {
+func checkEmptyEnvVar(envVar string) string {
 	valueStr := os.Getenv(envVar)
 	if valueStr == "" {
-		log.Error().Msgf(errMsgVarNotSet, envVar)
-		return
+		log.Fatal().Msgf(errMsgVarNotSet, envVar)
 	}
+	return valueStr
+}
+
+func loadEnvVariableInt(envVar string, target *int) {
+	valueStr := checkEmptyEnvVar(envVar)
 	value, err := strconv.Atoi(valueStr)
 	if err != nil {
 		log.Error().Err(err).Msgf(errMsgCheckJWTConfig, envVar)
@@ -165,11 +154,7 @@ func loadEnvVariableInt(envVar string, target *int) {
 }
 
 func loadEnvVariableBool(envVar string, target *bool) {
-	valueStr := os.Getenv(envVar)
-	if valueStr == "" {
-		log.Error().Msgf(errMsgVarNotSet, envVar)
-		return
-	}
+	valueStr := checkEmptyEnvVar(envVar)
 	value, err := strconv.ParseBool(valueStr)
 	if err != nil {
 		log.Error().Err(err).Msgf(errMsgCheckJWTConfig, envVar)
@@ -179,11 +164,7 @@ func loadEnvVariableBool(envVar string, target *bool) {
 }
 
 func loadEnvVariableDuration(envVar string, target *time.Duration) {
-	valueStr := os.Getenv(envVar)
-	if valueStr == "" {
-		log.Error().Msgf(errMsgVarNotSet, envVar)
-		return
-	}
+	valueStr := checkEmptyEnvVar(envVar)
 	value, err := time.ParseDuration(valueStr)
 	if err != nil {
 		log.Error().Err(err).Msgf(errMsgCheckJWTConfig, envVar)

@@ -5,13 +5,11 @@ import (
 	"encoding/json"
 	"io"
 	"os"
-	"strings"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
 	repo "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
 	password "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/bcrypt"
-	logger_env "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 )
@@ -30,16 +28,6 @@ type PostgresSeedRepository struct {
 }
 
 func NewSeedRepository(dbpool *pgxpool.Pool, env string) repo.PostgresSeedRepository {
-	envBasePath := envBasePath
-	cwd := logger_env.LogCWD()
-	logger_env.ListFiles()
-
-	// @TODO: Explore test binary compilation with `go test -c`
-	// Check if the current working directory contains "\test"
-	if strings.Contains(cwd, "\\test") || strings.Contains(cwd, "/test") {
-		envBasePath = "../build/"
-	}
-
 	ctx := context.Background()
 
 	// Create `users` table in Postgres
