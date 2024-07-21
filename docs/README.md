@@ -1,15 +1,5 @@
 <a name="readme-top"></a>
 
-- [Setup](#setup)
-- [JWT](#jwt)
-  - [Implementation of Refresh Token with Redis](#implementation-of-refresh-token-with-redis)
-  - [Redis and JWT Statelessness](#redis-and-jwt-statelessness)
-  - [What are Access and Refresh Tokens?](#what-are-access-and-refresh-tokens)
-  - [How Does It Work?](#how-does-it-work)
-  - [Managing Security Threats: CSRF and XSS Attacks](#managing-security-threats-csrf-and-xss-attacks)
-  - [Security Implementation Details](#security-implementation-details)
-  - [Workflow Overview](#workflow-overview)
-  - [Diagram: Token Workflow](#diagram-token-workflow)
 - [Concepts And Methodologies](#concepts-and-methodologies)
   - [1. Architectural Styles](#1-architectural-styles)
   - [2. Architectural Patterns](#2-architectural-patterns)
@@ -21,24 +11,115 @@
   - [8. Software Design Principles](#8-software-design-principles)
   - [9. Software Architectural Principles](#9-software-architectural-principles)
   - [10. Software Quality Attributes](#10-software-quality-attributes)
+- [JWT](#jwt)
+  - [Implementation of Refresh Token with Redis](#implementation-of-refresh-token-with-redis)
+  - [Redis and JWT Statelessness](#redis-and-jwt-statelessness)
+  - [What are Access and Refresh Tokens?](#what-are-access-and-refresh-tokens)
+  - [How Does It Work?](#how-does-it-work)
+  - [Managing Security Threats: CSRF and XSS Attacks](#managing-security-threats-csrf-and-xss-attacks)
+  - [Security Implementation Details](#security-implementation-details)
+  - [Workflow Overview](#workflow-overview)
+  - [Diagram: Token Workflow](#diagram-token-workflow)
 - [References](#references)
   - [Golang](#golang)
   - [Refresh JWTs \& Redis](#refresh-jwts--redis)
   - [Others](#others)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+# Concepts And Methodologies
 
-# Setup
+## [1. Architectural Styles](./notes/architectural_styles.md#architectural-styles)
 
-| No. |                     Includes                     |                                             Description                                              |
-| :-: | :----------------------------------------------: | :--------------------------------------------------------------------------------------------------: |
-| 1.  | Easy setup using Env files, Docker, and Makefile |                       Simplifies initial setup and environment configuration.                        |
-| 2.  | Ease of maintenance of Go packages with testing  |                      Ensures code reliability and simplifies testing processes.                      |
-| 3.  |           Transitioning Away From MVC            |                 [🔗](./notes/architectural_patterns.md#transitioning-away-from-mvc)                  |
-| 4.  |    Implementation of Refresh Token with Redis    |                                              [🔗](#jwt)                                              |
-| 5.  |     Fiber as a web framework for performance     |                    Optimized for minimal memory allocation and high performance.                     |
-| 6.  |                   Middlewares                    |                         [🔗](./notes/software_dev_framework.md#middlewares)                          |
-| 7.  |   Internal logging for security using zerolog    | Provides secure and efficient logging mechanisms,</br>including structured logging with JSON output. |
+- **Layered Architecture**:
+  - Separates functions into distinct layers, each with specific roles and responsibilities.
+  - Layers communicate only with adjacent layers.
+  - Common in enterprise applications.
+- **Object-Oriented Architecture**:
+  - Structures a system as a collection of interacting objects.
+  - Each object represents an instance of a class.
+  - Emphasizes reusability and modularity.
+- **Data Centered Architecture**:
+  - Centralized data repository accessed by multiple components.
+  - Ensures consistency and availability of data.
+  - Example: Database management systems.
+- **Event-Based Architecture**:
+  - Components interact through the production and consumption of events.
+  - Decouples components for flexibility and scalability.
+  - Common in real-time systems.
+
+## [2. Architectural Patterns](./notes/architectural_patterns.md#architectural-patterns)
+
+1. [Clean Architecture](./notes/architectural_patterns.md#clean-architecture)
+2. [Hexagonal Architecture](./notes/architectural_patterns.md#hexagonal-architecture)
+3. [CQRS (Command Query Responsibility Segregation)](./notes/architectural_patterns.md#cqrs-command-query-responsibility-segregation)
+4. [Event-Driven Architecture](./notes/architectural_patterns.md#event-driven-architecture)
+5. [Layered Architecture](./notes/architectural_patterns.md#layered-architecture)
+6. [Microservices Architecture](./notes/architectural_patterns.md#microservices-architecture)
+
+## 3. Design Patterns
+
+- **Creational Patterns**:
+  - **Singleton**: Ensuring a type has only one instance.
+  - **Factory**: Creating objects without specifying the exact type.
+  - **Builder**: Constructing complex objects step by step.
+- **Structural Patterns**:
+  - **Adapter**: Allowing incompatible interfaces to work together.
+  - **Decorator**: Adding behavior to objects dynamically.
+  - **Facade**: Providing a simplified interface to a complex subsystem.
+- **Behavioral Patterns**:
+  - **Strategy**: Encapsulating algorithms within a family and making them interchangeable.
+  - **Observer**: Notifying dependent objects about state changes.
+  - **Command**: Encapsulating a request as an object.
+
+## 4. Programming Paradigms
+
+- **Concurrent Programming**: Using goroutines and channels for concurrency.
+- **Procedural Programming**: Organizing code in procedures/functions.
+- **Functional Programming**: Using higher-order functions and immutability.
+
+## 5. Methodologies
+
+- **Agile**: Iterative development with a focus on collaboration.
+- **Scrum**: Framework for managing work with Sprints.
+- **Kanban**: Visual workflow management.
+- **Lean**: Reducing waste and improving efficiency.
+- **Waterfall**: Sequential design process.
+
+## [6. Development Practices](./notes/development_practices.md)
+
+- **Test-Driven Development (TDD)**: Writing tests using the `testing` package before code.
+- **Behavior-Driven Development (BDD)**: An extension of TDD that emphasizes collaboration between developers, testers, and business stakeholders. It involves writing high-level test scenarios in natural language using tools like `godog`, which are then automated to ensure the system behaves as expected. BDD focuses on the behavior of the system from the user's perspective and ensures all features add business value.
+- **Domain-Driven Design (DDD)**: Structuring and modeling software around the business domain, emphasizing collaboration with domain experts and clear bounded contexts.
+- **Continuous Integration (CI)**: Using tools like GitHub Actions, Travis CI, or CircleCI.
+- **Continuous Deployment (CD)**: Automating deployment pipelines with GoCD or Jenkins.
+
+## [7. Software Development Frameworks](./notes/software_dev_framework.md)
+
+- **[Fiber: Express-inspired web framework for building REST APIs.](./notes/software_dev_framework.md)**
+- **Gin**: Lightweight web framework.
+- **Beego**: Full-featured web framework.
+- **Echo**: High-performance, minimalist web framework.
+- **Buffalo**: Rapid development web framework.
+- **GORM**: ORM library for database interactions.
+
+## [8. Software Design Principles](./notes/software_design_principles.md)
+
+- [**SOLID**: The five fundamental principles of object-oriented programming and design help developers create understandable, flexible, and maintainable software systems.](./notes/software_design_principles.md#solid)
+- **DRY (Don't Repeat Yourself)**: Avoiding code duplication.
+- **KISS (Keep It Simple, Stupid)**: Prioritizing simplicity.
+- **YAGNI (You Aren't Gonna Need It)**: Avoiding unnecessary features.
+
+## 9. Software Architectural Principles
+
+- **Separation of Concerns**: Modularizing code.
+- **Single Responsibility Principle**: Each function/type should have one responsibility.
+- **Open/Closed Principle**: Types should be open for extension but closed for modification.
+
+## 10. Software Quality Attributes
+
+- **Scalability**: Using concurrency patterns and distributed systems.
+- **Reliability**: Ensuring robust error handling and resilience.
+- **Maintainability**: Writing clean, readable code and documentation.
+- **Usability**: Building intuitive APIs and user interfaces.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -194,104 +275,6 @@ Below is a simplified diagram to illustrate the token workflow:
 This flow ensures a seamless user experience while maintaining high security standards. Access tokens provide quick access to resources, while refresh tokens ensure continuous access without frequent logins. Redis enhances the process by managing tokens efficiently and allowing quick verifications and invalidations. Storing tokens in HTTP-only and SameSite cookies keeps them secure from client-side attacks.
 
 In summary, using access and refresh tokens with Redis, PostgreSQL, and cookies makes the authentication process both secure and user-friendly. Implementing measures to mitigate CSRF and XSS attacks on the frontend, backend, and during deployment ensures that user sessions are not only efficient but also highly secure.
-
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-# Concepts And Methodologies
-
-## [1. Architectural Styles](./notes/architectural_styles.md#architectural-styles)
-
-- **Layered Architecture**:
-  - Separates functions into distinct layers, each with specific roles and responsibilities.
-  - Layers communicate only with adjacent layers.
-  - Common in enterprise applications.
-- **Object-Oriented Architecture**:
-  - Structures a system as a collection of interacting objects.
-  - Each object represents an instance of a class.
-  - Emphasizes reusability and modularity.
-- **Data Centered Architecture**:
-  - Centralized data repository accessed by multiple components.
-  - Ensures consistency and availability of data.
-  - Example: Database management systems.
-- **Event-Based Architecture**:
-  - Components interact through the production and consumption of events.
-  - Decouples components for flexibility and scalability.
-  - Common in real-time systems.
-
-## [2. Architectural Patterns](./notes/architectural_patterns.md#architectural-patterns)
-
-1. [Clean Architecture](./notes/architectural_patterns.md#clean-architecture)
-2. [Hexagonal Architecture](./notes/architectural_patterns.md#hexagonal-architecture)
-3. [CQRS (Command Query Responsibility Segregation)](./notes/architectural_patterns.md#cqrs-command-query-responsibility-segregation)
-4. [Event-Driven Architecture](./notes/architectural_patterns.md#event-driven-architecture)
-5. [Layered Architecture](./notes/architectural_patterns.md#layered-architecture)
-6. [Microservices Architecture](./notes/architectural_patterns.md#microservices-architecture)
-
-## 3. Design Patterns
-
-- **Creational Patterns**:
-  - **Singleton**: Ensuring a type has only one instance.
-  - **Factory**: Creating objects without specifying the exact type.
-  - **Builder**: Constructing complex objects step by step.
-- **Structural Patterns**:
-  - **Adapter**: Allowing incompatible interfaces to work together.
-  - **Decorator**: Adding behavior to objects dynamically.
-  - **Facade**: Providing a simplified interface to a complex subsystem.
-- **Behavioral Patterns**:
-  - **Strategy**: Encapsulating algorithms within a family and making them interchangeable.
-  - **Observer**: Notifying dependent objects about state changes.
-  - **Command**: Encapsulating a request as an object.
-
-## 4. Programming Paradigms
-
-- **Concurrent Programming**: Using goroutines and channels for concurrency.
-- **Procedural Programming**: Organizing code in procedures/functions.
-- **Functional Programming**: Using higher-order functions and immutability.
-
-## 5. Methodologies
-
-- **Agile**: Iterative development with a focus on collaboration.
-- **Scrum**: Framework for managing work with Sprints.
-- **Kanban**: Visual workflow management.
-- **Lean**: Reducing waste and improving efficiency.
-- **Waterfall**: Sequential design process.
-
-## [6. Development Practices](./notes/development_practices.md)
-
-- **Test-Driven Development (TDD)**: Writing tests using the `testing` package before code.
-- **Behavior-Driven Development (BDD)**: An extension of TDD that emphasizes collaboration between developers, testers, and business stakeholders. It involves writing high-level test scenarios in natural language using tools like `godog`, which are then automated to ensure the system behaves as expected. BDD focuses on the behavior of the system from the user's perspective and ensures all features add business value.
-- **Domain-Driven Design (DDD)**: Structuring and modeling software around the business domain, emphasizing collaboration with domain experts and clear bounded contexts.
-- **Continuous Integration (CI)**: Using tools like GitHub Actions, Travis CI, or CircleCI.
-- **Continuous Deployment (CD)**: Automating deployment pipelines with GoCD or Jenkins.
-
-## [7. Software Development Frameworks](./notes/software_dev_framework.md)
-
-- **[Fiber: Express-inspired web framework for building REST APIs.](./notes/software_dev_framework.md)**
-- **Gin**: Lightweight web framework.
-- **Beego**: Full-featured web framework.
-- **Echo**: High-performance, minimalist web framework.
-- **Buffalo**: Rapid development web framework.
-- **GORM**: ORM library for database interactions.
-
-## [8. Software Design Principles](./notes/software_design_principles.md)
-
-- [**SOLID**: The five fundamental principles of object-oriented programming and design help developers create understandable, flexible, and maintainable software systems.](./notes/software_design_principles.md#solid)
-- **DRY (Don't Repeat Yourself)**: Avoiding code duplication.
-- **KISS (Keep It Simple, Stupid)**: Prioritizing simplicity.
-- **YAGNI (You Aren't Gonna Need It)**: Avoiding unnecessary features.
-
-## 9. Software Architectural Principles
-
-- **Separation of Concerns**: Modularizing code.
-- **Single Responsibility Principle**: Each function/type should have one responsibility.
-- **Open/Closed Principle**: Types should be open for extension but closed for modification.
-
-## 10. Software Quality Attributes
-
-- **Scalability**: Using concurrency patterns and distributed systems.
-- **Reliability**: Ensuring robust error handling and resilience.
-- **Maintainability**: Writing clean, readable code and documentation.
-- **Usability**: Building intuitive APIs and user interfaces.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 

@@ -20,6 +20,6 @@
 - [Architecture Styles in Distributed Systems](https://www.geeksforgeeks.org/architecture-styles-in-distributed-systems/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-<p align="right">(<a href="../SOFTWARE_DEV.MD">back to main</a>)</p>
+<p align="right">(<a href="../README.md">back to main</a>)</p>
 
 ---

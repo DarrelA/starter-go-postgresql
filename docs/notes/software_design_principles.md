@@ -60,6 +60,6 @@ SOLID is an acronym representing five fundamental principles of object-oriented 
 [Software Design Patterns Tutorial](https://www.geeksforgeeks.org/software-design-patterns/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-<p align="right">(<a href="../SOFTWARE_DEV.MD">back to main</a>)</p>
+<p align="right">(<a href="../README.md">back to main</a>)</p>
 
 ---

@@ -87,6 +87,6 @@ Dependency Injection (DI) is a design pattern that achieves Inversion of Control
 - [Dependency Injection(DI) Design Pattern](https://www.geeksforgeeks.org/dependency-injectiondi-design-pattern/)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-<p align="right">(<a href="../SOFTWARE_DEV.MD">back to main</a>)</p>
+<p align="right">(<a href="../README.md">back to main</a>)</p>
 
 ---
