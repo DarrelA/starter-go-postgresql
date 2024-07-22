@@ -52,7 +52,7 @@ func initializeEnv() *config.EnvConfig {
 	envConfig.LoadCORSConfig()
 	config, ok := envConfig.(*config.EnvConfig)
 	if !ok {
-		log.Fatal().Msg("failed to load environment configuration")
+		log.Error().Msg("failed to load environment configuration")
 	}
 
 	return config

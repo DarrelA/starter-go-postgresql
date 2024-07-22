@@ -13,13 +13,13 @@ import (
 )
 
 const (
-	dev  = "dev"
-	test = "test"
-	prod = "prod"
+	appLogPath = "/app/logs"
 
-	errMsgEnvVarNotSet   = "%s is not set or has an invalid value; only 'dev', 'test', or 'prod' are accepted"
-	errMsgVarNotSet      = "%s is not set"
-	errMsgCheckJWTConfig = "check JWT config: %s"
+	infoMsgDefaultEnvVar  = "Defaulting [%s] to [%s] of in the [%s] env"
+	errMsgInvalidEnv      = "%s is[%s]; only 'dev', 'test', or 'prod' are accepted"
+	errMsgVarNotSet       = "%s is not set"
+	errMsgInvalidLogLevel = "%s is[%s]; only 'trace', 'debug', 'info', 'warn', 'error', 'fatal', 'panic' are accepted"
+	errMsgCheckJWTConfig  = "check JWT config: %s"
 )
 
 type EnvConfig struct {
@@ -32,8 +32,10 @@ func NewTokenService() service.LoadEnvConfig {
 
 func (e *EnvConfig) LoadAppConfig() {
 	e.Env = os.Getenv("APP_ENV")
-	if e.Env != dev && e.Env != test && e.Env != prod {
-		log.Fatal().Msgf(errMsgEnvVarNotSet, "APP_ENV")
+	if e.Env != "dev" && e.Env != "test" && e.Env != "prod" {
+		log.Error().Msgf(errMsgInvalidEnv, "APP_ENV", e.Env)
+		e.Env = "test"
+		log.Info().Msgf(infoMsgDefaultEnvVar, "APP_ENV", e.Env, e.Env)
 	}
 
 	e.Port = checkEmptyEnvVar("APP_PORT")
@@ -52,16 +54,28 @@ func (e *EnvConfig) LoadAppConfig() {
 	*/
 	e.BaseURLsConfig = &entity.BaseURLsConfig{
 		AuthServicePathName: authServicePathName,
-		AuthService:         protocol + domain + e.Port + authServicePathName,
+		AuthService:         protocol + domain + ":" + e.Port + authServicePathName,
 	}
 }
 
 func (e *EnvConfig) LoadLogConfig() {
-	logLevel := checkEmptyEnvVar("LOG_LEVEL")
+	logLevel := strings.ToLower(os.Getenv("LOG_LEVEL"))
+	if logLevel != "trace" && logLevel != "debug" &&
+		logLevel != "info" && logLevel != "warn" &&
+		logLevel != "error" && logLevel != "fatal" &&
+		logLevel != "panic" {
+		log.Error().Msgf(errMsgInvalidLogLevel, "LOG_LEVEL", logLevel)
+
+		if e.Env != "prod" {
+			logLevel = "debug"
+		}
+
+		log.Info().Msgf(infoMsgDefaultEnvVar, "logLevel", logLevel, e.Env)
+	}
 
 	// Whichever level is chosen,
 	// all logs with a level greater than or equal to that level will be written.
-	switch strings.ToLower(logLevel) {
+	switch logLevel {
 	case "trace":
 		zerolog.SetGlobalLevel(zerolog.TraceLevel) // Level -1
 	case "debug":
@@ -80,8 +94,8 @@ func (e *EnvConfig) LoadLogConfig() {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel) // Level 1
 	}
 
-	if _, err := os.Stat("/app/logs"); os.IsNotExist(err) {
-		os.Mkdir("/app/logs", 0755)
+	if _, err := os.Stat(appLogPath); os.IsNotExist(err) {
+		os.Mkdir(appLogPath, 0755)
 	}
 }
 
@@ -138,7 +152,7 @@ func (e *EnvConfig) LoadCORSConfig() {
 func checkEmptyEnvVar(envVar string) string {
 	valueStr := os.Getenv(envVar)
 	if valueStr == "" {
-		log.Fatal().Msgf(errMsgVarNotSet, envVar)
+		log.Error().Msgf(errMsgVarNotSet, envVar)
 	}
 	return valueStr
 }
@@ -155,7 +169,7 @@ func loadEnvVariableInt(envVar string, target *int) {
 
 func loadEnvVariableBool(envVar string, target *bool) {
 	valueStr := checkEmptyEnvVar(envVar)
-	value, err := strconv.ParseBool(valueStr)
+	value, err := strconv.ParseBool(strings.ToLower(valueStr))
 	if err != nil {
 		log.Error().Err(err).Msgf(errMsgCheckJWTConfig, envVar)
 		return
