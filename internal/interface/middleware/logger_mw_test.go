@@ -77,6 +77,7 @@ func TestGetIPVersion(t *testing.T) {
 		ip            string
 		expectedValue string
 	}{
+		{"", "unknown"},
 		{"5.59.32.2", "IPv4"},
 		{"5bf7:a43f:402d:e01d:7b5d:071f:5068:62b7", "IPv6"},
 	}
