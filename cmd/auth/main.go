@@ -25,7 +25,7 @@ import (
 func main() {
 	envLogger.LogCWD()
 	envLogger.ListFiles()
-	logFile := envLogger.CreateAppLog()
+	logFile := envLogger.CreateAppLog("/docker_wd/logs/app.log")
 	logger.NewZeroLogger(logFile)
 	config := initializeEnv()
 	rc, redisUserRepo, pc, postgresUserRepo := initializeDatabases(config)

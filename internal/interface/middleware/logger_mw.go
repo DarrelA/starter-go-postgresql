@@ -21,24 +21,25 @@ func LoggerMW(c *fiber.Ctx) error {
 
 	request_id, ok := c.Locals("request_id").(string)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError)
+		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": request_id")
 		log.Error().Err(err).Msg("")
 	}
 
 	correlation_id, ok := c.Locals("correlation_id").(string)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError)
+		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": correlation_id")
 		log.Error().Err(err).Msg("")
 	}
 
 	hostname, hostnameErr := os.Hostname()
 	if hostnameErr != nil {
-		log.Fatal().Err(hostnameErr).Msg(errMsgInvalidHostname)
+		log.Error().Err(hostnameErr).Msg(errMsgInvalidHostname)
 	}
 
 	currentEnv, ok := c.Locals("env").(string)
 	if !ok {
-		log.Panic().Msg(errConst.ErrTypeError)
+		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": currentEnv")
+		log.Error().Err(err).Msg("")
 	}
 
 	switch currentEnv {
@@ -57,7 +58,7 @@ func LoggerMW(c *fiber.Ctx) error {
 			Str("user_agent", c.Get("User-Agent")).
 			Str("correlation_id", correlation_id).
 			Str("request_id", request_id).
-			Msg("request is completed")
+			Msgf("request is completed in [%s] env", currentEnv)
 
 	case "dev":
 		log.Info().
@@ -68,7 +69,7 @@ func LoggerMW(c *fiber.Ctx) error {
 			Bytes("response_body", c.Response().Body()).
 			Msgf("request is completed in [%s] env", currentEnv)
 
-	case "test":
+	default:
 		log.Info().
 			Str("hostname", hostname).
 			Str("method", c.Method()).
@@ -86,9 +87,6 @@ func LoggerMW(c *fiber.Ctx) error {
 			Str("correlation_id", correlation_id).
 			Str("request_id", request_id).
 			Msgf("request is completed in [%s] env", currentEnv)
-
-	default:
-		log.Info().Msgf("expecting prod, dev or test env but, current the env is [%s]", currentEnv)
 	}
 
 	return err

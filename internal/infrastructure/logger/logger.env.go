@@ -9,18 +9,17 @@ import (
 )
 
 const (
-	logFilePath                    = "/docker_wd/logs/app.log"
 	errMsgCreateLogFileError       = "failed to create log file"
 	errMsgFailedToGetCallerInfo    = "failed to get caller information"
 	errMsgGetWorkingDirectoryError = "error getting current working directory"
 	errMsgExecutingCmd             = "error executing ls command"
 )
 
-func CreateAppLog() *os.File {
+func CreateAppLog(logFilePath string) *os.File {
 	// Create a logger instance with output to a file
 	logFile, err := os.Create(logFilePath)
 	if err != nil {
-		log.Fatal().Err(err).Msg(errMsgCreateLogFileError)
+		log.Error().Err(err).Msg(errMsgCreateLogFileError)
 	}
 	return logFile
 }
