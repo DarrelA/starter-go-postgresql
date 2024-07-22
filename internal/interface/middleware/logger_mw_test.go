@@ -70,24 +70,24 @@ func TestLoggerMW(t *testing.T) {
 			checkLogOutput(t, buf, tt.expectedSubString, tt.expectedRequestID, tt.expectedCorrelationID)
 		})
 	}
-}
 
-func TestGetIPVersion(t *testing.T) {
-	tests := []struct {
-		ip            string
-		expectedValue string
-	}{
-		{"", "unknown"},
-		{"5.59.32.2", "IPv4"},
-		{"5bf7:a43f:402d:e01d:7b5d:071f:5068:62b7", "IPv6"},
-	}
-
-	for _, tt := range tests {
-		value := getIPVersion(tt.ip)
-		if value != tt.expectedValue {
-			t.Fatalf("Expected value '%s' but got '%s'", tt.expectedValue, value)
+	t.Run("Test getIPVersion", func(t *testing.T) {
+		tests := []struct {
+			ip            string
+			expectedValue string
+		}{
+			{"", "unknown"},
+			{"5.59.32.2", "IPv4"},
+			{"5bf7:a43f:402d:e01d:7b5d:071f:5068:62b7", "IPv6"},
 		}
-	}
+
+		for _, tt := range tests {
+			value := getIPVersion(tt.ip)
+			if value != tt.expectedValue {
+				t.Fatalf("Expected value '%s' but got '%s'", tt.expectedValue, value)
+			}
+		}
+	})
 }
 
 func setupAppAndBuffer(env any, requestID any, correlationID any) (
