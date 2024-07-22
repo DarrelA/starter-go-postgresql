@@ -33,8 +33,8 @@ For more detailed information on the setup, architecture, and various components
 
 ## Handle Initial Files
 
-1. **Respective `.env` files in `configs` folder**
-2. **Respective env server `.json` file:** Establishes server connection from pgAdmin to Postgres
+1. **Respective `.env` files in `internal/infrastructure/config` folder**
+2. **Respective env server `.json` file in `internal/infrastructure/db/postgres/json` folder:** Establishes server connection from pgAdmin to Postgres
 3. **Run `chmod` command for the shell script(s)**
 
 ## Generate the Private and Public Keys
@@ -71,7 +71,7 @@ tree -d
 
 ```sh
 # makefile defaults to dev env
-make t
+make wat
 ```
 
 ## psql
