@@ -1,4 +1,4 @@
-package middlewares
+package middleware
 
 import (
 	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"

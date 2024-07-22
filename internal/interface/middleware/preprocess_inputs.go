@@ -1,4 +1,4 @@
-package middlewares
+package middleware
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ const (
 func PreProcessInputs(c *fiber.Ctx) error {
 	baseURLsConfig, ok := c.Locals("baseURLsConfig").(*entity.BaseURLsConfig)
 	if !ok {
-		log.Panic().Msg(errMsgInvalidConfig)
+		log.Error().Msg(errMsgInvalidConfig)
 	}
 
 	authServicePathName := baseURLsConfig.AuthServicePathName
