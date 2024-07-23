@@ -18,8 +18,17 @@ import (
 
 const (
 	errMsgInvalidConfig   = "invalid baseURLsConfig"
-	errMsgInvalidEndPoint = "invalid endpoint for PreProcessInputs middleware"
+	errMsgInvalidEndPoint = "invalid endpoint: "
 	errInvalidJSON        = "invalid json body"
+
+	// Validation Message
+	requiredVM = "not be empty"
+	minVM      = "be at least %s characters long"
+	maxVM      = "be at most %s characters long"
+	alphaVM    = "contain only alphabetic characters"
+	alphanumVM = "contain only alphanumeric characters"
+	emailVM    = "be a valid email address"
+	passwdVM   = "contain at least one number, one uppercase letter, one lowercase letter, and one special character"
 )
 
 func PreProcessInputs(c *fiber.Ctx) error {
@@ -57,8 +66,8 @@ func PreProcessInputs(c *fiber.Ctx) error {
 		c.Locals("login_payload", payload)
 
 	default:
-		log.Error().Msg(errMsgInvalidEndPoint)
-		err := restInterfaceErr.NewBadRequestError("invalid endpoint: " + endpoint)
+		err := restInterfaceErr.NewBadRequestError(errMsgInvalidEndPoint + endpoint)
+		log.Error().Err(err).Msg("")
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
@@ -72,9 +81,19 @@ func normalizePath(path string) string {
 	return normalized
 }
 
+/*
+`parseAndSanitize` parses the incoming HTTP request body into the provided payload structure
+and sanitizes its fields.
+
+Parameters:
+  - `c`: The Fiber context, which contains the HTTP request and response information.
+  - `payload`: A pointer to a struct that will be filled with the parsed request body data.
+*/
 func parseAndSanitize(c *fiber.Ctx, payload interface{}) error {
+	log.Debug().Msgf("The type of payload interface{} is %s\n", reflect.TypeOf(payload))
+	// Parse the request body into the provided payload structure
 	if err := c.BodyParser(payload); err != nil {
-		err := restInterfaceErr.NewBadRequestError(errInvalidJSON)
+		err := restInterfaceErr.NewUnprocessableEntityError(errInvalidJSON)
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
@@ -113,13 +132,13 @@ func init() {
 }
 
 var validationMessages = map[string]string{
-	"required": "not be empty",
-	"min":      "be at least %s characters long",
-	"max":      "be at most %s characters long",
-	"alpha":    "contain only alphabetic characters",
-	"alphanum": "contain only alphanumeric characters",
-	"email":    "be a valid email address",
-	"passwd":   "contain at least one number, one uppercase letter, one lowercase letter, and one special character",
+	"required": requiredVM,
+	"min":      minVM,
+	"max":      maxVM,
+	"alpha":    alphaVM,
+	"alphanum": alphaVM,
+	"email":    emailVM,
+	"passwd":   passwdVM,
 }
 
 /*
@@ -135,12 +154,7 @@ func validateStruct[T any](payload *T) *restDomainErr.RestErr {
 	if err != nil {
 		for _, err := range err.(validator.ValidationErrors) {
 			tag := err.Tag()
-			messageTemplate, exists := validationMessages[tag]
-
-			if !exists {
-				messageTemplate = "be valid"
-			}
-
+			messageTemplate := validationMessages[tag]
 			fieldName := camelToSnakeCase(err.Field())
 			message := ""
 
