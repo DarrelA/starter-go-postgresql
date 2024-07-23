@@ -25,13 +25,13 @@ func TestLoadAppConfig(t *testing.T) {
 	}
 
 	e := &EnvConfig{}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			os.Setenv("APP_ENV", tt.env)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			os.Setenv("APP_ENV", test.env)
 			defer os.Unsetenv("APP_ENV")
 			e.LoadAppConfig()
-			if e.Env != tt.expectedEnv {
-				t.Errorf("expected e.Env to be '%s', got '%s'", tt.expectedEnv, e.Env)
+			if e.Env != test.expectedEnv {
+				t.Errorf("expected e.Env to be '%s', got '%s'", test.expectedEnv, e.Env)
 			}
 		})
 	}
@@ -101,14 +101,14 @@ func TestLoadLogConfig(t *testing.T) {
 			logLevel:  "invalid_logLeVeL", expectedLogLevel: zerolog.DebugLevel},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			os.Setenv("LOG_LEVEL", tt.logLevel)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			os.Setenv("LOG_LEVEL", test.logLevel)
 			defer os.Unsetenv("LOG_LEVEL")
-			e := tt.envConfig
+			e := test.envConfig
 			e.LoadLogConfig()
-			if zerolog.GlobalLevel() != tt.expectedLogLevel {
-				t.Errorf("expected zerolog.GlobalLevel() to be '%s', got '%s'", tt.expectedLogLevel, zerolog.GlobalLevel())
+			if zerolog.GlobalLevel() != test.expectedLogLevel {
+				t.Errorf("expected zerolog.GlobalLevel() to be '%s', got '%s'", test.expectedLogLevel, zerolog.GlobalLevel())
 			}
 		})
 	}

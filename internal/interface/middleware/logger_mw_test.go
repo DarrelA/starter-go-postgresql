@@ -51,9 +51,9 @@ func TestLoggerMW(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			app, buf := setupAppAndBuffer(tt.env, tt.requestID, tt.correlationID)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			app, buf := setupAppAndBuffer(test.env, test.requestID, test.correlationID)
 
 			// Create a test request
 			req := httptest.NewRequest("GET", "/", nil)
@@ -67,7 +67,7 @@ func TestLoggerMW(t *testing.T) {
 				t.Fatalf("Expected status '%d' but got '%d'", fiber.StatusOK, resp.StatusCode)
 			}
 
-			checkLogOutput(t, buf, tt.expectedSubString, tt.expectedRequestID, tt.expectedCorrelationID)
+			checkLogOutput(t, buf, test.expectedSubString, test.expectedRequestID, test.expectedCorrelationID)
 		})
 	}
 
@@ -81,10 +81,10 @@ func TestLoggerMW(t *testing.T) {
 			{"5bf7:a43f:402d:e01d:7b5d:071f:5068:62b7", "IPv6"},
 		}
 
-		for _, tt := range tests {
-			value := getIPVersion(tt.ip)
-			if value != tt.expectedValue {
-				t.Fatalf("Expected value '%s' but got '%s'", tt.expectedValue, value)
+		for _, test := range tests {
+			value := getIPVersion(test.ip)
+			if value != test.expectedValue {
+				t.Fatalf("Expected value '%s' but got '%s'", test.expectedValue, value)
 			}
 		}
 	})
