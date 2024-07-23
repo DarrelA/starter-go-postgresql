@@ -33,12 +33,12 @@ func LogCWD() string {
 		callerInfo = caller.Name()
 		log.Debug().Msgf("LogCWD() is called by %s (%s:%d)", callerInfo, file, line)
 	} else {
-		log.Debug().Msg(errMsgFailedToGetCallerInfo)
+		log.Debug().Msg(errMsgFailedToGetCallerInfo) // coverage:ignore
 	}
 
 	cwd, err := os.Getwd()
 	if err != nil {
-		log.Error().Err(err).Msg(errMsgGetWorkingDirectoryError)
+		log.Error().Err(err).Msg(errMsgGetWorkingDirectoryError) // coverage:ignore
 	}
 
 	log.Debug().Msgf("@cwd: %s", cwd)
@@ -50,7 +50,7 @@ func ListFiles() {
 	cmd := exec.Command("ls")
 	output, err := cmd.Output()
 	if err != nil {
-		log.Error().Err(err).Msg(errMsgExecutingCmd)
+		log.Error().Err(err).Msg(errMsgExecutingCmd) // coverage:ignore
 	}
 
 	// Log the output of `ls` command

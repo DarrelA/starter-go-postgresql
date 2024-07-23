@@ -12,6 +12,9 @@ RUN go mod download
 # Copy the source code into the container
 COPY . .
 
+# Install go-ignore-cov
+RUN go install github.com/quantumcycle/go-ignore-cov@latest
+
 # Set the build argument for the environment
 ARG APP_ENV
 ENV APP_ENV=${APP_ENV}
@@ -21,4 +24,5 @@ ENV APP_ENV=${APP_ENV}
 ENTRYPOINT ["sh", "-c", \
     "echo Running test in APP_ENV=${APP_ENV} && \
     APP_ENV=${APP_ENV} go test ./... -coverprofile=coverage.out && \
+    go-ignore-cov --file coverage.out && \
     go tool cover -html=coverage.out -o /docker_wd/test/reports/coverage.html"]

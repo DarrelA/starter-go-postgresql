@@ -33,7 +33,7 @@ func LoggerMW(c *fiber.Ctx) error {
 
 	hostname, hostnameErr := os.Hostname()
 	if hostnameErr != nil {
-		log.Error().Err(hostnameErr).Msg(errMsgInvalidHostname)
+		log.Error().Err(hostnameErr).Msg(errMsgInvalidHostname) // coverage:ignore
 	}
 
 	currentEnv, ok := c.Locals("env").(string)
