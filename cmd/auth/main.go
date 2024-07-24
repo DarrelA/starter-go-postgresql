@@ -13,7 +13,7 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/postgres"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/redis"
-	jwt "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/jwt/service"
+	jwt "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/jwt"
 	envLogger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
 	logger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger/zerolog"
 	"github.com/DarrelA/starter-go-postgresql/internal/interface/factory"
