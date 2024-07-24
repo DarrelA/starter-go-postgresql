@@ -53,7 +53,25 @@ func TestLoggerMW(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			app, buf := setupAppAndBuffer(test.env, test.requestID, test.correlationID)
+			app := fiber.New()
+
+			// Set up a buffer to capture log output
+			var buf bytes.Buffer
+			log.Logger = log.Output(&buf)
+			zerolog.SetGlobalLevel(zerolog.InfoLevel)
+
+			// Add required context to the app via middleware
+			app.Use(func(c *fiber.Ctx) error {
+				c.Locals("requestID", test.requestID)
+				c.Locals("correlationID", test.correlationID)
+				c.Locals("env", test.env)
+				return c.Next()
+			})
+
+			// Define a test route
+			app.Get("/", LoggerMW, func(c *fiber.Ctx) error {
+				return c.SendString("Hello, World!")
+			})
 
 			// Create a test request
 			req := httptest.NewRequest("GET", "/", nil)
@@ -67,7 +85,18 @@ func TestLoggerMW(t *testing.T) {
 				t.Errorf("Expected status '%d' but got '%d'", fiber.StatusOK, resp.StatusCode)
 			}
 
-			checkLogOutput(t, buf, test.expectedSubString, test.expectedRequestID, test.expectedCorrelationID)
+			logOutput := buf.String()
+			if !strings.Contains(logOutput, test.expectedSubString) {
+				t.Errorf("Expected '%s' not found in log output: %s", test.expectedSubString, logOutput)
+			}
+			if test.expectedRequestID != "" && !strings.Contains(logOutput, test.expectedRequestID) {
+				t.Errorf("Expected requestID '%s' not found in log output: %s", test.expectedRequestID, logOutput)
+			}
+			if test.expectedCorrelationID != "" && !strings.Contains(logOutput, test.expectedCorrelationID) {
+				t.Errorf("Expected correlationID '%s' not found in log output: %s", test.expectedCorrelationID, logOutput)
+			}
+			// Reset the logger to its default output
+			log.Logger = log.Output(os.Stdout)
 		})
 	}
 
@@ -88,48 +117,4 @@ func TestLoggerMW(t *testing.T) {
 			}
 		}
 	})
-}
-
-func setupAppAndBuffer(env any, requestID any, correlationID any) (
-	*fiber.App, *bytes.Buffer) {
-	app := fiber.New()
-
-	// Set up a buffer to capture log output
-	var buf bytes.Buffer
-	log.Logger = log.Output(&buf)
-	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-
-	// Add required context to the app via middleware
-	app.Use(func(c *fiber.Ctx) error {
-		c.Locals("requestID", requestID)
-		c.Locals("correlationID", correlationID)
-		c.Locals("env", env)
-		return c.Next()
-	})
-	app.Use(LoggerMW)
-
-	// Define a test route
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
-
-	return app, &buf
-}
-
-func checkLogOutput(
-	t *testing.T, buf *bytes.Buffer, expectedSubString string,
-	expectedRequestID string, expectedCorrelationID string,
-) {
-	logOutput := buf.String()
-	if !strings.Contains(logOutput, expectedSubString) {
-		t.Errorf("Expected '%s' not found in log output: %s", expectedSubString, logOutput)
-	}
-	if expectedRequestID != "" && !strings.Contains(logOutput, expectedRequestID) {
-		t.Errorf("Expected requestID '%s' not found in log output: %s", expectedRequestID, logOutput)
-	}
-	if expectedCorrelationID != "" && !strings.Contains(logOutput, expectedCorrelationID) {
-		t.Errorf("Expected correlationID '%s' not found in log output: %s", expectedCorrelationID, logOutput)
-	}
-	// Reset the logger to its default output
-	log.Logger = log.Output(os.Stdout)
 }
