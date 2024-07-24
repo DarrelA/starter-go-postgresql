@@ -37,7 +37,7 @@ func TestCorrelationAndRequestID(t *testing.T) {
 	req := httptest.NewRequest("GET", "/id", nil)
 	resp, err := app.Test(req)
 	if err != nil {
-		t.Fatalf("CorrelationAndRequestID middleware test failed: %v", err)
+		t.Errorf("CorrelationAndRequestID middleware test failed: %v", err)
 	}
 
 	defer resp.Body.Close()
@@ -45,12 +45,12 @@ func TestCorrelationAndRequestID(t *testing.T) {
 	var respBody map[string]interface{}
 	decodeErr := json.NewDecoder(resp.Body).Decode(&respBody)
 	if decodeErr != nil {
-		t.Fatalf("Failed to decode response body: %v", err)
+		t.Errorf("Failed to decode response body: %v", err)
 	}
 
 	requestID, ok := respBody["requestID"].(string)
 	if !ok {
-		t.Fatalf("Failed to get requestID from response body")
+		t.Errorf("Failed to get requestID from response body")
 	}
 	if requestID == "" {
 		t.Fatal("Expected requestID but got an empty string")
@@ -58,7 +58,7 @@ func TestCorrelationAndRequestID(t *testing.T) {
 
 	correlationID, ok := respBody["correlationID"].(string)
 	if !ok {
-		t.Fatalf("Failed to get correlationID from response body")
+		t.Errorf("Failed to get correlationID from response body")
 	}
 	if correlationID == "" {
 		t.Fatal("Expected correlationID but got an empty string")

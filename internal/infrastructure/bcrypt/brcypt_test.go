@@ -18,24 +18,24 @@ func TestHashPassword(t *testing.T) {
 		hashedPassword, err := HashPassword(password)
 
 		if err != nil {
-			t.Fatalf("Expected no error, got %v", err)
+			t.Errorf("Expected no error, got %v", err)
 		}
 
 		if hashedPassword == "" {
-			t.Fatalf("Expected hashed password, got empty string")
+			t.Errorf("Expected hashed password, got empty string")
 		}
 
 		// Verify that the hashed password can be used to compare with the original password
 		err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 		if err != nil {
-			t.Fatalf("Expected the hashed password to match the original password, got error: %v", err)
+			t.Errorf("Expected the hashed password to match the original password, got error: %v", err)
 		}
 	})
 
 	t.Run("bcrypt error", func(t *testing.T) {
 		_, err := HashPassword(generateLongPassword(80))
 		if err == nil {
-			t.Fatalf("Expected an error, got nil")
+			t.Errorf("Expected an error, got nil")
 		}
 	})
 }
@@ -44,23 +44,23 @@ func TestVerifyPassword(t *testing.T) {
 	hashedPassword, err := HashPassword(password)
 
 	if err != nil {
-		t.Fatalf("Expected no error, got %v", err)
+		t.Errorf("Expected no error, got %v", err)
 	}
 
 	err = VerifyPassword(hashedPassword, password)
 	if err != nil {
-		t.Fatalf("Expected no error, got %v", err)
+		t.Errorf("Expected no error, got %v", err)
 	}
 
 	// Test with incorrect password
 	err = VerifyPassword(hashedPassword, incorrectPassword)
 	if err == nil {
-		t.Fatalf("Expected error, got nil")
+		t.Errorf("Expected error, got nil")
 	}
 
 	expectedErr := errors.New(errConst.ErrMsgInvalidCredentials)
 	if err.Error() != expectedErr.Error() {
-		t.Fatalf("Expected error %v, got %v", expectedErr, err)
+		t.Errorf("Expected error %v, got %v", expectedErr, err)
 	}
 }
 

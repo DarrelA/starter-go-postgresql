@@ -35,7 +35,7 @@ func createRequest(t *testing.T, test testCase) *http.Request {
 	if test.payload != nil {
 		payloadBytes, err := json.Marshal(test.payload)
 		if err != nil {
-			t.Fatalf("Failed to marshal payload: %v", err)
+			t.Errorf("Failed to marshal payload: %v", err)
 		}
 		req := httptest.NewRequest("POST", test.url, bytes.NewReader(payloadBytes))
 		req.Header.Set("Content-Type", "application/json")
@@ -51,7 +51,7 @@ func createDummyRequest(t *testing.T, test testCase) *http.Request {
 	}
 	payloadBytes, err := json.Marshal(test.payload)
 	if err != nil {
-		t.Fatalf("failed to marshal payload: %v", err)
+		t.Errorf("failed to marshal payload: %v", err)
 	}
 	req := httptest.NewRequest("POST", "/dummy", bytes.NewReader(payloadBytes))
 	req.Header.Set("Content-Type", "application/json")
@@ -61,7 +61,7 @@ func createDummyRequest(t *testing.T, test testCase) *http.Request {
 // assertResponse asserts the response of the dummy request
 func assertResponse(t *testing.T, resp *http.Response, test testCase) {
 	if resp.StatusCode != test.expectedStatus {
-		t.Fatalf("expected status %d but got %d", test.expectedStatus, resp.StatusCode)
+		t.Errorf("expected status %d but got %d", test.expectedStatus, resp.StatusCode)
 	}
 
 	if test.invalidJSON {
@@ -76,16 +76,16 @@ func assertInvalidJSONResponse(t *testing.T, resp *http.Response, expectedError 
 	var respBody map[string]interface{}
 	err := json.NewDecoder(resp.Body).Decode(&respBody)
 	if err != nil {
-		t.Fatalf("failed to decode response body: %v", err)
+		t.Errorf("failed to decode response body: %v", err)
 	}
 
 	errorMsg, ok := respBody["error"].(map[string]interface{})["message"].(string)
 	if !ok {
-		t.Fatalf("failed to get error message from response body")
+		t.Errorf("failed to get error message from response body")
 	}
 
 	if errorMsg != expectedError {
-		t.Fatalf("expected error message '%s' but got '%s'", expectedError, errorMsg)
+		t.Errorf("expected error message '%s' but got '%s'", expectedError, errorMsg)
 	}
 }
 
@@ -94,10 +94,10 @@ func assertValidJSONResponse(t *testing.T, resp *http.Response, expectedPayload 
 	result := reflect.New(reflect.TypeOf(expectedPayload)).Interface()
 	err := json.NewDecoder(resp.Body).Decode(result)
 	if err != nil {
-		t.Fatalf("failed to decode response: %v", err)
+		t.Errorf("failed to decode response: %v", err)
 	}
 
 	if !reflect.DeepEqual(expectedPayload, reflect.ValueOf(result).Elem().Interface()) {
-		t.Fatalf("expected payload %+v but got %+v", expectedPayload, reflect.ValueOf(result).Elem().Interface())
+		t.Errorf("expected payload %+v but got %+v", expectedPayload, reflect.ValueOf(result).Elem().Interface())
 	}
 }

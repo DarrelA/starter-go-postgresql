@@ -59,12 +59,12 @@ func TestLoggerMW(t *testing.T) {
 			req := httptest.NewRequest("GET", "/", nil)
 			resp, err := app.Test(req)
 			if err != nil {
-				t.Fatalf("LoggerMW test failed: %v", err)
+				t.Errorf("LoggerMW test failed: %v", err)
 			}
 
 			// Ensure response status code is 200 OK
 			if resp.StatusCode != fiber.StatusOK {
-				t.Fatalf("Expected status '%d' but got '%d'", fiber.StatusOK, resp.StatusCode)
+				t.Errorf("Expected status '%d' but got '%d'", fiber.StatusOK, resp.StatusCode)
 			}
 
 			checkLogOutput(t, buf, test.expectedSubString, test.expectedRequestID, test.expectedCorrelationID)
@@ -84,7 +84,7 @@ func TestLoggerMW(t *testing.T) {
 		for _, test := range tests {
 			value := getIPVersion(test.ip)
 			if value != test.expectedValue {
-				t.Fatalf("Expected value '%s' but got '%s'", test.expectedValue, value)
+				t.Errorf("Expected value '%s' but got '%s'", test.expectedValue, value)
 			}
 		}
 	})

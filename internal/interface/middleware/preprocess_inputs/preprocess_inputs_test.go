@@ -31,7 +31,7 @@ func TestPreProcessInputs(t *testing.T) {
 			req := createRequest(t, test)
 			resp, err := app.Test(req)
 			if err != nil {
-				t.Fatalf("An error occurred: %v", err)
+				t.Errorf("An error occurred: %v", err)
 			}
 
 			defer resp.Body.Close()
@@ -39,7 +39,7 @@ func TestPreProcessInputs(t *testing.T) {
 			var respBody map[string]interface{}
 			err = json.NewDecoder(resp.Body).Decode(&respBody)
 			if err != nil {
-				t.Fatalf("Failed to decode response body: %v", err)
+				t.Errorf("Failed to decode response body: %v", err)
 			}
 
 			if test.expectedErrorMsg != "" {
@@ -54,10 +54,10 @@ func TestPreProcessInputs(t *testing.T) {
 
 				email, ok := respBody["email"].(string)
 				if !ok {
-					t.Fatalf("Failed to get email from response body")
+					t.Errorf("Failed to get email from response body")
 				}
 				if email != test.expectedEmail {
-					t.Fatalf("Expected email '%s' but got '%s'", test.expectedEmail, email)
+					t.Errorf("Expected email '%s' but got '%s'", test.expectedEmail, email)
 				}
 			}
 		})
@@ -68,7 +68,7 @@ func TestPreProcessInputs(t *testing.T) {
 			t.Run(test.name, func(t *testing.T) {
 				normalizePath := normalizePath(test.path)
 				if normalizePath != test.expectedValue {
-					t.Fatalf("Expected value '%s' but got '%s'", test.expectedValue, normalizePath)
+					t.Errorf("Expected value '%s' but got '%s'", test.expectedValue, normalizePath)
 				}
 			})
 		}
@@ -99,7 +99,7 @@ func TestParseAndSanitize(t *testing.T) {
 			req := createDummyRequest(t, test)
 			resp, err := app.Test(req)
 			if err != nil {
-				t.Fatalf("An error occurred: %v", err)
+				t.Errorf("An error occurred: %v", err)
 			}
 
 			assertResponse(t, resp, test)
@@ -112,10 +112,10 @@ func TestParseAndSanitize(t *testing.T) {
 				sanitizeHelper(&test.registerPayload)
 				sanitizeHelper(&test.loginPayload)
 				if test.registerPayload != test.expectedSanitizedRP {
-					t.Fatalf("Expected value '%s' but got '%s'", test.expectedSanitizedRP, test.registerPayload)
+					t.Errorf("Expected value '%s' but got '%s'", test.expectedSanitizedRP, test.registerPayload)
 				}
 				if test.loginPayload != test.expectedSanitizedLP {
-					t.Fatalf("Expected value '%s' but got '%s'", test.expectedSanitizedLP, test.loginPayload)
+					t.Errorf("Expected value '%s' but got '%s'", test.expectedSanitizedLP, test.loginPayload)
 				}
 			})
 		}
@@ -134,14 +134,14 @@ func TestValidateStruct(t *testing.T) {
 			if test.expectedErrMsg == "" {
 				// Expect no error
 				if err != nil {
-					t.Fatalf("Expected no error but got '%s'", err.Error())
+					t.Errorf("Expected no error but got '%s'", err.Error())
 				}
 			} else {
 				if err == nil {
-					t.Fatalf("Expected an error but got nil")
+					t.Errorf("Expected an error but got nil")
 				}
 				if !strings.Contains(err.Error(), test.expectedErrMsg) {
-					t.Fatalf("Expected error message to contain '%s' but got '%s'", test.expectedErrMsg, err.Error())
+					t.Errorf("Expected error message to contain '%s' but got '%s'", test.expectedErrMsg, err.Error())
 				}
 			}
 		})
@@ -151,7 +151,7 @@ func TestValidateStruct(t *testing.T) {
 		for _, test := range camelToSnakeCaseTests {
 			value := camelToSnakeCase(test.str)
 			if value != test.expectedValue {
-				t.Fatalf("Expected value '%s' but got '%s'", test.expectedValue, value)
+				t.Errorf("Expected value '%s' but got '%s'", test.expectedValue, value)
 			}
 		}
 	})
@@ -165,7 +165,7 @@ func TestValidatePassword(t *testing.T) {
 		}
 		value := validatePassword(mockFieldLevel)
 		if value != test.expectedValue {
-			t.Fatalf("Expected value '%v' but got '%v' for password '%s'", test.expectedValue, value, test.password)
+			t.Errorf("Expected value '%v' but got '%v' for password '%s'", test.expectedValue, value, test.password)
 		}
 	}
 }

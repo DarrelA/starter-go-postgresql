@@ -17,22 +17,22 @@ func TestNewTokenService(t *testing.T) {
 			tokenService := NewTokenService()
 			userUUID, err := uuid.NewV7()
 			if err != nil {
-				t.Fatalf("Failed to create userUUID: %v", err)
+				t.Errorf("Failed to create userUUID: %v", err)
 			}
 
 			if test.validPrivateKey && test.validPublicKey {
 				testToken, err := tokenService.CreateToken(userUUID.String(), testTTL, test.privateKey)
 				if err != nil {
-					t.Fatalf("Failed to CreateToken: %v", err)
+					t.Errorf("Failed to CreateToken: %v", err)
 				}
 
 				validatedToken, err := tokenService.ValidateToken(*testToken.Token, test.publicKey)
 				if err != nil {
-					t.Fatalf("Failed to ValidateToken: %v", err)
+					t.Errorf("Failed to ValidateToken: %v", err)
 				}
 
 				if validatedToken == nil {
-					t.Fatalf("Token validation failed")
+					t.Errorf("Token validation failed")
 				}
 			}
 
@@ -53,7 +53,7 @@ func TestNewTokenService(t *testing.T) {
 			if test.validPrivateKey && !test.validPublicKey {
 				testToken, err := tokenService.CreateToken(userUUID.String(), testTTL, test.privateKey)
 				if err != nil {
-					t.Fatalf("Failed to CreateToken: %v", err)
+					t.Errorf("Failed to CreateToken: %v", err)
 				}
 
 				_, err = tokenService.ValidateToken(*testToken.Token, test.publicKey)
