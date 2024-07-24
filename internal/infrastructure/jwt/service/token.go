@@ -41,7 +41,7 @@ func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateK
 	}
 
 	id, err := uuid.NewV7()
-	if err != nil {
+	if err != nil { // coverage:ignore
 		log.Error().Err(err).Msg(errConst.ErrUUIDError)
 		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
 	}
