@@ -2,20 +2,37 @@ package middleware
 
 import (
 	"io"
+	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	"github.com/gofiber/fiber/v2"
 )
 
 // TestPreProcessInputs tests the PreProcessInputs middleware
 func TestPreProcessInputs(t *testing.T) {
-	app := setupFiberTestApp()
+	app := fiber.New()
+
+	// A middleware that mocks setting baseURLsConfig in Locals
+	app.Use(func(c *fiber.Ctx) error {
+		c.Locals("baseURLsConfig", &entity.BaseURLsConfig{
+			AuthServicePathName: authServicePathName,
+		})
+		return c.Next()
+	})
+
+	app.Use(PreProcessInputs)
+	app.Post(authServicePathName+"/register", registerHandler)
+	app.Post(authServicePathName+"/login", loginHandler)
 
 	for _, test := range preProcessInputsTests {
 		t.Run(test.name, func(t *testing.T) {
-			req := createPreProcessInputsTestRequest(t, test)
-			resp := performAppTest(t, app, req)
+			req := createRequest(t, test)
+			resp, err := app.Test(req)
+			if err != nil {
+				t.Fatalf("An error occurred: %v", err)
+			}
 
 			body, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -55,8 +72,28 @@ func TestParseAndSanitize(t *testing.T) {
 	for _, test := range parseAndSanitizeTests {
 		t.Run(test.name, func(t *testing.T) {
 			app := fiber.New()
-			createDummyRoute(app, test)
-			resp := createParseAndSanitizeTestRequest(t, app, test)
+			app.Post("/dummy", func(c *fiber.Ctx) error {
+				if test.invalidJSON {
+					var invalidPayload interface{}
+					if err := parseAndSanitize(c, invalidPayload); err != nil {
+						return err
+					}
+				} else {
+					payload := reflect.New(reflect.TypeOf(test.payload).Elem()).Interface()
+					if err := parseAndSanitize(c, payload); err != nil {
+						return err
+					}
+					return c.JSON(payload)
+				}
+				return nil
+			})
+
+			req := createDummyRequest(t, test)
+			resp, err := app.Test(req)
+			if err != nil {
+				t.Fatalf("An error occurred: %v", err)
+			}
+
 			assertResponse(t, resp, test)
 		})
 	}
