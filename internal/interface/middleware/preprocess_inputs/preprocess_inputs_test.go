@@ -36,14 +36,14 @@ func TestPreProcessInputs(t *testing.T) {
 
 			defer resp.Body.Close()
 
-			var responseBody map[string]interface{}
-			err = json.NewDecoder(resp.Body).Decode(&responseBody)
+			var respBody map[string]interface{}
+			err = json.NewDecoder(resp.Body).Decode(&respBody)
 			if err != nil {
 				t.Fatalf("Failed to decode response body: %v", err)
 			}
 
 			if test.expectedErrorMsg != "" {
-				errorMsg, ok := responseBody["error"].(map[string]interface{})["message"].(string)
+				errorMsg, ok := respBody["error"].(map[string]interface{})["message"].(string)
 				if !ok || !strings.Contains(errorMsg, test.expectedErrorMsg) {
 					t.Errorf("Expected error message to contain %q, got %q", test.expectedErrorMsg, errorMsg)
 				}
@@ -52,7 +52,7 @@ func TestPreProcessInputs(t *testing.T) {
 					t.Errorf("Expected status code %d, got %d.", fiber.StatusOK, resp.StatusCode)
 				}
 
-				email, ok := responseBody["email"].(string)
+				email, ok := respBody["email"].(string)
 				if !ok {
 					t.Fatalf("Failed to get email from response body")
 				}

@@ -73,13 +73,13 @@ func assertResponse(t *testing.T, resp *http.Response, test testCase) {
 
 // assertInvalidJSONResponse asserts the response for an invalid JSON request
 func assertInvalidJSONResponse(t *testing.T, resp *http.Response, expectedError string) {
-	var responseBody map[string]interface{}
-	err := json.NewDecoder(resp.Body).Decode(&responseBody)
+	var respBody map[string]interface{}
+	err := json.NewDecoder(resp.Body).Decode(&respBody)
 	if err != nil {
 		t.Fatalf("failed to decode response body: %v", err)
 	}
 
-	errorMsg, ok := responseBody["error"].(map[string]interface{})["message"].(string)
+	errorMsg, ok := respBody["error"].(map[string]interface{})["message"].(string)
 	if !ok {
 		t.Fatalf("failed to get error message from response body")
 	}

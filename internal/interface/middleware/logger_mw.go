@@ -19,15 +19,15 @@ func LoggerMW(c *fiber.Ctx) error {
 	duration := time.Since(start)
 	ip := c.IP()
 
-	request_id, ok := c.Locals("request_id").(string)
+	requestID, ok := c.Locals("requestID").(string)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": request_id")
+		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": requestID")
 		log.Error().Err(err).Msg("")
 	}
 
-	correlation_id, ok := c.Locals("correlation_id").(string)
+	correlationID, ok := c.Locals("correlationID").(string)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": correlation_id")
+		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": correlationID")
 		log.Error().Err(err).Msg("")
 	}
 
@@ -56,8 +56,8 @@ func LoggerMW(c *fiber.Ctx) error {
 			Str("ip_address", ip).
 			Str("ip_version", getIPVersion(ip)).
 			Str("user_agent", c.Get("User-Agent")).
-			Str("correlation_id", correlation_id).
-			Str("request_id", request_id).
+			Str("correlationID", correlationID).
+			Str("requestID", requestID).
 			Msgf("request is completed in [%s] env", currentEnv)
 
 	case "dev":
@@ -84,8 +84,8 @@ func LoggerMW(c *fiber.Ctx) error {
 			Str("ip_address", ip).
 			Str("ip_version", getIPVersion(ip)).
 			Str("user_agent", c.Get("User-Agent")).
-			Str("correlation_id", correlation_id).
-			Str("request_id", request_id).
+			Str("correlationID", correlationID).
+			Str("requestID", requestID).
 			Msgf("request is completed in [%s] env", currentEnv)
 	}
 

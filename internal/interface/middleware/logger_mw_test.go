@@ -36,12 +36,12 @@ func TestLoggerMW(t *testing.T) {
 		},
 		{
 			name: "invalidRequestID", env: "test", requestID: 0, correlationID: "test-correlation-id",
-			expectedSubString: "status 400: type error: request_id",
+			expectedSubString: "status 400: type error: requestID",
 			expectedRequestID: "", expectedCorrelationID: "",
 		},
 		{
 			name: "invalidCorrelationID", env: "test", requestID: "test-request-id", correlationID: 0,
-			expectedSubString: "status 400: type error: correlation_id",
+			expectedSubString: "status 400: type error: correlationID",
 			expectedRequestID: "", expectedCorrelationID: "",
 		},
 		{
@@ -101,8 +101,8 @@ func setupAppAndBuffer(env any, requestID any, correlationID any) (
 
 	// Add required context to the app via middleware
 	app.Use(func(c *fiber.Ctx) error {
-		c.Locals("request_id", requestID)
-		c.Locals("correlation_id", correlationID)
+		c.Locals("requestID", requestID)
+		c.Locals("correlationID", correlationID)
 		c.Locals("env", env)
 		return c.Next()
 	})
@@ -125,10 +125,10 @@ func checkLogOutput(
 		t.Errorf("Expected '%s' not found in log output: %s", expectedSubString, logOutput)
 	}
 	if expectedRequestID != "" && !strings.Contains(logOutput, expectedRequestID) {
-		t.Errorf("Expected request_id '%s' not found in log output: %s", expectedRequestID, logOutput)
+		t.Errorf("Expected requestID '%s' not found in log output: %s", expectedRequestID, logOutput)
 	}
 	if expectedCorrelationID != "" && !strings.Contains(logOutput, expectedCorrelationID) {
-		t.Errorf("Expected correlation_id '%s' not found in log output: %s", expectedCorrelationID, logOutput)
+		t.Errorf("Expected correlationID '%s' not found in log output: %s", expectedCorrelationID, logOutput)
 	}
 	// Reset the logger to its default output
 	log.Logger = log.Output(os.Stdout)

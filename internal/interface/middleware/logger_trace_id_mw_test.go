@@ -14,21 +14,21 @@ import (
 func TestCorrelationAndRequestID(t *testing.T) {
 	app := fiber.New()
 	app.Get("/id", CorrelationAndRequestID, func(c *fiber.Ctx) error {
-		request_id, ok := c.Locals("request_id").(string)
+		requestID, ok := c.Locals("requestID").(string)
 		if !ok {
-			err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": request_id")
+			err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": requestID")
 			log.Error().Err(err).Msg("")
 		}
 
-		correlation_id, ok := c.Locals("correlation_id").(string)
+		correlationID, ok := c.Locals("correlationID").(string)
 		if !ok {
-			err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": correlation_id")
+			err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": correlationID")
 			log.Error().Err(err).Msg("")
 		}
 
 		resp := map[string]string{
-			"requestID":     request_id,
-			"correlationID": correlation_id,
+			"requestID":     requestID,
+			"correlationID": correlationID,
 		}
 
 		return c.JSON(resp)
@@ -42,13 +42,13 @@ func TestCorrelationAndRequestID(t *testing.T) {
 
 	defer resp.Body.Close()
 
-	var responseBody map[string]interface{}
-	decodeErr := json.NewDecoder(resp.Body).Decode(&responseBody)
+	var respBody map[string]interface{}
+	decodeErr := json.NewDecoder(resp.Body).Decode(&respBody)
 	if decodeErr != nil {
 		t.Fatalf("Failed to decode response body: %v", err)
 	}
 
-	requestID, ok := responseBody["requestID"].(string)
+	requestID, ok := respBody["requestID"].(string)
 	if !ok {
 		t.Fatalf("Failed to get requestID from response body")
 	}
@@ -56,7 +56,7 @@ func TestCorrelationAndRequestID(t *testing.T) {
 		t.Fatal("Expected requestID but got an empty string")
 	}
 
-	correlationID, ok := responseBody["correlationID"].(string)
+	correlationID, ok := respBody["correlationID"].(string)
 	if !ok {
 		t.Fatalf("Failed to get correlationID from response body")
 	}

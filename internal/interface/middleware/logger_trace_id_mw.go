@@ -8,12 +8,12 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const correlation_id = "Correlation-ID"
-const request_id = "Request-ID"
+const correlationID = "Correlation-ID"
+const requestID = "Request-ID"
 
 func CorrelationAndRequestID(c *fiber.Ctx) error {
-	correlationID := c.Get(correlation_id)
-	requestID := c.Get(request_id)
+	correlationID := c.Get(correlationID)
+	requestID := c.Get(requestID)
 
 	if correlationID == "" {
 		id, err := uuid.NewV7()
@@ -23,7 +23,7 @@ func CorrelationAndRequestID(c *fiber.Ctx) error {
 		}
 
 		correlationID = id.String()
-		c.Set(correlation_id, correlationID)
+		c.Set(correlationID, correlationID)
 	}
 
 	if requestID == "" {
@@ -34,11 +34,11 @@ func CorrelationAndRequestID(c *fiber.Ctx) error {
 		}
 
 		requestID = id.String()
-		c.Set(request_id, requestID)
+		c.Set(requestID, requestID)
 	}
 
-	c.Locals("correlation_id", correlationID)
-	c.Locals("request_id", requestID)
+	c.Locals("correlationID", correlationID)
+	c.Locals("requestID", requestID)
 
 	return c.Next()
 }
