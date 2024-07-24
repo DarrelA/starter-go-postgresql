@@ -9,11 +9,11 @@ WORKDIR /docker_wd
 COPY go.mod go.sum ./
 RUN go mod download
 
+# Install go-ignore-cov separately for caching
+RUN go install github.com/quantumcycle/go-ignore-cov@latest
+
 # Copy the source code into the container
 COPY . .
-
-# Install go-ignore-cov
-RUN go install github.com/quantumcycle/go-ignore-cov@latest
 
 # Set the build argument for the environment
 ARG APP_ENV
