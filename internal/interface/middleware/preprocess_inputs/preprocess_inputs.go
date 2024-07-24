@@ -44,11 +44,11 @@ func PreProcessInputs(c *fiber.Ctx) error {
 	case authServicePathName + "/register":
 		var payload dto.RegisterInput
 		if err := parseAndSanitize(c, &payload); err != nil {
-			return err
+			return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 		}
 
 		if err := validateStruct(&payload); err != nil {
-			return err
+			return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 		}
 
 		c.Locals("register_payload", payload)
@@ -56,11 +56,11 @@ func PreProcessInputs(c *fiber.Ctx) error {
 	case authServicePathName + "/login":
 		var payload dto.LoginInput
 		if err := parseAndSanitize(c, &payload); err != nil {
-			return err
+			return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 		}
 
 		if err := validateStruct(&payload); err != nil {
-			return err
+			return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 		}
 
 		c.Locals("login_payload", payload)
@@ -89,12 +89,13 @@ Parameters:
   - `c`: The Fiber context, which contains the HTTP request and response information.
   - `payload`: A pointer to a struct that will be filled with the parsed request body data.
 */
-func parseAndSanitize(c *fiber.Ctx, payload interface{}) error {
+func parseAndSanitize(c *fiber.Ctx, payload interface{}) *restDomainErr.RestErr {
 	log.Debug().Msgf("The type of payload interface{} is %s\n", reflect.TypeOf(payload))
 	// Parse the request body into the provided payload structure
 	if err := c.BodyParser(payload); err != nil {
-		err := restInterfaceErr.NewUnprocessableEntityError(errInvalidJSON)
-		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
+		// err := restInterfaceErr.NewUnprocessableEntityError(errInvalidJSON)
+		// return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
+		return restInterfaceErr.NewUnprocessableEntityError(errInvalidJSON)
 	}
 
 	sanitizeHelper(payload)

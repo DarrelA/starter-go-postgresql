@@ -52,13 +52,13 @@ var preProcessInputsTests = []testCase{
 		name:             "Failed to parse and sanitize register payload",
 		url:              authServicePathName + "/register",
 		payload:          nil, // This would simulate invalid JSON or payload
-		expectedErrorMsg: "validation error:",
+		expectedErrorMsg: "invalid json body",
 	},
 	{
 		name:             "Failed to parse and sanitize login payload",
 		url:              authServicePathName + "/login",
 		payload:          nil, // This would simulate invalid JSON or payload
-		expectedErrorMsg: "validation error:",
+		expectedErrorMsg: "invalid json body",
 	},
 	{
 		name: "Failed to validate register payload",

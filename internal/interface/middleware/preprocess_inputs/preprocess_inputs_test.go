@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"io"
+	"encoding/json"
 	"reflect"
 	"strings"
 	"testing"
@@ -34,23 +34,31 @@ func TestPreProcessInputs(t *testing.T) {
 				t.Fatalf("An error occurred: %v", err)
 			}
 
-			body, err := io.ReadAll(resp.Body)
+			defer resp.Body.Close()
+
+			var responseBody map[string]interface{}
+			err = json.NewDecoder(resp.Body).Decode(&responseBody)
 			if err != nil {
-				t.Fatalf("Failed to read response body: %v", err)
+				t.Fatalf("Failed to decode response body: %v", err)
 			}
 
 			if test.expectedErrorMsg != "" {
-				if !strings.Contains(string(body), test.expectedErrorMsg) {
-					t.Errorf("Expected error message to contain %q, got %q", test.expectedErrorMsg, string(body))
+				errorMsg, ok := responseBody["error"].(map[string]interface{})["message"].(string)
+				if !ok || !strings.Contains(errorMsg, test.expectedErrorMsg) {
+					t.Errorf("Expected error message to contain %q, got %q", test.expectedErrorMsg, errorMsg)
 				}
-			}
+			} else {
+				if resp.StatusCode != fiber.StatusOK {
+					t.Errorf("Expected status code %d, got %d.", fiber.StatusOK, resp.StatusCode)
+				}
 
-			if resp.StatusCode != fiber.StatusOK && test.expectedErrorMsg == "" {
-				t.Errorf("Expected status code %d, got %d.", fiber.StatusOK, resp.StatusCode)
-			}
-
-			if test.expectedErrorMsg == "" {
-				assertEmail(t, body, test.expectedEmail)
+				email, ok := responseBody["email"].(string)
+				if !ok {
+					t.Fatalf("Failed to get email from response body")
+				}
+				if email != test.expectedEmail {
+					t.Fatalf("Expected email '%s' but got '%s'", test.expectedEmail, email)
+				}
 			}
 		})
 	}
@@ -76,12 +84,12 @@ func TestParseAndSanitize(t *testing.T) {
 				if test.invalidJSON {
 					var invalidPayload interface{}
 					if err := parseAndSanitize(c, invalidPayload); err != nil {
-						return err
+						return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 					}
 				} else {
 					payload := reflect.New(reflect.TypeOf(test.payload).Elem()).Interface()
 					if err := parseAndSanitize(c, payload); err != nil {
-						return err
+						return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 					}
 					return c.JSON(payload)
 				}

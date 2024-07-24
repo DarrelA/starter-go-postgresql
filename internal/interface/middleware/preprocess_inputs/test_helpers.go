@@ -44,23 +44,6 @@ func createRequest(t *testing.T, test testCase) *http.Request {
 	return httptest.NewRequest("POST", test.url, nil)
 }
 
-// assertEmail checks if the email in the response body matches the expected email
-func assertEmail(t *testing.T, body []byte, expectedEmail string) {
-	var responseBody map[string]interface{}
-	err := json.Unmarshal(body, &responseBody)
-	if err != nil {
-		t.Fatalf("Failed to decode response body: %v", err)
-	}
-
-	email, ok := responseBody["email"].(string)
-	if !ok {
-		t.Fatalf("Failed to get email from response body")
-	}
-	if email != expectedEmail {
-		t.Fatalf("Expected email '%s' but got '%s'", expectedEmail, email)
-	}
-}
-
 // createDummyRequest creates a new dummy request based on the test case
 func createDummyRequest(t *testing.T, test testCase) *http.Request {
 	if test.invalidJSON {
@@ -96,13 +79,13 @@ func assertInvalidJSONResponse(t *testing.T, resp *http.Response, expectedError 
 		t.Fatalf("failed to decode response body: %v", err)
 	}
 
-	errorMessage, ok := responseBody["error"].(map[string]interface{})["message"].(string)
+	errorMsg, ok := responseBody["error"].(map[string]interface{})["message"].(string)
 	if !ok {
 		t.Fatalf("failed to get error message from response body")
 	}
 
-	if errorMessage != expectedError {
-		t.Fatalf("expected error message '%s' but got '%s'", expectedError, errorMessage)
+	if errorMsg != expectedError {
+		t.Fatalf("expected error message '%s' but got '%s'", expectedError, errorMsg)
 	}
 }
 
