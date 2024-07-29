@@ -9,6 +9,7 @@ import (
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
 	mw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware"
+	dumw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware/deserialize_user"
 	ppmw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware/preprocess_inputs"
 	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/gofiber/fiber/v2"
@@ -56,7 +57,7 @@ func NewRouter(
 	user.Post("/register", ppmw.PreProcessInputs, authService.Register)
 	user.Post("/login", ppmw.PreProcessInputs, authService.Login)
 
-	authUser := user.Group("/").Use(mw.Deserializer(redisRepo, tokenService, userFactory))
+	authUser := user.Group("/").Use(dumw.Deserializer(redisRepo, tokenService, userFactory))
 	authUser.Get("/logout", authService.Logout)
 	authUser.Get("/me", userService.GetUserRecord)
 
