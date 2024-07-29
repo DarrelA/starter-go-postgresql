@@ -42,10 +42,10 @@ func TestPreProcessInputs(t *testing.T) {
 				t.Errorf("Failed to decode response body: %v", err)
 			}
 
-			if test.expectedErrorMsg != "" {
+			if test.expectedErrMsg != "" {
 				errorMsg, ok := respBody["error"].(map[string]interface{})["message"].(string)
-				if !ok || !strings.Contains(errorMsg, test.expectedErrorMsg) {
-					t.Errorf("Expected error message to contain %q, got %q", test.expectedErrorMsg, errorMsg)
+				if !ok || !strings.Contains(errorMsg, test.expectedErrMsg) {
+					t.Errorf("Expected error message to contain %q, got %q", test.expectedErrMsg, errorMsg)
 				}
 			} else {
 				if resp.StatusCode != fiber.StatusOK {

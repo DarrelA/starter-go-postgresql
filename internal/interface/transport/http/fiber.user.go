@@ -14,7 +14,7 @@ func NewUserService() service.UserService {
 }
 
 func (us *UserService) GetUserRecord(c *fiber.Ctx) error {
-	user_record := c.Locals("user_record").(*dto.UserRecord)
+	userRecord := c.Locals("userRecord").(*dto.UserRecord)
 	return c.Status(fiber.StatusOK).
-		JSON(fiber.Map{"status": "success", "data": fiber.Map{"user_record": user_record}})
+		JSON(fiber.Map{"status": "success", "data": fiber.Map{"userRecord": userRecord}})
 }

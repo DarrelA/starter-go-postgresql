@@ -11,15 +11,15 @@ import (
 const authServicePathName = "/auth/api/v1/users"
 
 type testCase struct {
-	name             string
-	url              string
-	payload          interface{}
-	expectedEmail    string
-	expectedErrorMsg string
-	expectedStatus   int
-	expectedError    string
-	expectedPayload  interface{}
-	invalidJSON      bool
+	name            string
+	url             string
+	payload         interface{}
+	expectedEmail   string
+	expectedErrMsg  string
+	expectedStatus  int
+	expectedError   string
+	expectedPayload interface{}
+	invalidJSON     bool
 }
 
 var preProcessInputsTests = []testCase{
@@ -44,21 +44,21 @@ var preProcessInputsTests = []testCase{
 		expectedEmail: "jiewei@gmail.com",
 	},
 	{
-		name:             "Invalid endpoint",
-		url:              "/auth/invalid",
-		expectedErrorMsg: "invalid endpoint: /auth/invalid",
+		name:           "Invalid endpoint",
+		url:            "/auth/invalid",
+		expectedErrMsg: "invalid endpoint: /auth/invalid",
 	},
 	{
-		name:             "Failed to parse and sanitize register payload",
-		url:              authServicePathName + "/register",
-		payload:          nil, // This would simulate invalid JSON or payload
-		expectedErrorMsg: "invalid json body",
+		name:           "Failed to parse and sanitize register payload",
+		url:            authServicePathName + "/register",
+		payload:        nil, // This would simulate invalid JSON or payload
+		expectedErrMsg: "invalid json body",
 	},
 	{
-		name:             "Failed to parse and sanitize login payload",
-		url:              authServicePathName + "/login",
-		payload:          nil, // This would simulate invalid JSON or payload
-		expectedErrorMsg: "invalid json body",
+		name:           "Failed to parse and sanitize login payload",
+		url:            authServicePathName + "/login",
+		payload:        nil, // This would simulate invalid JSON or payload
+		expectedErrMsg: "invalid json body",
 	},
 	{
 		name: "Failed to validate register payload",
@@ -66,7 +66,7 @@ var preProcessInputsTests = []testCase{
 		payload: dto.RegisterInput{
 			FirstName: "", LastName: "", Email: "invalidEmail", Password: "",
 		},
-		expectedErrorMsg: fmt.Sprintf("the field [%s] should %s\n", "first_name", requiredVM) +
+		expectedErrMsg: fmt.Sprintf("the field [%s] should %s\n", "first_name", requiredVM) +
 			fmt.Sprintf("the field [%s] should %s\n", "last_name", requiredVM) +
 			fmt.Sprintf("the field [%s] should %s\n", "email", emailVM) +
 			fmt.Sprintf("the field [%s] should %s", "password", requiredVM),
@@ -77,7 +77,7 @@ var preProcessInputsTests = []testCase{
 		payload: dto.LoginInput{
 			Email: "invalidEmail", Password: "",
 		},
-		expectedErrorMsg: fmt.Sprintf("the field [%s] should %s\n", "email", emailVM) +
+		expectedErrMsg: fmt.Sprintf("the field [%s] should %s\n", "email", emailVM) +
 			fmt.Sprintf("the field [%s] should %s", "password", requiredVM),
 	},
 }

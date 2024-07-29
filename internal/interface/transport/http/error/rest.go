@@ -27,9 +27,16 @@ func NewUnprocessableEntityError(message string) *restDomainErr.RestErr {
 	}
 }
 
-func NewForbiddenError(message string) *restDomainErr.RestErr {
+func NewUnauthorizedError(message string) *restDomainErr.RestErr {
 	return &restDomainErr.RestErr{
 		Message: message,
-		Status:  http.StatusForbidden,
+		Status:  http.StatusUnauthorized,
+	}
+}
+
+func NewBadGatewayError(message string) *restDomainErr.RestErr {
+	return &restDomainErr.RestErr{
+		Message: message,
+		Status:  http.StatusBadGateway,
 	}
 }

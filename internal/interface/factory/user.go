@@ -68,7 +68,7 @@ func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse,
 	return userResponse, nil
 }
 
-func (uf *UserFactory) GetUser(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr) {
+func (uf *UserFactory) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr) {
 	result := &entity.User{Email: u.Email}
 	if err := uf.ur.GetUserByEmail(result); err != nil {
 		return nil, err

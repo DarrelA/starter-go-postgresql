@@ -103,14 +103,14 @@ func (ts *TokenService) ValidateToken(tokenStr string, publicKey string) (
 
 	if err != nil {
 		log.Error().Err(err).Msg(errConst.ErrMsgInvalidToken)
-		return nil, restInterfaceErr.NewForbiddenError(errConst.ErrMsgPleaseLoginAgain)
+		return nil, restInterfaceErr.NewUnauthorizedError(errConst.ErrMsgPleaseLoginAgain)
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok || !parsedToken.Valid {
-		err := restInterfaceErr.NewForbiddenError(errConst.ErrMsgInvalidToken)
+		err := restInterfaceErr.NewUnauthorizedError(errConst.ErrMsgInvalidToken)
 		log.Error().Err(err).Msg("")
-		return nil, restInterfaceErr.NewForbiddenError(errConst.ErrMsgPleaseLoginAgain)
+		return nil, restInterfaceErr.NewUnauthorizedError(errConst.ErrMsgPleaseLoginAgain)
 	}
 
 	return &entity.Token{

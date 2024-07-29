@@ -17,7 +17,7 @@ import (
 const (
 	errMsgRegisterPayload = "register_payload is not of type users.RegisterInput"
 	errMsgLoginPayload    = "login_payload is not of type users.RegisterInput"
-	errMsgAccessTokenUUID = "access_token_uuid is not a string or not set"
+	errMsgAccessTokenUUID = "accessTokenUUID is not a string or not set"
 )
 
 type AuthService struct {
@@ -56,7 +56,7 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 		log.Error().Err(err).Msg(errConst.ErrTypeError)
 	}
 
-	user, err := ah.uf.GetUser(payload)
+	user, err := ah.uf.GetUserByEmail(payload)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
@@ -87,9 +87,7 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 	)
 
 	if errAccess != nil {
-		log.Error().Err(errAccess).Msg(errConst.ErrMsgRedisError)
-		return c.Status(fiber.StatusUnprocessableEntity).
-			JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgSomethingWentWrong})
+		return c.Status(errAccess.Status).JSON(fiber.Map{"status": "fail", "error": errAccess})
 	}
 
 	errRefresh := ah.r.SetUserUUID(
@@ -99,9 +97,7 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 	)
 
 	if errRefresh != nil {
-		log.Error().Err(errRefresh).Msg(errConst.ErrMsgRedisError)
-		return c.Status(fiber.StatusUnprocessableEntity).
-			JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgSomethingWentWrong})
+		return c.Status(errRefresh.Status).JSON(fiber.Map{"status": "fail", "error": errRefresh})
 	}
 
 	c.Cookie(&fiber.Cookie{
@@ -134,8 +130,8 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 	refresh_token := c.Cookies("refresh_token")
 
 	if refresh_token == "" {
-		return c.Status(fiber.StatusForbidden).
-			JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgPleaseLoginAgain})
+		clientErr := restInterfaceErr.NewBadRequestError(errConst.ErrMsgPleaseLoginAgain)
+		return c.Status(clientErr.Status).JSON(fiber.Map{"status": "fail", "error": clientErr})
 	}
 
 	jwtConfig := ah.uf.GetJWTConfig()
@@ -146,8 +142,7 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 
 	userUuid, errGetTokenUUID := ah.r.GetUserUUID(tokenClaims.TokenUUID)
 	if errGetTokenUUID != nil {
-		return c.Status(fiber.StatusForbidden).
-			JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgPleaseLoginAgain})
+		return c.Status(errGetTokenUUID.Status).JSON(fiber.Map{"status": "fail", "error": errGetTokenUUID})
 	}
 
 	user, err := ah.uf.GetUserByUUID(userUuid)
@@ -171,9 +166,7 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 	)
 
 	if errAccess != nil {
-		log.Error().Err(errAccess).Msg(errConst.ErrMsgRedisError)
-		return c.Status(fiber.StatusUnprocessableEntity).
-			JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgSomethingWentWrong})
+		return c.Status(errAccess.Status).JSON(fiber.Map{"status": "fail", "error": errAccess})
 	}
 
 	c.Cookie(&fiber.Cookie{
@@ -195,8 +188,8 @@ func (ah *AuthService) Logout(c *fiber.Ctx) error {
 	refresh_token := c.Cookies("refresh_token")
 
 	if refresh_token == "" {
-		return c.Status(fiber.StatusForbidden).
-			JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgPleaseLoginAgain})
+		clientErr := restInterfaceErr.NewBadRequestError(errConst.ErrMsgPleaseLoginAgain)
+		return c.Status(clientErr.Status).JSON(fiber.Map{"status": "fail", "error": clientErr})
 	}
 
 	jwtConfig := ah.uf.GetJWTConfig()
@@ -205,20 +198,15 @@ func (ah *AuthService) Logout(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	accessTokenUUID, ok := c.Locals("access_token_uuid").(string) // type assertion
+	accessTokenUUID, ok := c.Locals("accessTokenUUID").(string) // type assertion
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError(errMsgAccessTokenUUID)
-		log.Error().Err(err).Msg(errConst.ErrTypeError)
-		return c.Status(fiber.StatusBadRequest).
-			JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgPleaseLoginAgain})
+		internalErr := restInterfaceErr.NewBadRequestError(errMsgAccessTokenUUID)
+		log.Error().Err(internalErr).Msg(errConst.ErrTypeError)
+		clientErr := restInterfaceErr.NewBadRequestError(errConst.ErrMsgPleaseLoginAgain)
+		return c.Status(clientErr.Status).JSON(fiber.Map{"status": "fail", "error": clientErr})
 	}
 
-	_, errDelTokenUUID := ah.r.DelUserUUID(tokenClaims.TokenUUID, accessTokenUUID)
-	if errDelTokenUUID != nil {
-		return c.Status(fiber.StatusBadGateway).
-			JSON(fiber.Map{"status": "fail", "message": errDelTokenUUID.Error()})
-	}
-
+	ah.r.DelUserUUID(tokenClaims.TokenUUID, accessTokenUUID)
 	expired := time.Now().Add(-time.Hour * 24)
 
 	c.Cookie(&fiber.Cookie{

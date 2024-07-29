@@ -9,6 +9,7 @@ import (
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
 	mw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware"
+	ppmw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware/preprocess_inputs"
 	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -16,13 +17,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-const errMsgServiceUnavailable = "service is unavailable at the moment"
+const (
+	errMsgStartServerFailure = "failed to start server"
+	errMsgServiceUnavailable = "service is unavailable at the moment"
+)
 
 func StartServer(app *fiber.App, port string) {
 	log.Info().Msg("listening at port: " + port)
 	err := app.Listen(":" + port)
 	if err != nil {
-		log.Fatal().Err(err).Msg("failed to start server")
+		log.Error().Err(err).Msg(errMsgStartServerFailure)
 	}
 }
 
@@ -49,8 +53,8 @@ func NewRouter(
 	})
 
 	user := v1.Group("/users")
-	user.Post("/register", mw.PreProcessInputs, authService.Register)
-	user.Post("/login", mw.PreProcessInputs, authService.Login)
+	user.Post("/register", ppmw.PreProcessInputs, authService.Register)
+	user.Post("/login", ppmw.PreProcessInputs, authService.Login)
 
 	authUser := user.Group("/").Use(mw.Deserializer(redisRepo, tokenService, userFactory))
 	authUser.Get("/logout", authService.Logout)
