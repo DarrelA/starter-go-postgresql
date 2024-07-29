@@ -1,3 +1,5 @@
+// coverage:ignore file
+// Test file
 package middleware
 
 const mockExpiresIn = int64(3600)
