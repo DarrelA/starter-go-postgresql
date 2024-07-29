@@ -8,6 +8,7 @@ import (
 	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
+	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -27,8 +28,8 @@ func Deserializer(
 		}
 
 		if access_token == "" {
-			return c.Status(fiber.StatusUnauthorized).
-				JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgPleaseLoginAgain})
+			err := restInterfaceErr.NewUnauthorizedError(errConst.ErrMsgPleaseLoginAgain)
+			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "fail", "error": err})
 		}
 
 		tokenClaims, err := ts.ValidateToken(access_token, uf.GetJWTConfig().AccessTokenPublicKey)
@@ -38,8 +39,8 @@ func Deserializer(
 
 		userUuid, errGetTokenUUID := r.GetUserUUID(tokenClaims.TokenUUID)
 		if errGetTokenUUID != nil {
-			return c.Status(fiber.StatusForbidden).
-				JSON(fiber.Map{"status": "fail", "message": errConst.ErrMsgPleaseLoginAgain})
+			return c.Status(fiber.StatusUnauthorized).
+				JSON(fiber.Map{"status": "fail", "message": errGetTokenUUID})
 		}
 
 		u, err := uf.GetUserByUUID(userUuid)
@@ -56,8 +57,8 @@ func Deserializer(
 			UpdatedAt: u.UpdatedAt,
 		}
 
-		c.Locals("user_record", userRecord)
-		c.Locals("access_token_uuid", tokenClaims.TokenUUID)
+		c.Locals("userRecord", userRecord)
+		c.Locals("accessTokenUUID", tokenClaims.TokenUUID)
 
 		return c.Next()
 	}
