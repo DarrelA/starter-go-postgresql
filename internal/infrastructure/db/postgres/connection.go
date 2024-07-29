@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/DarrelA/starter-go-postgresql/internal/application/repository"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/repository"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog/log"
 )
@@ -28,13 +28,7 @@ type PostgresDB struct {
 	Dbpool           *pgxpool.Pool
 }
 
-// Connection is a struct to hold the return values from the `Connect` function.
-type Connection struct {
-	RDBMS      repository.RDBMS
-	PostgresDB *PostgresDB
-}
-
-func Connect(postgresDBConfig *entity.PostgresDBConfig) Connection {
+func (p *PostgresDB) ConnectToPostgres(postgresDBConfig *entity.PostgresDBConfig) repository.RDBMS {
 	connString := fmt.Sprintf(
 		"user=%s password=%s host=%s port=%s dbname=%s sslmode=%s pool_max_conns=%s",
 		postgresDBConfig.Username, postgresDBConfig.Password,
@@ -58,11 +52,10 @@ func Connect(postgresDBConfig *entity.PostgresDBConfig) Connection {
 	}
 
 	log.Info().Msg("successfully connected to the Postgres database")
-	postgresDB := &PostgresDB{PostgresDBConfig: postgresDBConfig, Dbpool: dbpool}
-	return Connection{RDBMS: postgresDB, PostgresDB: postgresDB}
+	return &PostgresDB{PostgresDBConfig: postgresDBConfig, Dbpool: dbpool}
 }
 
-func (p *PostgresDB) Disconnect() {
+func (p *PostgresDB) DisconnectFromPostgres() {
 	if p.Dbpool != nil {
 		p.Dbpool.Close()
 		log.Info().Msg("PostgreSQL database connection closed")

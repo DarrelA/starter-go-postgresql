@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/DarrelA/starter-go-postgresql/internal/application/repository"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/repository"
 	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog/log"
 )
@@ -21,13 +21,7 @@ type RedisDB struct {
 	RedisCtx      context.Context
 }
 
-// Connection is a struct to hold the return values from the `Connect` function.
-type Connection struct {
-	InMemoryDB repository.InMemoryDB
-	RedisDB    *RedisDB
-}
-
-func Connect(redisDBConfig *entity.RedisDBConfig) Connection {
+func (r *RedisDB) ConnectToRedis(redisDBConfig *entity.RedisDBConfig) repository.InMemoryDB {
 	// Create a top level context
 	ctx := context.Background()
 
@@ -37,17 +31,11 @@ func Connect(redisDBConfig *entity.RedisDBConfig) Connection {
 		panic(err)
 	}
 
-	redisDB := &RedisDB{
-		RedisDBConfig: redisDBConfig,
-		RedisClient:   redisClient,
-		RedisCtx:      ctx,
-	}
-
 	log.Info().Msg("successfully connected to the Redis database")
-	return Connection{InMemoryDB: redisDB, RedisDB: redisDB}
+	return &RedisDB{RedisDBConfig: redisDBConfig, RedisClient: redisClient, RedisCtx: ctx}
 }
 
-func (r *RedisDB) Disconnect() {
+func (r *RedisDB) DisconnectFromRedis() {
 	if r != nil {
 		_, cancel := context.WithTimeout(r.RedisCtx, 10*time.Second)
 		defer cancel()

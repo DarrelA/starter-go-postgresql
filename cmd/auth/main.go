@@ -8,16 +8,20 @@ import (
 	"syscall"
 	"time"
 
+	repo "github.com/DarrelA/starter-go-postgresql/internal/domain/repository"
 	rp "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
 	rr "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
+
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/postgres"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/db/redis"
 	jwt "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/jwt"
 	envLogger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
 	logger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger/zerolog"
+
 	"github.com/DarrelA/starter-go-postgresql/internal/interface/factory"
 	"github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -28,7 +32,7 @@ func main() {
 	logFile := envLogger.CreateAppLog("/docker_wd/logs/app.log")
 	logger.NewZeroLogger(logFile)
 	config := initializeEnv()
-	rc, redisUserRepo, pc, postgresUserRepo := initializeDatabases(config)
+	redisConn, redisUserRepo, postgresConn, postgresUserRepo := initializeDatabases(config)
 
 	// Use `WaitGroup` when you just need to wait for tasks to complete without exchanging data.
 	// Use channels when you need to signal task completion and possibly exchange data.
@@ -37,7 +41,7 @@ func main() {
 	appServiceInstance := initializeServer(&wg, config, redisUserRepo, postgresUserRepo)
 
 	wg.Wait()
-	waitForShutdown(appServiceInstance, rc, pc)
+	waitForShutdown(appServiceInstance, redisConn, postgresConn)
 	logFile.Close()
 	os.Exit(0)
 }
@@ -59,18 +63,22 @@ func initializeEnv() *config.EnvConfig {
 }
 
 func initializeDatabases(config *config.EnvConfig) (
-	redis.Connection, rr.RedisUserRepository,
-	postgres.Connection, rp.PostgresUserRepository,
+	repo.InMemoryDB, rr.RedisUserRepository,
+	repo.RDBMS, rp.PostgresUserRepository,
 ) {
-	redisConnection := redis.Connect(config.RedisDBConfig)
-	redisUserRepo := redis.NewUserRepository(redisConnection.RedisDB)
+	redisDB := &redis.RedisDB{}
+	redisConnection := redisDB.ConnectToRedis(config.RedisDBConfig)
+	redisDBInstance := redisConnection.(*redis.RedisDB) // Type assert redisDB to *redis.RedisDB
+	redisUserRepo := redis.NewUserRepository(redisDBInstance)
 
-	postgresConnection := postgres.Connect(config.PostgresDBConfig)
-	postgresUserRepo := postgres.NewUserRepository(postgresConnection.PostgresDB.Dbpool)
-	postgresSeedRepo := postgres.NewSeedRepository(postgresConnection.PostgresDB.Dbpool, config.Env)
+	postgresDB := &postgres.PostgresDB{}
+	postgresConnection := postgresDB.ConnectToPostgres(config.PostgresDBConfig)
+	postgresDBInstance := postgresConnection.(*postgres.PostgresDB) // Type assert postgresDB to *postgres.PostgresDB
+	postgresUserRepo := postgres.NewUserRepository(postgresDBInstance.Dbpool)
+	postgresSeedRepo := postgres.NewSeedRepository(postgresDBInstance.Dbpool, config.Env)
 	postgresSeedRepo.Seed(postgresUserRepo)
 
-	return redisConnection, redisUserRepo, postgresConnection, postgresUserRepo
+	return redisDBInstance, redisUserRepo, postgresConnection, postgresUserRepo
 }
 
 func initializeServer(
@@ -93,7 +101,7 @@ func initializeServer(
 	return appServiceInstance
 }
 
-func waitForShutdown(appServiceInstance *fiber.App, rc redis.Connection, pc postgres.Connection) {
+func waitForShutdown(appServiceInstance *fiber.App, redisConn repo.InMemoryDB, postgresConn repo.RDBMS) {
 	sigChan := make(chan os.Signal, 1) // Create a channel to listen for OS signals
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	<-sigChan // Block until a signal is received
@@ -107,6 +115,6 @@ func waitForShutdown(appServiceInstance *fiber.App, rc redis.Connection, pc post
 	cancel()
 	log.Info().Msg("app instance has shutdown")
 
-	rc.InMemoryDB.Disconnect()
-	pc.RDBMS.Disconnect()
+	redisConn.DisconnectFromRedis()
+	postgresConn.DisconnectFromPostgres()
 }

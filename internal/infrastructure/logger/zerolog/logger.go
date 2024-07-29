@@ -3,7 +3,7 @@ package zerolog
 import (
 	"os"
 
-	repo "github.com/DarrelA/starter-go-postgresql/internal/application/repository"
+	repo "github.com/DarrelA/starter-go-postgresql/internal/domain/repository"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
