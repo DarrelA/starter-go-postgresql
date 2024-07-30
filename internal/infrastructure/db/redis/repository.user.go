@@ -28,8 +28,12 @@ func (r RedisUserRepository) SetUserUUID(tokenUUID string, userUUID string, expi
 
 	timeNow := time.Now()
 	err := r.RedisDB.RedisClient.Set(ctx, tokenUUID, userUUID, time.Unix(expiresIn, 0).Sub(timeNow)).Err()
-	log.Error().Err(err).Msg(errConst.ErrMsgRedisError)
-	return restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
+	if err != nil {
+		log.Error().Err(err).Msg(errConst.ErrMsgRedisError)
+		return restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
+	}
+
+	return nil
 }
 
 func (r RedisUserRepository) GetUserUUID(tokenUUID string) (string, *restDomainErr.RestErr) {
