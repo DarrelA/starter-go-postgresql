@@ -6,8 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/DarrelA/starter-go-postgresql/internal/application/config"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -26,7 +26,7 @@ type EnvConfig struct {
 	entity.EnvConfig
 }
 
-func NewTokenService() service.LoadEnvConfig {
+func NewTokenService() config.LoadEnvConfig {
 	return &EnvConfig{}
 }
 

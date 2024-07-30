@@ -1,7 +1,7 @@
 package http
 
 import (
-	dto "github.com/DarrelA/starter-go-postgresql/internal/application/repository/dto"
+	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	"github.com/gofiber/fiber/v2"
 )

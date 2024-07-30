@@ -3,8 +3,8 @@ package middleware
 import (
 	"strings"
 
+	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
-	dto "github.com/DarrelA/starter-go-postgresql/internal/application/repository/dto"
 	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"

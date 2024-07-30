@@ -3,8 +3,8 @@ package http
 import (
 	"time"
 
+	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
-	dto "github.com/DarrelA/starter-go-postgresql/internal/application/repository/dto"
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"

@@ -1,8 +1,8 @@
 package factory
 
 import (
+	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
-	dto "github.com/DarrelA/starter-go-postgresql/internal/application/repository/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"

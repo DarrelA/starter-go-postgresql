@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	dto "github.com/DarrelA/starter-go-postgresql/internal/application/repository/dto"
+	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
 	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"

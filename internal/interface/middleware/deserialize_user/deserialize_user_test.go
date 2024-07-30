@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	dto "github.com/DarrelA/starter-go-postgresql/internal/application/repository/dto"
+	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
 	"github.com/gofiber/fiber/v2"
 )
 
