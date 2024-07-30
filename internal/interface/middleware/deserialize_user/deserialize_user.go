@@ -4,18 +4,18 @@ import (
 	"strings"
 
 	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
-	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
+	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
-	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
+	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/gofiber/fiber/v2"
 )
 
 func Deserializer(
 	r r.RedisUserRepository,
-	ts service.TokenService,
-	uf factory.UserFactory,
+	ts domainSvc.TokenService,
+	us appSvc.UserService,
 ) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		var access_token string
@@ -32,7 +32,7 @@ func Deserializer(
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "fail", "error": err})
 		}
 
-		tokenClaims, err := ts.ValidateToken(access_token, uf.GetJWTConfig().AccessTokenPublicKey)
+		tokenClaims, err := ts.ValidateToken(access_token, us.GetJWTConfig().AccessTokenPublicKey)
 		if err != nil {
 			return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 		}
@@ -43,7 +43,7 @@ func Deserializer(
 				JSON(fiber.Map{"status": "fail", "message": errGetTokenUUID})
 		}
 
-		u, err := uf.GetUserByUUID(userUuid)
+		u, err := us.GetUserByUUID(userUuid)
 		if err != nil {
 			return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 		}

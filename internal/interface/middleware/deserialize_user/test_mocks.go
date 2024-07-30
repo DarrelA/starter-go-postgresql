@@ -66,19 +66,19 @@ func (m *MockTokenService) ValidateToken(token string, publicKey string) (
 	return mockToken, nil
 }
 
-type UserFactory struct{}
+type UserService struct{}
 
-func (m *UserFactory) GetJWTConfig() *entity.JWTConfig { return &entity.JWTConfig{} }
+func (m *UserService) GetJWTConfig() *entity.JWTConfig { return &entity.JWTConfig{} }
 
-func (m *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restDomainErr.RestErr) {
+func (m *UserService) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restDomainErr.RestErr) {
 	return nil, nil
 }
 
-func (m *UserFactory) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr) {
+func (m *UserService) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr) {
 	return nil, nil
 }
 
-func (m *UserFactory) GetUserByUUID(userUuid string) (*entity.User, *restDomainErr.RestErr) {
+func (m *UserService) GetUserByUUID(userUuid string) (*entity.User, *restDomainErr.RestErr) {
 	uuidPointer, _ := uuid.Parse(userUuid)
 	user := &entity.User{
 		ID:        int64(1),

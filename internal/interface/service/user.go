@@ -1,8 +1,8 @@
-package factory
+package service
 
 import (
 	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
-	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
+	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
 	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
@@ -13,33 +13,20 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-/*
-The `UserFactory` is responsible for creating and retrieving `User` entities.
-The factory pattern here is used to encapsulate the creation logic,
-including hashing passwords and calling the repository to save or fetch users.
-
-The factory logic is part of the domain layer as it encapsulates domain-specific creation and retrieval logic.
-This is appropriate for the domain layer, as it deals with core business logic.
-*/
-type UserFactory struct {
+type UserService struct {
 	JWTConfig *entity.JWTConfig
 	ur        repo.PostgresUserRepository
 }
 
-/*
-The factory interacts with the `PostgresUserRepository` interface to perform persistence operations.
-This adheres to the principle of dependency inversion,
-where the factory depends on an abstraction rather than a concrete implementation.
-*/
-func NewUserFactory(JWTConfig *entity.JWTConfig, ur repo.PostgresUserRepository) factory.UserFactory {
-	return &UserFactory{JWTConfig, ur}
+func NewUserService(JWTConfig *entity.JWTConfig, ur repo.PostgresUserRepository) appSvc.UserService {
+	return &UserService{JWTConfig, ur}
 }
 
-func (uf *UserFactory) GetJWTConfig() *entity.JWTConfig {
-	return uf.JWTConfig
+func (us *UserService) GetJWTConfig() *entity.JWTConfig {
+	return us.JWTConfig
 }
 
-func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restDomainErr.RestErr) {
+func (us *UserService) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restDomainErr.RestErr) {
 	newUser := &entity.User{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
@@ -54,7 +41,7 @@ func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse,
 
 	newUser.Password = hashedPassword
 
-	if err := uf.ur.SaveUser(newUser); err != nil {
+	if err := us.ur.SaveUser(newUser); err != nil {
 		return nil, err
 	}
 
@@ -68,9 +55,9 @@ func (uf *UserFactory) CreateUser(payload dto.RegisterInput) (*dto.UserResponse,
 	return userResponse, nil
 }
 
-func (uf *UserFactory) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr) {
+func (us *UserService) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr) {
 	result := &entity.User{Email: u.Email}
-	if err := uf.ur.GetUserByEmail(result); err != nil {
+	if err := us.ur.GetUserByEmail(result); err != nil {
 		return nil, err
 	}
 
@@ -88,7 +75,7 @@ func (uf *UserFactory) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *res
 	return userResponse, nil
 }
 
-func (uf *UserFactory) GetUserByUUID(userUuid string) (*entity.User, *restDomainErr.RestErr) {
+func (us *UserService) GetUserByUUID(userUuid string) (*entity.User, *restDomainErr.RestErr) {
 	uuidPointer, err := uuid.Parse(userUuid)
 	if err != nil {
 		log.Error().Err(err).Msg(errConst.ErrUUIDError)
@@ -97,7 +84,7 @@ func (uf *UserFactory) GetUserByUUID(userUuid string) (*entity.User, *restDomain
 
 	result := &entity.User{UUID: &uuidPointer}
 
-	if err := uf.ur.GetUserByUUID(result); err != nil {
+	if err := us.ur.GetUserByUUID(result); err != nil {
 		return nil, err
 	}
 	return result, nil

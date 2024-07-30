@@ -3,8 +3,8 @@ package http
 import (
 	"runtime/debug"
 
-	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
+	"github.com/DarrelA/starter-go-postgresql/internal/application/usecase"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
@@ -35,9 +35,9 @@ func NewRouter(
 	envConfig *config.EnvConfig,
 	redisRepo r.RedisUserRepository,
 	tokenService domainSvc.TokenService,
-	userFactory factory.UserFactory,
-	authService appSvc.AuthService,
 	userService appSvc.UserService,
+	authUseCase usecase.AuthUseCase,
+	userUseCase usecase.UserUseCase,
 ) *fiber.App {
 	log.Info().Msg("creating fiber instances")
 	appInstance := fiber.New()
@@ -54,14 +54,14 @@ func NewRouter(
 	})
 
 	user := v1.Group("/users")
-	user.Post("/register", ppmw.PreProcessInputs, authService.Register)
-	user.Post("/login", ppmw.PreProcessInputs, authService.Login)
+	user.Post("/register", ppmw.PreProcessInputs, authUseCase.Register)
+	user.Post("/login", ppmw.PreProcessInputs, authUseCase.Login)
 
-	authUser := user.Group("/").Use(dumw.Deserializer(redisRepo, tokenService, userFactory))
-	authUser.Get("/logout", authService.Logout)
-	authUser.Get("/me", userService.GetUserRecord)
+	authUser := user.Group("/").Use(dumw.Deserializer(redisRepo, tokenService, userService))
+	authUser.Get("/logout", authUseCase.Logout)
+	authUser.Get("/me", userUseCase.GetUserRecord)
 
-	user.Get("/refresh", authService.RefreshAccessToken)
+	user.Get("/refresh", authUseCase.RefreshAccessToken)
 
 	authServiceInstance.Get("/health", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success"})

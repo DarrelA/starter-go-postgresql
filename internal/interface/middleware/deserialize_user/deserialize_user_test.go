@@ -22,10 +22,10 @@ func TestDeserializer(t *testing.T) {
 
 	redisUserRepo := &MockRedisUserRepository{mid: mockUUIDs}
 	tokenService := &MockTokenService{mid: mockUUIDs}
-	userFactory := &UserFactory{}
+	userService := &UserService{}
 
 	app := fiber.New()
-	app.Use(Deserializer(redisUserRepo, tokenService, userFactory))
+	app.Use(Deserializer(redisUserRepo, tokenService, userService))
 	app.Get("/", func(c *fiber.Ctx) error {
 		userRecord := c.Locals("userRecord").(*dto.UserRecord)
 		accessTokenUUID := c.Locals("accessTokenUUID").(string)

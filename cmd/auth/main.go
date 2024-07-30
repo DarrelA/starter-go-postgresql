@@ -19,7 +19,7 @@ import (
 	envLogger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger"
 	logger "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/logger/zerolog"
 
-	"github.com/DarrelA/starter-go-postgresql/internal/interface/factory"
+	interfaceSvc "github.com/DarrelA/starter-go-postgresql/internal/interface/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http"
 
 	"github.com/gofiber/fiber/v2"
@@ -86,13 +86,13 @@ func initializeServer(
 	redisUserRepo rr.RedisUserRepository, postgresUserRepo rp.PostgresUserRepository,
 ) *fiber.App {
 	defer wg.Done()
-	userFactory := factory.NewUserFactory(config.JWTConfig, postgresUserRepo)
-	userService := http.NewUserService()
+	userService := interfaceSvc.NewUserService(config.JWTConfig, postgresUserRepo)
+	userUseCase := http.NewUserUseCase()
 	tokenService := jwt.NewTokenService()
-	authService := http.NewAuthService(redisUserRepo, userFactory, tokenService)
+	authUseCase := http.NewAuthUseCase(redisUserRepo, userService, tokenService)
 
 	appServiceInstance := http.NewRouter(config, redisUserRepo,
-		tokenService, userFactory, authService, userService,
+		tokenService, userService, authUseCase, userUseCase,
 	)
 
 	go func() {

@@ -4,8 +4,8 @@ import (
 	"time"
 
 	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
-	"github.com/DarrelA/starter-go-postgresql/internal/application/factory"
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
+	"github.com/DarrelA/starter-go-postgresql/internal/application/usecase"
 	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
@@ -20,28 +20,28 @@ const (
 	errMsgAccessTokenUUID = "accessTokenUUID is not a string or not set"
 )
 
-type AuthService struct {
+type AuthUseCase struct {
 	r  r.RedisUserRepository
-	uf factory.UserFactory
+	us appSvc.UserService
 	ts domainSvc.TokenService
 }
 
-func NewAuthService(
+func NewAuthUseCase(
 	r r.RedisUserRepository,
-	uf factory.UserFactory,
+	us appSvc.UserService,
 	ts domainSvc.TokenService,
-) appSvc.AuthService {
-	return &AuthService{r, uf, ts}
+) usecase.AuthUseCase {
+	return &AuthUseCase{r, us, ts}
 }
 
-func (ah *AuthService) Register(c *fiber.Ctx) error {
+func (auc *AuthUseCase) Register(c *fiber.Ctx) error {
 	payload, ok := c.Locals("register_payload").(dto.RegisterInput)
 	if !ok {
 		err := restInterfaceErr.NewBadRequestError(errMsgRegisterPayload)
 		log.Error().Err(err).Msg(errConst.ErrTypeError)
 	}
 
-	result, err := ah.uf.CreateUser(payload)
+	result, err := auc.us.CreateUser(payload)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
@@ -49,20 +49,20 @@ func (ah *AuthService) Register(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "user": result})
 }
 
-func (ah *AuthService) Login(c *fiber.Ctx) error {
+func (auc *AuthUseCase) Login(c *fiber.Ctx) error {
 	payload, ok := c.Locals("login_payload").(dto.LoginInput)
 	if !ok {
 		err := restInterfaceErr.NewBadRequestError(errMsgLoginPayload)
 		log.Error().Err(err).Msg(errConst.ErrTypeError)
 	}
 
-	user, err := ah.uf.GetUserByEmail(payload)
+	user, err := auc.us.GetUserByEmail(payload)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	jwtConfig := ah.uf.GetJWTConfig()
-	accessTokenDetails, err := ah.ts.CreateToken(
+	jwtConfig := auc.us.GetJWTConfig()
+	accessTokenDetails, err := auc.ts.CreateToken(
 		user.UUID.String(),
 		jwtConfig.AccessTokenExpiredIn,
 		jwtConfig.AccessTokenPrivateKey,
@@ -71,7 +71,7 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	refreshTokenDetails, err := ah.ts.CreateToken(
+	refreshTokenDetails, err := auc.ts.CreateToken(
 		user.UUID.String(),
 		jwtConfig.RefreshTokenExpiredIn,
 		jwtConfig.RefreshTokenPrivateKey,
@@ -80,7 +80,7 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	errAccess := ah.r.SetUserUUID(
+	errAccess := auc.r.SetUserUUID(
 		accessTokenDetails.TokenUUID,
 		user.UUID.String(),
 		*accessTokenDetails.ExpiresIn,
@@ -90,7 +90,7 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 		return c.Status(errAccess.Status).JSON(fiber.Map{"status": "fail", "error": errAccess})
 	}
 
-	errRefresh := ah.r.SetUserUUID(
+	errRefresh := auc.r.SetUserUUID(
 		refreshTokenDetails.TokenUUID,
 		user.UUID.String(),
 		*refreshTokenDetails.ExpiresIn,
@@ -126,7 +126,7 @@ func (ah *AuthService) Login(c *fiber.Ctx) error {
 		JSON(fiber.Map{"status": "success", "access_token": accessTokenDetails.Token})
 }
 
-func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
+func (auc *AuthUseCase) RefreshAccessToken(c *fiber.Ctx) error {
 	refresh_token := c.Cookies("refresh_token")
 
 	if refresh_token == "" {
@@ -134,23 +134,23 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 		return c.Status(clientErr.Status).JSON(fiber.Map{"status": "fail", "error": clientErr})
 	}
 
-	jwtConfig := ah.uf.GetJWTConfig()
-	tokenClaims, err := ah.ts.ValidateToken(refresh_token, jwtConfig.RefreshTokenPublicKey)
+	jwtConfig := auc.us.GetJWTConfig()
+	tokenClaims, err := auc.ts.ValidateToken(refresh_token, jwtConfig.RefreshTokenPublicKey)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	userUuid, errGetTokenUUID := ah.r.GetUserUUID(tokenClaims.TokenUUID)
+	userUuid, errGetTokenUUID := auc.r.GetUserUUID(tokenClaims.TokenUUID)
 	if errGetTokenUUID != nil {
 		return c.Status(errGetTokenUUID.Status).JSON(fiber.Map{"status": "fail", "error": errGetTokenUUID})
 	}
 
-	user, err := ah.uf.GetUserByUUID(userUuid)
+	user, err := auc.us.GetUserByUUID(userUuid)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	accessTokenDetails, err := ah.ts.CreateToken(
+	accessTokenDetails, err := auc.ts.CreateToken(
 		user.UUID.String(),
 		jwtConfig.AccessTokenExpiredIn,
 		jwtConfig.AccessTokenPrivateKey,
@@ -159,7 +159,7 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
-	errAccess := ah.r.SetUserUUID(
+	errAccess := auc.r.SetUserUUID(
 		accessTokenDetails.TokenUUID,
 		user.UUID.String(),
 		*accessTokenDetails.ExpiresIn,
@@ -184,7 +184,7 @@ func (ah *AuthService) RefreshAccessToken(c *fiber.Ctx) error {
 		JSON(fiber.Map{"status": "success", "access_token": accessTokenDetails.Token})
 }
 
-func (ah *AuthService) Logout(c *fiber.Ctx) error {
+func (auc *AuthUseCase) Logout(c *fiber.Ctx) error {
 	refresh_token := c.Cookies("refresh_token")
 
 	if refresh_token == "" {
@@ -192,8 +192,8 @@ func (ah *AuthService) Logout(c *fiber.Ctx) error {
 		return c.Status(clientErr.Status).JSON(fiber.Map{"status": "fail", "error": clientErr})
 	}
 
-	jwtConfig := ah.uf.GetJWTConfig()
-	tokenClaims, err := ah.ts.ValidateToken(refresh_token, jwtConfig.RefreshTokenPublicKey)
+	jwtConfig := auc.us.GetJWTConfig()
+	tokenClaims, err := auc.ts.ValidateToken(refresh_token, jwtConfig.RefreshTokenPublicKey)
 	if err != nil {
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
@@ -206,7 +206,7 @@ func (ah *AuthService) Logout(c *fiber.Ctx) error {
 		return c.Status(clientErr.Status).JSON(fiber.Map{"status": "fail", "error": clientErr})
 	}
 
-	ah.r.DelUserUUID(tokenClaims.TokenUUID, accessTokenUUID)
+	auc.r.DelUserUUID(tokenClaims.TokenUUID, accessTokenUUID)
 	expired := time.Now().Add(-time.Hour * 24)
 
 	c.Cookie(&fiber.Cookie{

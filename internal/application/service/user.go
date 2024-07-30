@@ -1,18 +1,14 @@
 package service
 
-import "github.com/gofiber/fiber/v2"
+import (
+	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
+	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
+	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
+)
 
-/*
-This interface defines a contract for the `GetUserRecord` method.
-
-By defining an `UserService` interface  in the application layer,
-the implementation details is abstracted away from the transport layer.
-
-This allows for easier testing and flexibility in changing implementations without affecting the transport layer.
-
-The interface itself can remain framework agnostic,
-ensuring that the core business logic does not depend on specific web frameworks.
-*/
 type UserService interface {
-	GetUserRecord(c *fiber.Ctx) error
+	GetJWTConfig() *entity.JWTConfig
+	CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restDomainErr.RestErr)
+	GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr)
+	GetUserByUUID(userUuid string) (*entity.User, *restDomainErr.RestErr)
 }

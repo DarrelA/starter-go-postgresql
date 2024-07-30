@@ -10,6 +10,7 @@
 - [Hexagonal Architecture](#hexagonal-architecture)
   - [Key concepts of Hexagonal Architecture](#key-concepts-of-hexagonal-architecture)
   - [Benefits of Hexagonal Architecture](#benefits-of-hexagonal-architecture)
+  - [Implementation with DDD](#implementation-with-ddd)
 - [CQRS (Command Query Responsibility Segregation)](#cqrs-command-query-responsibility-segregation)
   - [Key concepts of CQRS](#key-concepts-of-cqrs)
   - [Benefits of CQRS](#benefits-of-cqrs)
@@ -97,8 +98,14 @@ Hexagonal Architecture, also known as Ports and Adapters, is a design pattern in
   - Defines use cases and services that leverage the core domain logic.
   - **Ports** are part of this layer, providing an abstraction over the core domain logic.
 - **Infrastructure Layer**:
-  - Contains **adapters** that interact with external systems such as databases, web services, and user interfaces.
-  - Implements the ports defined in the application layer to facilitate communication with the external world.
+  - Contains **adapters** that interact with external systems.
+    - **Inbound Adapters**:
+      - Handle incoming requests from external sources such as web controllers, message listeners, or API gateways.
+      - Translate external inputs into actions that the application layer can process by invoking the appropriate use cases.
+    - **Outbound Adapters**:
+      - Handle outgoing requests to external systems such as databases, third-party services, or other external APIs.
+      - Implement the outbound ports to translate application layer requests into actions that can be understood and processed by external systems.
+  - Contains **implementations of the ports (interfaces)** defined in the application layer to facilitate communication with the external world.
   - Provides technical capabilities required by the application layer.
 
 ## Benefits of Hexagonal Architecture
@@ -106,6 +113,11 @@ Hexagonal Architecture, also known as Ports and Adapters, is a design pattern in
 - **Separation of Concerns**: The core logic is isolated from external concerns, making it easier to develop and maintain.
 - **Testability**: The core can be tested independently of external systems, improving test coverage and reliability.
 - **Flexibility**: Adapters can be swapped or modified without affecting the core logic, allowing for easy integration with different technologies.
+
+## [Implementation with DDD](./development_practices.md#domain-driven-design-ddd)
+
+- **Use Case as Orchestrator**: The use case orchestrates the flow by utilizing various **domain components** like entities, value objects, aggregates, repositories, factories, services, and events.
+- **Separation of Concerns**: Each component has a specific responsibility, and the use case ties them together to fulfill a business requirement.
 
 ![https://docs.google.com/drawings/d/1E_hx5B4czRVFVhGJbrbPDlb_JFxJC8fYB86OMzZuAhg/edit](/docs/assets/hexagonal_architecture_shodiq_muhammad.svg)
 
