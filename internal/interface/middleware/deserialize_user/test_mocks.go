@@ -13,40 +13,40 @@ import (
 	"github.com/google/uuid"
 )
 
-type MockUUIDs struct {
+type mockUUIDs struct {
 	mockUserUUID  *uuid.UUID
 	mockTokenUUID *uuid.UUID
 }
 
-func (m *MockUUIDs) initializeMockUUIDEntities() {
+func (m *mockUUIDs) initializeMockUUIDEntities() {
 	mockUserUUID, _ := uuid.NewV7()
 	mockTokenUUID, _ := uuid.NewV7()
 	m.mockUserUUID = &mockUserUUID
 	m.mockTokenUUID = &mockTokenUUID
 }
 
-type MockRedisUserRepository struct{ mid MockUUIDs }
+type mockRedisUserRepository struct{ mid mockUUIDs }
 
-func (m *MockRedisUserRepository) SetUserUUID(tokenUUID string, userUUID string, expiresIn int64) *restDomainErr.RestErr {
+func (m *mockRedisUserRepository) SetUserUUID(tokenUUID string, userUUID string, expiresIn int64) *restDomainErr.RestErr {
 	return nil
 }
 
-func (m *MockRedisUserRepository) GetUserUUID(tokenUUID string) (string, *restDomainErr.RestErr) {
+func (m *mockRedisUserRepository) GetUserUUID(tokenUUID string) (string, *restDomainErr.RestErr) {
 	return m.mid.mockUserUUID.String(), nil
 }
 
-func (m *MockRedisUserRepository) DelUserUUID(tokenUUID string, accessTokenUUID string) (int64, *restDomainErr.RestErr) {
+func (m *mockRedisUserRepository) DelUserUUID(tokenUUID string, accessTokenUUID string) (int64, *restDomainErr.RestErr) {
 	return 1, nil
 }
 
-type MockTokenService struct{ mid MockUUIDs }
+type mockTokenService struct{ mid mockUUIDs }
 
-func (m *MockTokenService) CreateToken(userUUID string, ttl time.Duration, privateKey string) (
+func (m *mockTokenService) CreateToken(userUUID string, ttl time.Duration, privateKey string) (
 	*entity.Token, *restDomainErr.RestErr) {
 	return nil, nil
 }
 
-func (m *MockTokenService) ValidateToken(token string, publicKey string) (
+func (m *mockTokenService) ValidateToken(token string, publicKey string) (
 	*entity.Token, *restDomainErr.RestErr) {
 	// Simulate invalid token
 	if token == "" || token == "mockInvalidBearerToken" {
@@ -66,19 +66,19 @@ func (m *MockTokenService) ValidateToken(token string, publicKey string) (
 	return mockToken, nil
 }
 
-type UserService struct{}
+type mockUserService struct{}
 
-func (m *UserService) GetJWTConfig() *entity.JWTConfig { return &entity.JWTConfig{} }
+func (m *mockUserService) GetJWTConfig() *entity.JWTConfig { return &entity.JWTConfig{} }
 
-func (m *UserService) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restDomainErr.RestErr) {
+func (m *mockUserService) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restDomainErr.RestErr) {
 	return nil, nil
 }
 
-func (m *UserService) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr) {
+func (m *mockUserService) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr) {
 	return nil, nil
 }
 
-func (m *UserService) GetUserByUUID(userUuid string) (*entity.User, *restDomainErr.RestErr) {
+func (m *mockUserService) GetUserByUUID(userUuid string) (*entity.User, *restDomainErr.RestErr) {
 	uuidPointer, _ := uuid.Parse(userUuid)
 	user := &entity.User{
 		ID:        int64(1),

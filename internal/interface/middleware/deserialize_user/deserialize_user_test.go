@@ -17,12 +17,12 @@ type Response struct {
 }
 
 func TestDeserializer(t *testing.T) {
-	mockUUIDs := MockUUIDs{}
+	mockUUIDs := mockUUIDs{}
 	mockUUIDs.initializeMockUUIDEntities()
 
-	redisUserRepo := &MockRedisUserRepository{mid: mockUUIDs}
-	tokenService := &MockTokenService{mid: mockUUIDs}
-	userService := &UserService{}
+	redisUserRepo := &mockRedisUserRepository{mid: mockUUIDs}
+	tokenService := &mockTokenService{mid: mockUUIDs}
+	userService := &mockUserService{}
 
 	app := fiber.New()
 	app.Use(Deserializer(redisUserRepo, tokenService, userService))
