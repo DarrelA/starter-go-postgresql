@@ -56,10 +56,31 @@ services:
       redis:
         condition: service_started
 
-  app-test:
+  app-unit-test:
     build:
       context: ..
-      dockerfile: ./deployment/Dockerfile.test
+      dockerfile: ./deployment/Dockerfile.unit_test
+    image: starter-go-postgresql-tester
+    container_name: starter-go-postgresql-tester
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./logs:/docker_wd/logs
+      - ../testdata/reports:/docker_wd/test/reports
+    environment:
+      - APP_ENV=${APP_ENV}
+    env_file:
+      - ../internal/infrastructure/config/.env.${APP_ENV}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  app-integration-test:
+    build:
+      context: ..
+      dockerfile: ./deployment/Dockerfile.integration_test
     image: starter-go-postgresql-tester
     container_name: starter-go-postgresql-tester
     ports:

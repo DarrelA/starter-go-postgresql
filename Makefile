@@ -49,11 +49,18 @@ dv:
 wa:
 	@cd deployment && $(VARS) docker-compose build app
 
-# Target to rebuild the docker-compose app-test service & run test
-wat:
-	@cd deployment && $(VARS) docker-compose build app-test --build-arg APP_ENV=$(APP_ENV)
-	@cd deployment && $(VARS) docker-compose run app-test
+# Target to rebuild the docker-compose app-unit-test service & run test
+ut:
+	@cd deployment && $(VARS) docker-compose build app-unit-test --build-arg APP_ENV=$(APP_ENV)
+	@cd deployment && $(VARS) docker-compose run app-unit-test
 	make dv
+
+# Target to rebuild the docker-compose app-integration-test service & run test
+it:
+	@cd deployment && $(VARS) docker-compose build app-integration-test --build-arg APP_ENV=$(APP_ENV)
+	@cd deployment && $(VARS) docker-compose run app-integration-test
+	make dv
+
 
 # Format log
 lg:

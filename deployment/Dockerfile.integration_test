@@ -1,3 +1,5 @@
+# @TODO: Modify `Dockerfile` for integration test
+
 # Stage 1: Build the Go binary
 FROM golang:latest AS builder
 
