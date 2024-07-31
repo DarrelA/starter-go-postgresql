@@ -1,3 +1,5 @@
+// coverage:ignore file
+// Testing with integration test
 package service
 
 import (
