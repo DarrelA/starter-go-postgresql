@@ -1,8 +1,18 @@
 #!/bin/bash
 
 OUTPUT_JSON_FILE="./testdata/output/responses.json"
-REGISTER_URL="localhost:8080/auth/api/v1/users/register"
-REGISTER_JSON_FILE="./testdata/json/register.json"   
+
+# Testdata files
+TESTDATA_JSON_FILES=(
+    "./testdata/json/register.json"
+    "./testdata/json/login.json"
+)
+
+# Endpoints
+URLS=(
+    "localhost:8080/auth/api/v1/users/register"
+    "localhost:8080/auth/api/v1/users/login"
+)
 
 # Run the main application
 ./starter-go-postgresql-it &
@@ -21,33 +31,39 @@ echo "[]" > "$OUTPUT_JSON_FILE"
 # Create response_body.txt file
 touch response_body.txt
 
-# Loop through the JSON file
-jq -c '.[]' "$REGISTER_JSON_FILE" | while read -r item; do
-    # Extract TestName, ExpectedStatusCode, and Input
-    test_name=$(jq -r '.TestName' <<< "$item")
-    expected_status_code=$(jq -r '.ExpectedStatusCode' <<< "$item")
-    input=$(jq -c '.Input' <<< "$item")
+# Loop through the JSON files and URLs
+for i in "${!TESTDATA_JSON_FILES[@]}"; do
+    TESTDATA_JSON_FILE=${TESTDATA_JSON_FILES[$i]}
+    URL=${URLS[$i]}
 
-    # Send POST request and capture response body and status
-    response_status=$(curl -s \
-        -o response_body.txt \
-        -w "%{http_code}" \
-        -X POST \
-        -H "Content-Type: application/json" \
-        -d "$input" \
-        "$REGISTER_URL")
+    # Loop through the JSON file
+    jq -c '.[]' "$TESTDATA_JSON_FILE" | while read -r item; do
+        # Extract TestName, ExpectedStatusCode, and Input
+        test_name=$(echo "$item" | jq -r '.TestName')
+        expected_status_code=$(echo "$item" | jq -r '.ExpectedStatusCode')
+        input=$(echo "$item" | jq -c '.Input')
 
-    # Read response body from the file
-    response_body=$(cat response_body.txt)
+        # Send POST request and capture response body and status
+        response_status=$(curl -s \
+            -o response_body.txt \
+            -w "%{http_code}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d "$input" \
+            "$URL")
 
-    # Append the result to the output JSON file
-    jq --arg test_name "$test_name" \
-       --arg expected_status_code "$expected_status_code" \
-       --arg response_status "$response_status" \
-       --arg response_body "$response_body" \
-       '. += [{"TestName": $test_name, "ExpectedStatusCode": $expected_status_code, "ResponseStatus": $response_status, "ResponseBody": $response_body}]' \
-       "$OUTPUT_JSON_FILE" > temp.json && mv temp.json "$OUTPUT_JSON_FILE"
+        # Read response body from the file
+        response_body=$(cat response_body.txt)
 
+        # Append the result to the output JSON file
+        jq --arg test_name "$test_name" \
+           --arg expected_status_code "$expected_status_code" \
+           --arg response_status "$response_status" \
+           --arg response_body "$response_body" \
+           '. += [{"TestName": $test_name, "ExpectedStatusCode": $expected_status_code, "ResponseStatus": $response_status, "ResponseBody": $response_body}]' \
+           "$OUTPUT_JSON_FILE" > temp.json && mv temp.json "$OUTPUT_JSON_FILE"
+
+    done
 done
 
 # Cleanup temporary file
