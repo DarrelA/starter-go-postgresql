@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 OUTPUT_JSON_FILE="./testdata/output/responses.json"
 REGISTER_URL="localhost:8080/auth/api/v1/users/register"
@@ -24,9 +24,9 @@ touch response_body.txt
 # Loop through the JSON file
 jq -c '.[]' "$REGISTER_JSON_FILE" | while read -r item; do
     # Extract TestName, ExpectedStatusCode, and Input
-    test_name=$(echo "$item" | jq -r '.TestName')
-    expected_status_code=$(echo "$item" | jq -r '.ExpectedStatusCode')
-    input=$(echo "$item" | jq -c '.Input')
+    test_name=$(jq -r '.TestName' <<< "$item")
+    expected_status_code=$(jq -r '.ExpectedStatusCode' <<< "$item")
+    input=$(jq -c '.Input' <<< "$item")
 
     # Send POST request and capture response body and status
     response_status=$(curl -s \

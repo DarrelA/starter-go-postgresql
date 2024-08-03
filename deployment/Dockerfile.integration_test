@@ -28,6 +28,8 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -o starter-go-postgresql-it github.com/
 # Stage 2: Create a smaller image for the final binary
 FROM alpine:latest
 
+# Install bash
+RUN apk add --no-cache bash
 # Install jq
 RUN apk add --no-cache jq
 # Install curl
@@ -51,5 +53,4 @@ WORKDIR /root
 RUN chmod +x /root/integration_test.sh
 
 # Run the shell script when the container starts
-# ENTRYPOINT ["./integration_test.sh"]
-ENTRYPOINT ["./integration_test.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "./integration_test.sh"]
