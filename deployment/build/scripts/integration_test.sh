@@ -36,6 +36,10 @@ for i in "${!TESTDATA_JSON_FILES[@]}"; do
     TESTDATA_JSON_FILE=${TESTDATA_JSON_FILES[$i]}
     URL=${URLS[$i]}
 
+    # Add Endpoint and initialize Responses
+    jq --arg url "$URL" '. += [{"Endpoint": $url, "Responses": {}}]' \
+       "$OUTPUT_JSON_FILE" > temp.json && mv temp.json "$OUTPUT_JSON_FILE"
+
     # Loop through the JSON file
     jq -c '.[]' "$TESTDATA_JSON_FILE" | while read -r item; do
         # Extract TestName, ExpectedStatusCode, and Input
@@ -55,12 +59,21 @@ for i in "${!TESTDATA_JSON_FILES[@]}"; do
         # Read response body from the file
         response_body=$(cat response_body.txt)
 
-        # Append the result to the output JSON file
+        # Append the result to the Responses key in the output JSON file
+        # The jq expression .[-1].Responses ensures that the response is added 
+        # to the last entry in the output JSON file, which corresponds 
+        # to the current endpoint being processed.
         jq --arg test_name "$test_name" \
            --arg expected_status_code "$expected_status_code" \
            --arg response_status "$response_status" \
            --arg response_body "$response_body" \
-           '. += [{"TestName": $test_name, "ExpectedStatusCode": $expected_status_code, "ResponseStatus": $response_status, "ResponseBody": $response_body}]' \
+           '.[-1].Responses += {
+                ($test_name): {
+                    "ExpectedStatusCode": $expected_status_code,
+                    "ResponseStatus": $response_status,
+                    "ResponseBody": $response_body
+                }
+            }' \
            "$OUTPUT_JSON_FILE" > temp.json && mv temp.json "$OUTPUT_JSON_FILE"
 
     done
