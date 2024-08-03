@@ -88,6 +88,7 @@ services:
     volumes:
       - ./logs:/docker_wd/logs
       - ../testdata/reports:/docker_wd/test/reports
+      - ../testdata/reports:/root/testdata/output
     environment:
       - APP_ENV=${APP_ENV}
     env_file:
