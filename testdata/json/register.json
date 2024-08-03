@@ -1,0 +1,267 @@
+[
+  {
+    "TestName": "valid account 1",
+    "ExpectedStatusCode": 200,
+    "Input": {
+      "first_name": "kangYao",
+      "last_name": "tan",
+      "email": "tky@e.com",
+      "password": "I_<3_c_#"
+    }
+  },
+  {
+    "TestName": "valid account 2",
+    "ExpectedStatusCode": 200,
+    "Input": {
+      "first_name": "jieWei",
+      "last_name": "low",
+      "email": "ljw@e.com",
+      "password": "i_<3_Java"
+    }
+  },
+  {
+    "TestName": "valid account 3",
+    "ExpectedStatusCode": 200,
+    "Input": {
+      "first_name": "bingHong",
+      "last_name": "tan",
+      "email": "tbh@e.com",
+      "password": "1_heArt_VB:)"
+    }
+  },
+  {
+    "TestName": "valid account 4 (leading and trailing whitespace)",
+    "ExpectedStatusCode": 200,
+    "Input": {
+      "first_name": "  Dessislava  ",
+      "last_name": "  Kenyatta  ",
+      "email": "  Dessislava.Kenyatta@outlook.com  ",
+      "password": "     Password1!   "
+    }
+  },
+
+  {
+    "TestName": "space in last_name",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "jason",
+      "last_name": "the consultant",
+      "email": "j@e.com",
+      "password": "I&asked(a)question^at!the*town-hall:_Why@is9the6air~conditioning%so+cold"
+    }
+  },
+  {
+    "TestName": "all empty fields",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "",
+      "last_name": "",
+      "email": "",
+      "password": ""
+    }
+  },
+  {
+    "TestName": "empty password only",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "John_Doe@gmail.com",
+      "password": ""
+    }
+  },
+  {
+    "TestName": "empty email only",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "Jane",
+      "last_name": "Smith",
+      "email": "",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "empty last name only",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "Alice",
+      "last_name": "",
+      "email": "Alice@yahoo.com",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "empty first name only",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "",
+      "last_name": "Brown",
+      "email": "Brown@outlook.com",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "email is already taken 1",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "Emily",
+      "last_name": "Clark",
+      "email": "Emily_Clark@gmail.com",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "email is already taken 2",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "emily",
+      "last_name": "clark",
+      "email": "emily_clark@gmail.com",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "invalid email (less than 5 characters)",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "Jamie",
+      "last_name": "Tuna",
+      "email": "@.me",
+      "password": "Password1!"
+    }
+  },
+
+  {
+    "TestName": "invalid email (more than 64 characters)",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "Jasmine",
+      "last_name": "Worth",
+      "email": "Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiwhenu@gmail.com",
+      "password": "Password1!"
+    }
+  },
+
+  {
+    "TestName": "invalid email format",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "Oliver",
+      "last_name": "Jones",
+      "email": "Oliver_Jones",
+      "password": "Password1!"
+    }
+  },
+
+  {
+    "TestName": "invalid password (too short)",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "Michael",
+      "last_name": "Taylor",
+      "email": "Michael_Taylor@yahoo.com",
+      "password": "Pass1!"
+    }
+  },
+
+  {
+    "TestName": "invalid password (no special character)",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "Emma",
+      "last_name": "Davis",
+      "email": "Emma_Davis@outlook.com",
+      "password": "Password1"
+    }
+  },
+
+  {
+    "TestName": "invalid password (no number)",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "William",
+      "last_name": "Martinez",
+      "email": "William_Martinez@gmail.com",
+      "password": "password!"
+    }
+  },
+
+  {
+    "TestName": "invalid first name (less than 2 characters)",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "A",
+      "last_name": "Anderson",
+      "email": "A_Anderson@yahoo.com",
+      "password": "Password1!"
+    }
+  },
+
+  {
+    "TestName": "invalid last name (less than 2 characters)",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "Sophia",
+      "last_name": "B",
+      "email": "Sophia_B@outlook.com",
+      "password": "Password1!"
+    }
+  },
+
+  {
+    "TestName": "invalid first name (more than 50 characters)",
+    "ExpectedStatusCode": 400,
+
+    "Input": {
+      "first_name": "Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiwhenu",
+      "last_name": "Harris",
+      "email": "LongFirstName@gmail.com",
+      "password": "Password1!"
+    }
+  },
+
+  {
+    "TestName": "invalid last name (more than 50 characters)",
+    "ExpectedStatusCode": 400,
+
+    "Input": {
+      "first_name": "James",
+      "last_name": "Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiwhenu",
+      "email": "LongLastName@gmail.com",
+      "password": "Password1!"
+    }
+  },
+
+  {
+    "TestName": "invalid first name (contains non-alphabetic characters)",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "John123",
+      "last_name": "Walker",
+      "email": "John123_Walker@gmail.com",
+      "password": "Password1!"
+    }
+  },
+
+  {
+    "TestName": "invalid last name (contains non-alphabetic characters)",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "Grace",
+      "last_name": "Miller456",
+      "email": "Grace_Miller456@yahoo.com",
+      "password": "Password1!"
+    }
+  },
+
+  {
+    "TestName": "whitespace only fields",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "first_name": "   ",
+      "last_name": "   ",
+      "email": "   ",
+      "password": "   "
+    }
+  }
+]

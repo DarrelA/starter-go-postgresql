@@ -82,6 +82,8 @@ Dependency Injection (DI) is a design pattern that achieves Inversion of Control
 - [Appendix A. PostgreSQL Error Codes](https://www.postgresql.org/docs/current/errcodes-appendix.html)
 - [What is Test Driven Development (TDD)?](https://www.geeksforgeeks.org/test-driven-development-tdd/)
 - [What is Behavior-Driven Development (BDD)?](https://www.geeksforgeeks.org/behavioral-driven-development-bdd-in-software-engineering/)
+- [DDD Part 1: Strategic Domain-Driven Design](https://vaadin.com/blog/ddd-part-1-strategic-domain-driven-design)
+- [Domain-Driven Design: Aggregates in Practice](https://medium.com/@aforank/domain-driven-design-aggregates-in-practice-bcced7d21ae5)
 - [Domain-Driven Design (DDD)](https://prbpedro.substack.com/i/107466822/domain-driven-design)
 - [sklinkert/go-ddd](https://github.com/sklinkert/go-ddd/tree/main)
 - [Dependency Injection(DI) Design Pattern](https://www.geeksforgeeks.org/dependency-injectiondi-design-pattern/)

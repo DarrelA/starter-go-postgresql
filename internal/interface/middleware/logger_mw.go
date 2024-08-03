@@ -71,21 +71,9 @@ func LoggerMW(c *fiber.Ctx) error {
 
 	default:
 		log.Info().
-			Str("hostname", hostname).
 			Str("method", c.Method()).
-			Str("referer", c.Get("Referer")).
 			Str("url", c.OriginalURL()).
 			Int("status", c.Response().StatusCode()).
-			Bytes("request_body", c.Request().Body()).
-			Bytes("response_body", c.Response().Body()).
-			Str("user_host", c.Get("Host")).
-			Dur("response_time", duration).
-			Int64("latency_ms", duration.Milliseconds()).
-			Str("ip_address", ip).
-			Str("ip_version", getIPVersion(ip)).
-			Str("user_agent", c.Get("User-Agent")).
-			Str("correlationID", correlationID).
-			Str("requestID", requestID).
 			Msgf("request is completed in [%s] env", currentEnv)
 	}
 

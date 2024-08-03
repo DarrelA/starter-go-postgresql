@@ -1,0 +1,139 @@
+[
+  {
+    "TestName": "valid account 1",
+    "ExpectedStatusCode": 200,
+    "Input": {
+      "email": "Carlyn_Daniel@gmail.com",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "valid account non-ASCII character",
+    "ExpectedStatusCode": 200,
+    "Input": {
+      "email": "Carlyn_Daniël@gmail.com",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "valid account 2",
+    "ExpectedStatusCode": 200,
+    "Input": {
+      "email": "Emily_Clark@gmail.com",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "email case sensitivity",
+    "ExpectedStatusCode": 200,
+    "Input": {
+      "email": "EMILY_CLARK@gmail.com",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "email with trailing spaces",
+    "ExpectedStatusCode": 200,
+    "Input": {
+      "email": "Emily_Clark@gmail.com    ",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "password with leading spaces",
+    "ExpectedStatusCode": 200,
+    "Input": {
+      "email": "   Emily_Clark@gmail.com",
+      "password": " Password1! "
+    }
+  },
+
+  {
+    "TestName": "incorrect email",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "email": "emily_clarky@gmail.com",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "incorrect password",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "email": "Emily_Clark@gmail.com",
+      "password": "password1!2"
+    }
+  },
+  {
+    "TestName": "empty email only",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "email": "",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "empty password only",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "email": "Emily_Clark@gmail.com",
+      "password": ""
+    }
+  },
+  {
+    "TestName": "empty email and password",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "email": "",
+      "password": ""
+    }
+  },
+  {
+    "TestName": "invalid email format",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "email": "Emily_Clark@com",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "SQL injection attempt",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "email": "Emily_Clark@gmail.com",
+      "password": "' OR '1'='1"
+    }
+  },
+  {
+    "TestName": "password case sensitivity",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "email": "Emily_Clark@gmail.com",
+      "password": "password1!"
+    }
+  },
+  {
+    "TestName": "long email input",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "email": "this.is.a.very.long.email.address.Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiwhenu@gmail.com",
+      "password": "Password1!"
+    }
+  },
+  {
+    "TestName": "long password input",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "email": "Emily_Clark@gmail.com",
+      "password": "Taumatawhakatangihangakoauauotamateaturipukakapikimaungahoronukupokaiwhenu!"
+    }
+  },
+  {
+    "TestName": "invalid email format",
+    "ExpectedStatusCode": 400,
+    "Input": {
+      "email": "Emily_Clark@!gmail.com",
+      "password": "Password1!"
+    }
+  }
+]
