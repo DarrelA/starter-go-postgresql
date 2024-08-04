@@ -36,9 +36,13 @@ for i in "${!TESTDATA_JSON_FILES[@]}"; do
     TESTDATA_JSON_FILE=${TESTDATA_JSON_FILES[$i]}
     URL=${URLS[$i]}
 
-    # Add Endpoint and initialize Responses
-    jq --arg url "$URL" '. += [{"Endpoint": $url, "Responses": {}}]' \
-       "$OUTPUT_JSON_FILE" > temp.json && mv temp.json "$OUTPUT_JSON_FILE"
+    # Get the current date and time in the desired format
+    DATETIME=$(date +"%Y-%m-%dT%H:%M:%S%z")
+
+    # Add DateTime, Endpoint and initialize Responses
+    jq --arg url "$URL" --arg datetime "$DATETIME" \
+   '. += [{"DateTime": $datetime, "Endpoint": $url, "Responses": {}}]' \
+   "$OUTPUT_JSON_FILE" > temp.json && mv temp.json "$OUTPUT_JSON_FILE"
 
     # Loop through the JSON file
     jq -c '.[]' "$TESTDATA_JSON_FILE" | while read -r item; do
