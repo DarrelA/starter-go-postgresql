@@ -90,7 +90,7 @@ Parameters:
   - `payload`: A pointer to a struct that will be filled with the parsed request body data.
 */
 func parseAndSanitize(c *fiber.Ctx, payload interface{}) *restDomainErr.RestErr {
-	log.Debug().Msgf("The type of payload interface{} is %s\n", reflect.TypeOf(payload))
+	// log.Debug().Msgf("The type of payload interface{} is %s\n", reflect.TypeOf(payload))
 	// Parse the request body into the provided payload structure
 	if err := c.BodyParser(payload); err != nil {
 		// err := restInterfaceErr.NewUnprocessableEntityError(errInvalidJSON)
