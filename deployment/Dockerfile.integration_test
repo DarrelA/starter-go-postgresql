@@ -1,5 +1,3 @@
-# @TODO: Modify `Dockerfile` for integration test
-
 # Stage 1: Build the Go binary
 FROM golang:latest AS builder
 
@@ -23,17 +21,16 @@ RUN rm -rf /docker_wd/testdata/reports
 # go build -a: Forces a rebuild of all packages and their dependencies,
 #              regardless of whether they have changed or not
 # -o starter-go-postgresql.test: Specifies the output file name
-RUN CGO_ENABLED=0 GOOS=linux go build -a -o starter-go-postgresql-it github.com/DarrelA/starter-go-postgresql/cmd/auth
+RUN CGO_ENABLED=0 GOOS=linux \
+    go build -cover -a \
+    -o starter-go-postgresql-it \
+    github.com/DarrelA/starter-go-postgresql/cmd/auth
 
 # Stage 2: Create a smaller image for the final binary
 FROM alpine:latest
 
-# Install bash
-RUN apk add --no-cache bash
-# Install jq
-RUN apk add --no-cache jq
-# Install curl
-RUN apk add --no-cache curl
+# Install bash, jq, curl, and Go
+RUN apk add --no-cache bash jq curl go
 
 # Copy the pre-built binary file from the builder stage
 COPY --from=builder /docker_wd/starter-go-postgresql-it /root
@@ -45,12 +42,14 @@ COPY deployment/build/json /root/deployment/build/json
 # Copy necessary files for integration test
 COPY /testdata/json /root/testdata/json
 COPY deployment/build/scripts/integration_test.sh /root
+COPY deployment/build/scripts/wrap_test_for_coverage.sh /root
 
 # Set the working directory for the container
 WORKDIR /root
 
-# Make the integration test script executable
+# Make the shell scripts executable
 RUN chmod +x /root/integration_test.sh
+RUN chmod +x /root/wrap_test_for_coverage.sh
 
 # Run the shell script when the container starts
-ENTRYPOINT ["/bin/bash", "-c", "./integration_test.sh"]
+ENTRYPOINT ["/bin/bash", "-c", "./wrap_test_for_coverage.sh"]
