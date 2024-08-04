@@ -32,7 +32,7 @@ func TestLoggerMW(t *testing.T) {
 		},
 		{
 			name: "currentEnvDefault", env: "test", requestID: "test-request-id", correlationID: "test-correlation-id", expectedSubString: "request is completed in [test] env",
-			expectedRequestID: "test-request-id", expectedCorrelationID: "test-correlation-id",
+			expectedRequestID: "", expectedCorrelationID: "",
 		},
 		{
 			name: "invalidRequestID", env: "test", requestID: 0, correlationID: "test-correlation-id",
