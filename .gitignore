@@ -10,5 +10,6 @@ db/pgdb/servers.json
 *.log
 *.log.json
 
+testdata/reports/covdatafiles
 testdata/reports/*.html
 testdata/reports/*.json

@@ -37,13 +37,13 @@ up:
 # Target to bring down the docker-compose services
 d:
 	@cd deployment && APP_ENV=$(APP_ENV) docker-compose down
-	make lg
+	@make lg
 
 # Target to bring down the docker-compose services, named volumes, and remove unused containers
 dv:
 	@cd deployment && APP_ENV=$(APP_ENV) docker-compose down -v
 	@docker container prune -f
-	make lg
+	@make lg
 
 # Target to rebuild the docker-compose app service
 wa:
@@ -53,13 +53,15 @@ wa:
 ut:
 	@cd deployment && $(VARS) docker-compose build app-unit-test --build-arg APP_ENV=$(APP_ENV)
 	@cd deployment && $(VARS) docker-compose run app-unit-test
-	make dv
+	@make dv
 
 # Target to rebuild the docker-compose app-integration-test service & run test
+# @TODO: Move the Go command to `wrap_test_for_coverage.sh`
 it:
 	@cd deployment && $(VARS) docker-compose build app-integration-test --build-arg APP_ENV=$(APP_ENV)
 	@cd deployment && $(VARS) docker-compose run app-integration-test
-	make dv
+	@make dv
+	@go tool cover -html=./testdata/reports/covdatafiles/coverage.out -o "./testdata/reports/it_ coverage.html"
 
 
 # Format log

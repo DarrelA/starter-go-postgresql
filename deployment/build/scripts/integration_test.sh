@@ -1,11 +1,11 @@
 #!/bin/bash
 
-OUTPUT_JSON_FILE="./testdata/output/responses.json"
+OUTPUT_JSON_FILE="/root/testdata/output/responses.json"
 
 # Testdata files
 TESTDATA_JSON_FILES=(
-    "./testdata/json/register.json"
-    "./testdata/json/login.json"
+    "/root/testdata/json/register.json"
+    "/root/testdata/json/login.json"
 )
 
 # Endpoints
@@ -16,6 +16,9 @@ URLS=(
 
 # Run the main application
 ./starter-go-postgresql-it &
+
+# Capture the PID of the application
+APP_PID=$!
 
 # Wait for the application to start
 sleep 5
@@ -85,5 +88,11 @@ done
 
 # Cleanup temporary file
 rm response_body.txt
+
+# Initiate graceful shutdown by sending SIGTERM to the application process
+kill -SIGTERM "$APP_PID"
+
+# Wait for the application to shutdown gracefully
+wait "$APP_PID"
 
 echo "Completed running the integration_test.sh"
