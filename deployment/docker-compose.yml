@@ -66,7 +66,7 @@ services:
       - '8080:8080'
     volumes:
       - ./logs:/docker_wd/logs
-      - ../testdata/reports:/docker_wd/test/reports
+      - ../testdata/reports:/docker_wd/testdata/output
     environment:
       - APP_ENV=${APP_ENV}
     env_file:

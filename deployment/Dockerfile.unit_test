@@ -26,4 +26,4 @@ ENTRYPOINT ["sh", "-c", \
     "echo Running test in APP_ENV=${APP_ENV} && \
     APP_ENV=${APP_ENV} go test ./... -coverprofile=coverage.out && \
     go-ignore-cov --file coverage.out && \
-    go tool cover -html=coverage.out -o /docker_wd/test/reports/ut_coverage.html"]
+    go tool cover -html=coverage.out -o /docker_wd/testdata/output/ut_coverage.html"]
