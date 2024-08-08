@@ -154,7 +154,8 @@ func (e *EnvConfig) LoadOAuth2Config() {
 	domain := checkEmptyEnvVar("DOMAIN")
 
 	e.OAuth2Config = &entity.OAuth2Config{
-		GoogleRedirectURL:  protocol + domain + ":" + e.Port + "/google_callback",
+		// Google Cloud Console -> Credentials -> OAuth 2.0 Client IDs -> Authorized redirect URIs
+		GoogleRedirectURL:  protocol + domain + ":" + e.Port + "/auth/google_callback",
 		GoogleClientID:     checkEmptyEnvVar("GOOGLE_CLIENT_ID"),
 		GoogleClientSecret: checkEmptyEnvVar("GOOGLE_CLIENT_SECRET"),
 		Scopes: []string{
