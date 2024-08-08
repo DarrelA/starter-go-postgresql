@@ -8,3 +8,8 @@ type AuthUseCase interface {
 	RefreshAccessToken(c *fiber.Ctx) error
 	Logout(c *fiber.Ctx) error
 }
+
+type OAuth2UseCase interface {
+	Login(c *fiber.Ctx) error
+	Callback(c *fiber.Ctx) error
+}

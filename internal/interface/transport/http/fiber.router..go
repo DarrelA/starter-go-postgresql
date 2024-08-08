@@ -38,8 +38,9 @@ func NewRouter(
 	redisRepo r.RedisUserRepository,
 	tokenService domainSvc.TokenService,
 	userService appSvc.UserService,
-	authUseCase usecase.AuthUseCase,
 	userUseCase usecase.UserUseCase,
+	authUseCase usecase.AuthUseCase,
+	googleOAuth2UseCase usecase.OAuth2UseCase,
 ) *fiber.App {
 	log.Info().Msg("creating fiber instances")
 	appInstance := fiber.New()
@@ -55,6 +56,9 @@ func NewRouter(
 		return c.Next()
 	})
 
+	/********************
+	 *   Refresh Token  *
+	 ********************/
 	user := v1.Group("/users")
 	user.Post("/register", ppmw.PreProcessInputs, authUseCase.Register)
 	user.Post("/login", ppmw.PreProcessInputs, authUseCase.Login)
@@ -64,6 +68,12 @@ func NewRouter(
 	authUser.Get("/me", userUseCase.GetUserRecord)
 
 	user.Get("/refresh", authUseCase.RefreshAccessToken)
+
+	/********************
+	 *      OAuth2      *
+	 ********************/
+	authServiceInstance.Get("/google_login", googleOAuth2UseCase.Login)
+	authServiceInstance.Get("/google_callback", googleOAuth2UseCase.Callback)
 
 	authServiceInstance.Get("/health", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success"})

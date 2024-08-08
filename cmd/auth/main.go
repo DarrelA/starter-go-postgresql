@@ -23,6 +23,7 @@ import (
 
 	interfaceSvc "github.com/DarrelA/starter-go-postgresql/internal/interface/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http"
+	oauth2 "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/oauth2"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
@@ -49,13 +50,14 @@ func main() {
 }
 
 func initializeEnv() *config.EnvConfig {
-	envConfig := config.NewTokenService()
+	envConfig := config.LoadEnvConfig()
 	envConfig.LoadAppConfig()
 	envConfig.LoadLogConfig()
 	envConfig.LoadDBConfig()
 	envConfig.LoadRedisConfig()
 	envConfig.LoadJWTConfig()
 	envConfig.LoadCORSConfig()
+	envConfig.LoadOAuth2Config()
 	config, ok := envConfig.(*config.EnvConfig)
 	if !ok {
 		log.Error().Msg("failed to load environment configuration")
@@ -92,9 +94,12 @@ func initializeServer(
 	userUseCase := http.NewUserUseCase()
 	tokenService := jwt.NewTokenService()
 	authUseCase := http.NewAuthUseCase(redisUserRepo, userService, tokenService)
+	googleOAuth2UseCase := oauth2.NewGoogleOAuth2(config.OAuth2Config)
 
-	appServiceInstance := http.NewRouter(config, redisUserRepo,
-		tokenService, userService, authUseCase, userUseCase,
+	appServiceInstance := http.NewRouter(
+		config, redisUserRepo, tokenService,
+		userService, userUseCase,
+		authUseCase, googleOAuth2UseCase,
 	)
 
 	go func() {
