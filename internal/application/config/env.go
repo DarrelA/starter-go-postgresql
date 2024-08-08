@@ -10,4 +10,5 @@ type LoadEnvConfig interface {
 	LoadRedisConfig()
 	LoadJWTConfig()
 	LoadCORSConfig()
+	LoadOAuth2Config()
 }

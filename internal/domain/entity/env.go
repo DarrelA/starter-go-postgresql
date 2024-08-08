@@ -11,6 +11,7 @@ type (
 		RedisDBConfig    *RedisDBConfig
 		JWTConfig        *JWTConfig
 		CORSConfig       *CORSConfig
+		OAuth2Config     *OAuth2Config
 	}
 
 	BaseURLsConfig struct {
@@ -49,5 +50,12 @@ type (
 
 	CORSConfig struct {
 		AllowedOrigins string
+	}
+
+	OAuth2Config struct {
+		GoogleRedirectURL  string
+		GoogleClientID     string
+		GoogleClientSecret string
+		Scopes             []string
 	}
 )

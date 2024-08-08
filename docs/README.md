@@ -23,6 +23,7 @@
 - [References](#references)
   - [Golang](#golang)
   - [Refresh JWTs \& Redis](#refresh-jwts--redis)
+  - [OAuth2](#oauth2)
   - [Others](#others)
 
 # Concepts And Methodologies
@@ -295,6 +296,11 @@ In summary, using access and refresh tokens with Redis, PostgreSQL, and cookies 
 ## Refresh JWTs & Redis
 
 - [How to Properly Refresh JWTs for Authentication in Golang](https://codevoweb.com/how-to-properly-use-jwt-for-authentication-in-golang/)
+
+## OAuth2
+
+- [OAuth 2.0 Implementation in Golang](https://dev.to/siddheshk02/oauth-20-implementation-in-golang-3mj1)
+- [Google APIs console](https://console.cloud.google.com/apis)
 
 ## Others
 

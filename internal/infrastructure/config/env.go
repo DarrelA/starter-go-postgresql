@@ -26,7 +26,7 @@ type EnvConfig struct {
 	entity.EnvConfig
 }
 
-func NewTokenService() config.LoadEnvConfig {
+func LoadEnvConfig() config.LoadEnvConfig {
 	return &EnvConfig{}
 }
 
@@ -146,6 +146,21 @@ func (e *EnvConfig) LoadJWTConfig() {
 func (e *EnvConfig) LoadCORSConfig() {
 	e.CORSConfig = &entity.CORSConfig{
 		AllowedOrigins: checkEmptyEnvVar("CORS_ALLOWED_ORIGINS"),
+	}
+}
+
+func (e *EnvConfig) LoadOAuth2Config() {
+	protocol := checkEmptyEnvVar("PROTOCOL")
+	domain := checkEmptyEnvVar("DOMAIN")
+
+	e.OAuth2Config = &entity.OAuth2Config{
+		GoogleRedirectURL:  protocol + domain + ":" + e.Port + "/google_callback",
+		GoogleClientID:     checkEmptyEnvVar("GOOGLE_CLIENT_ID"),
+		GoogleClientSecret: checkEmptyEnvVar("GOOGLE_CLIENT_SECRET"),
+		Scopes: []string{
+			"https://www.googleapis.com/auth/userinfo.email",
+			"https://www.googleapis.com/auth/userinfo.profile",
+		},
 	}
 }
 
