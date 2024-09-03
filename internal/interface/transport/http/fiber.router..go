@@ -9,11 +9,12 @@ import (
 	"github.com/DarrelA/starter-go-postgresql/internal/application/usecase"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
+	restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
 	"github.com/DarrelA/starter-go-postgresql/internal/infrastructure/config"
 	mw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware"
 	dumw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware/deserialize_user"
 	ppmw "github.com/DarrelA/starter-go-postgresql/internal/interface/middleware/preprocess_inputs"
-	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
@@ -81,7 +82,7 @@ func NewRouter(
 
 	appInstance.All("*", func(c *fiber.Ctx) error {
 		path := c.Path()
-		err := restInterfaceErr.NewBadRequestError("Invalid Path: " + path)
+		err := restErr.NewBadRequestError("Invalid Path: " + path)
 		log.Error().Err(err).Msg("")
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"status":  "fail",

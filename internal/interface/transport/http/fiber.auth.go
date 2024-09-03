@@ -8,10 +8,10 @@ import (
 	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/application/usecase"
-	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
-	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
+	restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -39,8 +39,8 @@ func NewAuthUseCase(
 func (auc *AuthUseCase) Register(c *fiber.Ctx) error {
 	payload, ok := c.Locals("register_payload").(dto.RegisterInput)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError(errMsgRegisterPayload)
-		log.Error().Err(err).Msg(errConst.ErrTypeError)
+		err := restErr.NewBadRequestError(errMsgRegisterPayload)
+		log.Error().Err(err).Msg(restErr.ErrTypeError)
 	}
 
 	result, err := auc.us.CreateUser(payload)
@@ -54,8 +54,8 @@ func (auc *AuthUseCase) Register(c *fiber.Ctx) error {
 func (auc *AuthUseCase) Login(c *fiber.Ctx) error {
 	payload, ok := c.Locals("login_payload").(dto.LoginInput)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError(errMsgLoginPayload)
-		log.Error().Err(err).Msg(errConst.ErrTypeError)
+		err := restErr.NewBadRequestError(errMsgLoginPayload)
+		log.Error().Err(err).Msg(restErr.ErrTypeError)
 	}
 
 	user, err := auc.us.GetUserByEmail(payload)
@@ -132,7 +132,7 @@ func (auc *AuthUseCase) RefreshAccessToken(c *fiber.Ctx) error {
 	refresh_token := c.Cookies("refresh_token")
 
 	if refresh_token == "" {
-		clientErr := restInterfaceErr.NewBadRequestError(errConst.ErrMsgPleaseLoginAgain)
+		clientErr := restErr.NewBadRequestError(restErr.ErrMsgPleaseLoginAgain)
 		return c.Status(clientErr.Status).JSON(fiber.Map{"status": "fail", "error": clientErr})
 	}
 
@@ -190,7 +190,7 @@ func (auc *AuthUseCase) Logout(c *fiber.Ctx) error {
 	refresh_token := c.Cookies("refresh_token")
 
 	if refresh_token == "" {
-		clientErr := restInterfaceErr.NewBadRequestError(errConst.ErrMsgPleaseLoginAgain)
+		clientErr := restErr.NewBadRequestError(restErr.ErrMsgPleaseLoginAgain)
 		return c.Status(clientErr.Status).JSON(fiber.Map{"status": "fail", "error": clientErr})
 	}
 
@@ -202,9 +202,9 @@ func (auc *AuthUseCase) Logout(c *fiber.Ctx) error {
 
 	accessTokenUUID, ok := c.Locals("accessTokenUUID").(string) // type assertion
 	if !ok {
-		internalErr := restInterfaceErr.NewBadRequestError(errMsgAccessTokenUUID)
-		log.Error().Err(internalErr).Msg(errConst.ErrTypeError)
-		clientErr := restInterfaceErr.NewBadRequestError(errConst.ErrMsgPleaseLoginAgain)
+		internalErr := restErr.NewBadRequestError(errMsgAccessTokenUUID)
+		log.Error().Err(internalErr).Msg(restErr.ErrTypeError)
+		clientErr := restErr.NewBadRequestError(restErr.ErrMsgPleaseLoginAgain)
 		return c.Status(clientErr.Status).JSON(fiber.Map{"status": "fail", "error": clientErr})
 	}
 

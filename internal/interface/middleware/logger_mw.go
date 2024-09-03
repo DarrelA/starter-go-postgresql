@@ -5,8 +5,7 @@ import (
 	"os"
 	"time"
 
-	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
-	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
+	restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 )
@@ -21,13 +20,13 @@ func LoggerMW(c *fiber.Ctx) error {
 
 	requestID, ok := c.Locals("requestID").(string)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": requestID")
+		err := restErr.NewBadRequestError(restErr.ErrTypeError + ": requestID")
 		log.Error().Err(err).Msg("")
 	}
 
 	correlationID, ok := c.Locals("correlationID").(string)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": correlationID")
+		err := restErr.NewBadRequestError(restErr.ErrTypeError + ": correlationID")
 		log.Error().Err(err).Msg("")
 	}
 
@@ -38,7 +37,7 @@ func LoggerMW(c *fiber.Ctx) error {
 
 	currentEnv, ok := c.Locals("env").(string)
 	if !ok {
-		err := restInterfaceErr.NewBadRequestError(errConst.ErrTypeError + ": currentEnv")
+		err := restErr.NewBadRequestError(restErr.ErrTypeError + ": currentEnv")
 		log.Error().Err(err).Msg("")
 	}
 

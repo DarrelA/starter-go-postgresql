@@ -7,9 +7,8 @@ import (
 
 	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
-	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
-	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
+	errConst "github.com/DarrelA/starter-go-postgresql/internal/error"
+	restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
 	"github.com/google/uuid"
 )
 
@@ -27,30 +26,30 @@ func (m *mockUUIDs) initializeMockUUIDEntities() {
 
 type mockRedisUserRepository struct{ mid mockUUIDs }
 
-func (m *mockRedisUserRepository) SetUserUUID(tokenUUID string, userUUID string, expiresIn int64) *restDomainErr.RestErr {
+func (m *mockRedisUserRepository) SetUserUUID(tokenUUID string, userUUID string, expiresIn int64) *restErr.RestErr {
 	return nil
 }
 
-func (m *mockRedisUserRepository) GetUserUUID(tokenUUID string) (string, *restDomainErr.RestErr) {
+func (m *mockRedisUserRepository) GetUserUUID(tokenUUID string) (string, *restErr.RestErr) {
 	return m.mid.mockUserUUID.String(), nil
 }
 
-func (m *mockRedisUserRepository) DelUserUUID(tokenUUID string, accessTokenUUID string) (int64, *restDomainErr.RestErr) {
+func (m *mockRedisUserRepository) DelUserUUID(tokenUUID string, accessTokenUUID string) (int64, *restErr.RestErr) {
 	return 1, nil
 }
 
 type mockTokenService struct{ mid mockUUIDs }
 
 func (m *mockTokenService) CreateToken(userUUID string, ttl time.Duration, privateKey string) (
-	*entity.Token, *restDomainErr.RestErr) {
+	*entity.Token, *restErr.RestErr) {
 	return nil, nil
 }
 
 func (m *mockTokenService) ValidateToken(token string, publicKey string) (
-	*entity.Token, *restDomainErr.RestErr) {
+	*entity.Token, *restErr.RestErr) {
 	// Simulate invalid token
 	if token == "" || token == "mockInvalidBearerToken" {
-		err := restInterfaceErr.NewUnauthorizedError(errConst.ErrMsgPleaseLoginAgain)
+		err := restErr.NewUnauthorizedError(errConst.ErrMsgPleaseLoginAgain)
 		return nil, err
 	}
 
@@ -70,15 +69,15 @@ type mockUserService struct{}
 
 func (m *mockUserService) GetJWTConfig() *entity.JWTConfig { return &entity.JWTConfig{} }
 
-func (m *mockUserService) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restDomainErr.RestErr) {
+func (m *mockUserService) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restErr.RestErr) {
 	return nil, nil
 }
 
-func (m *mockUserService) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr) {
+func (m *mockUserService) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restErr.RestErr) {
 	return nil, nil
 }
 
-func (m *mockUserService) GetUserByUUID(userUuid string) (*entity.User, *restDomainErr.RestErr) {
+func (m *mockUserService) GetUserByUUID(userUuid string) (*entity.User, *restErr.RestErr) {
 	uuidPointer, _ := uuid.Parse(userUuid)
 	user := &entity.User{
 		ID:        int64(1),

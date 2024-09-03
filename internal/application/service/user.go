@@ -3,12 +3,12 @@ package service
 import (
 	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
+	restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
 )
 
 type UserService interface {
 	GetJWTConfig() *entity.JWTConfig
-	CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restDomainErr.RestErr)
-	GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr)
-	GetUserByUUID(userUuid string) (*entity.User, *restDomainErr.RestErr)
+	CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restErr.RestErr)
+	GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restErr.RestErr)
+	GetUserByUUID(userUuid string) (*entity.User, *restErr.RestErr)
 }

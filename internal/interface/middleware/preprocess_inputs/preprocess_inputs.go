@@ -9,8 +9,7 @@ import (
 
 	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
-	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
+	restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
@@ -66,7 +65,7 @@ func PreProcessInputs(c *fiber.Ctx) error {
 		c.Locals("login_payload", payload)
 
 	default:
-		err := restInterfaceErr.NewBadRequestError(errMsgInvalidEndPoint + endpoint)
+		err := restErr.NewBadRequestError(errMsgInvalidEndPoint + endpoint)
 		log.Error().Err(err).Msg("")
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
@@ -89,13 +88,13 @@ Parameters:
   - `c`: The Fiber context, which contains the HTTP request and response information.
   - `payload`: A pointer to a struct that will be filled with the parsed request body data.
 */
-func parseAndSanitize(c *fiber.Ctx, payload interface{}) *restDomainErr.RestErr {
+func parseAndSanitize(c *fiber.Ctx, payload interface{}) *restErr.RestErr {
 	// log.Debug().Msgf("The type of payload interface{} is %s\n", reflect.TypeOf(payload))
 	// Parse the request body into the provided payload structure
 	if err := c.BodyParser(payload); err != nil {
-		// err := restInterfaceErr.NewUnprocessableEntityError(errInvalidJSON)
+		// err := restErr.NewUnprocessableEntityError(errInvalidJSON)
 		// return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
-		return restInterfaceErr.NewUnprocessableEntityError(errInvalidJSON)
+		return restErr.NewUnprocessableEntityError(errInvalidJSON)
 	}
 
 	sanitizeHelper(payload)
@@ -149,7 +148,7 @@ The message is constructed using the field name and the user-friendly message.
 
 Pass the payload by reference
 */
-func validateStruct[T any](payload *T) *restDomainErr.RestErr {
+func validateStruct[T any](payload *T) *restErr.RestErr {
 	var validationErrors []string
 	err := validate.Struct(payload)
 	if err != nil {
@@ -169,7 +168,7 @@ func validateStruct[T any](payload *T) *restDomainErr.RestErr {
 		}
 
 		fullMessage := "validation error: " + strings.Join(validationErrors, "\n")
-		return restInterfaceErr.NewBadRequestError(fullMessage)
+		return restErr.NewBadRequestError(fullMessage)
 	}
 
 	return nil

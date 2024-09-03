@@ -1,9 +1,9 @@
 package repository
 
-import restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
+import restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
 
 type RedisUserRepository interface {
-	SetUserUUID(tokenUUID string, userUUID string, expiresIn int64) *restDomainErr.RestErr
-	GetUserUUID(tokenUUID string) (string, *restDomainErr.RestErr)
-	DelUserUUID(tokenUUID string, accessTokenUUID string) (int64, *restDomainErr.RestErr)
+	SetUserUUID(tokenUUID string, userUUID string, expiresIn int64) *restErr.RestErr
+	GetUserUUID(tokenUUID string) (string, *restErr.RestErr)
+	DelUserUUID(tokenUUID string, accessTokenUUID string) (int64, *restErr.RestErr)
 }

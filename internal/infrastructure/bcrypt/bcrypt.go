@@ -3,7 +3,7 @@ package bcrypt
 import (
 	"errors"
 
-	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
+	errConst "github.com/DarrelA/starter-go-postgresql/internal/error"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 )

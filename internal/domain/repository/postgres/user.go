@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
+	restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
 )
 
 /*
@@ -12,7 +12,7 @@ Defining the repository interface in the domain layer is appropriate as
 it represents a boundary for persistence operations
 */
 type PostgresUserRepository interface {
-	SaveUser(user *entity.User) *restDomainErr.RestErr
-	GetUserByEmail(user *entity.User) *restDomainErr.RestErr
-	GetUserByUUID(user *entity.User) *restDomainErr.RestErr
+	SaveUser(user *entity.User) *restErr.RestErr
+	GetUserByEmail(user *entity.User) *restErr.RestErr
+	GetUserByUUID(user *entity.User) *restErr.RestErr
 }

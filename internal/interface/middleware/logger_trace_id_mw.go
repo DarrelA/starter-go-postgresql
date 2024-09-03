@@ -1,8 +1,7 @@
 package middleware
 
 import (
-	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
-	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
+	restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -18,8 +17,8 @@ func CorrelationAndRequestID(c *fiber.Ctx) error {
 	if correlationID == "" {
 		id, err := uuid.NewV7()
 		if err != nil { // coverage:ignore
-			log.Error().Err(err).Msg(errConst.ErrUUIDError)
-			return restInterfaceErr.NewUnprocessableEntityError(errConst.ErrUUIDError)
+			log.Error().Err(err).Msg(restErr.ErrUUIDError)
+			return restErr.NewUnprocessableEntityError(restErr.ErrUUIDError)
 		}
 
 		correlationID = id.String()
@@ -29,8 +28,8 @@ func CorrelationAndRequestID(c *fiber.Ctx) error {
 	if requestID == "" {
 		id, err := uuid.NewV7()
 		if err != nil { // coverage:ignore
-			log.Error().Err(err).Msg(errConst.ErrUUIDError)
-			return restInterfaceErr.NewUnprocessableEntityError(errConst.ErrUUIDError)
+			log.Error().Err(err).Msg(restErr.ErrUUIDError)
+			return restErr.NewUnprocessableEntityError(restErr.ErrUUIDError)
 		}
 
 		requestID = id.String()

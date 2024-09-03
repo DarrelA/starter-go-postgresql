@@ -6,10 +6,8 @@ import (
 	"time"
 
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
-	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/service"
-	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
+	restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
 	"github.com/golang-jwt/jwt/v5"
 	uuid "github.com/google/uuid"
 	"github.com/rs/zerolog/log"
@@ -33,7 +31,7 @@ func NewTokenService() service.TokenService {
 }
 
 func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateKey string) (
-	*entity.Token, *restDomainErr.RestErr) {
+	*entity.Token, *restErr.RestErr) {
 	now := time.Now().UTC()
 	t := &entity.Token{
 		ExpiresIn: new(int64),
@@ -42,8 +40,8 @@ func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateK
 
 	id, err := uuid.NewV7()
 	if err != nil { // coverage:ignore
-		log.Error().Err(err).Msg(errConst.ErrUUIDError)
-		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
+		log.Error().Err(err).Msg(restErr.ErrUUIDError)
+		return nil, restErr.NewUnprocessableEntityError(restErr.ErrMsgSomethingWentWrong)
 	}
 
 	t.TokenUUID = id.String()
@@ -53,14 +51,14 @@ func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateK
 	decodedPrivateKey, err := base64.StdEncoding.DecodeString(privateKey)
 	if err != nil {
 		log.Error().Err(err).Msg(errMsgDecodeStringError)
-		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
+		return nil, restErr.NewUnprocessableEntityError(restErr.ErrMsgSomethingWentWrong)
 	}
 
 	key, err := jwt.ParseRSAPrivateKeyFromPEM(decodedPrivateKey)
 
 	if err != nil {
 		log.Error().Err(err).Msg(errMsgParseRSAKeyError)
-		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
+		return nil, restErr.NewUnprocessableEntityError(restErr.ErrMsgSomethingWentWrong)
 	}
 
 	atClaims := jwt.MapClaims{
@@ -74,24 +72,24 @@ func (ts *TokenService) CreateToken(userUUID string, ttl time.Duration, privateK
 	*t.Token, err = jwt.NewWithClaims(jwt.SigningMethodRS256, atClaims).SignedString(key)
 	if err != nil {
 		log.Error().Err(err).Msg(errMsgSignKeyError)
-		return nil, restInterfaceErr.NewUnprocessableEntityError(errConst.ErrMsgSomethingWentWrong)
+		return nil, restErr.NewUnprocessableEntityError(restErr.ErrMsgSomethingWentWrong)
 	}
 
 	return t, nil
 }
 
 func (ts *TokenService) ValidateToken(tokenStr string, publicKey string) (
-	*entity.Token, *restDomainErr.RestErr) {
+	*entity.Token, *restErr.RestErr) {
 	decodedPublicKey, err := base64.StdEncoding.DecodeString(publicKey)
 	if err != nil {
 		log.Error().Err(err).Msg(errMsgDecodeStringError)
-		return nil, restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
+		return nil, restErr.NewInternalServerError(restErr.ErrMsgSomethingWentWrong)
 	}
 
 	key, err := jwt.ParseRSAPublicKeyFromPEM(decodedPublicKey)
 	if err != nil {
 		log.Error().Err(err).Msg(errMsgParseRSAKeyError)
-		return nil, restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
+		return nil, restErr.NewInternalServerError(restErr.ErrMsgSomethingWentWrong)
 	}
 
 	parsedToken, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
@@ -102,15 +100,15 @@ func (ts *TokenService) ValidateToken(tokenStr string, publicKey string) (
 	})
 
 	if err != nil {
-		log.Error().Err(err).Msg(errConst.ErrMsgInvalidToken)
-		return nil, restInterfaceErr.NewUnauthorizedError(errConst.ErrMsgPleaseLoginAgain)
+		log.Error().Err(err).Msg(restErr.ErrMsgInvalidToken)
+		return nil, restErr.NewUnauthorizedError(restErr.ErrMsgPleaseLoginAgain)
 	}
 
 	claims, ok := parsedToken.Claims.(jwt.MapClaims)
 	if !ok || !parsedToken.Valid {
-		err := restInterfaceErr.NewUnauthorizedError(errConst.ErrMsgInvalidToken)
+		err := restErr.NewUnauthorizedError(restErr.ErrMsgInvalidToken)
 		log.Error().Err(err).Msg("")
-		return nil, restInterfaceErr.NewUnauthorizedError(errConst.ErrMsgPleaseLoginAgain)
+		return nil, restErr.NewUnauthorizedError(restErr.ErrMsgPleaseLoginAgain)
 	}
 
 	return &entity.Token{

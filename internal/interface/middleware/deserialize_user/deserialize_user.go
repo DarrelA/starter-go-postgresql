@@ -5,10 +5,9 @@ import (
 
 	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
-	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
 	r "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/redis"
 	domainSvc "github.com/DarrelA/starter-go-postgresql/internal/domain/service"
-	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
+	restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -28,7 +27,7 @@ func Deserializer(
 		}
 
 		if access_token == "" {
-			err := restInterfaceErr.NewUnauthorizedError(errConst.ErrMsgPleaseLoginAgain)
+			err := restErr.NewUnauthorizedError(restErr.ErrMsgPleaseLoginAgain)
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"status": "fail", "error": err})
 		}
 

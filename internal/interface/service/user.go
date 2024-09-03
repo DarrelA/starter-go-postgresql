@@ -6,11 +6,9 @@ import (
 	dto "github.com/DarrelA/starter-go-postgresql/internal/application/dto"
 	appSvc "github.com/DarrelA/starter-go-postgresql/internal/application/service"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
-	restDomainErr "github.com/DarrelA/starter-go-postgresql/internal/domain/error/transport/http"
 	repo "github.com/DarrelA/starter-go-postgresql/internal/domain/repository/postgres"
+	restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
 	password "github.com/DarrelA/starter-go-postgresql/internal/infrastructure/bcrypt"
-	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
 )
@@ -28,7 +26,7 @@ func (us *UserService) GetJWTConfig() *entity.JWTConfig {
 	return us.JWTConfig
 }
 
-func (us *UserService) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restDomainErr.RestErr) {
+func (us *UserService) CreateUser(payload dto.RegisterInput) (*dto.UserResponse, *restErr.RestErr) {
 	newUser := &entity.User{
 		FirstName: payload.FirstName,
 		LastName:  payload.LastName,
@@ -38,7 +36,7 @@ func (us *UserService) CreateUser(payload dto.RegisterInput) (*dto.UserResponse,
 
 	hashedPassword, err := password.HashPassword(newUser.Password)
 	if err != nil {
-		return nil, restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
+		return nil, restErr.NewInternalServerError(restErr.ErrMsgSomethingWentWrong)
 	}
 
 	newUser.Password = hashedPassword
@@ -57,14 +55,14 @@ func (us *UserService) CreateUser(payload dto.RegisterInput) (*dto.UserResponse,
 	return userResponse, nil
 }
 
-func (us *UserService) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restDomainErr.RestErr) {
+func (us *UserService) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *restErr.RestErr) {
 	result := &entity.User{Email: u.Email}
 	if err := us.ur.GetUserByEmail(result); err != nil {
 		return nil, err
 	}
 
 	if err := password.VerifyPassword(result.Password, u.Password); err != nil {
-		return nil, restInterfaceErr.NewBadRequestError(err.Error())
+		return nil, restErr.NewBadRequestError(err.Error())
 	}
 
 	userResponse := &dto.UserResponse{
@@ -77,11 +75,11 @@ func (us *UserService) GetUserByEmail(u dto.LoginInput) (*dto.UserResponse, *res
 	return userResponse, nil
 }
 
-func (us *UserService) GetUserByUUID(userUuid string) (*entity.User, *restDomainErr.RestErr) {
+func (us *UserService) GetUserByUUID(userUuid string) (*entity.User, *restErr.RestErr) {
 	uuidPointer, err := uuid.Parse(userUuid)
 	if err != nil {
-		log.Error().Err(err).Msg(errConst.ErrUUIDError)
-		return nil, restInterfaceErr.NewUnprocessableEntityError((errConst.ErrMsgSomethingWentWrong))
+		log.Error().Err(err).Msg(restErr.ErrUUIDError)
+		return nil, restErr.NewUnprocessableEntityError((restErr.ErrMsgSomethingWentWrong))
 	}
 
 	result := &entity.User{UUID: &uuidPointer}

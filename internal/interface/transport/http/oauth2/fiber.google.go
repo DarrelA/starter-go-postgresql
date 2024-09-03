@@ -8,8 +8,7 @@ import (
 
 	"github.com/DarrelA/starter-go-postgresql/internal/application/usecase"
 	"github.com/DarrelA/starter-go-postgresql/internal/domain/entity"
-	errConst "github.com/DarrelA/starter-go-postgresql/internal/domain/error"
-	restInterfaceErr "github.com/DarrelA/starter-go-postgresql/internal/interface/transport/http/error"
+	restErr "github.com/DarrelA/starter-go-postgresql/internal/error"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog/log"
 
@@ -43,35 +42,35 @@ func (oa GoogleOAuth2) Login(c *fiber.Ctx) error {
 func (oa GoogleOAuth2) Callback(c *fiber.Ctx) error {
 	state := c.Query("state")
 	if state != "randomstate" {
-		err := restInterfaceErr.NewBadRequestError(errConst.ErrMsgPleaseLoginAgain)
+		err := restErr.NewBadRequestError(restErr.ErrMsgPleaseLoginAgain)
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
 	code := c.Query("code")
 	token, err := oa.GoogleLoginConfig.Exchange(context.Background(), code)
 	if err != nil {
-		err := restInterfaceErr.NewBadRequestError(errConst.ErrMsgPleaseLoginAgain)
+		err := restErr.NewBadRequestError(restErr.ErrMsgPleaseLoginAgain)
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
 	resp, err := http.Get(googleUserInfoEndpoint + token.AccessToken)
 	if err != nil {
-		log.Error().Err(err).Msg(errConst.ErrMsgGoogleOAuth2Error)
-		err := restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
+		log.Error().Err(err).Msg(restErr.ErrMsgGoogleOAuth2Error)
+		err := restErr.NewInternalServerError(restErr.ErrMsgSomethingWentWrong)
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
 	userInfo, err := io.ReadAll(resp.Body)
 	if err != nil {
-		log.Error().Err(err).Msg(errConst.ErrMsgGoogleOAuth2Error)
-		err := restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
+		log.Error().Err(err).Msg(restErr.ErrMsgGoogleOAuth2Error)
+		err := restErr.NewInternalServerError(restErr.ErrMsgSomethingWentWrong)
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
 	var user map[string]interface{}
 	if err := json.Unmarshal(userInfo, &user); err != nil {
 		log.Error().Err(err).Msg("")
-		err := restInterfaceErr.NewInternalServerError(errConst.ErrMsgSomethingWentWrong)
+		err := restErr.NewInternalServerError(restErr.ErrMsgSomethingWentWrong)
 		return c.Status(err.Status).JSON(fiber.Map{"status": "fail", "error": err})
 	}
 
