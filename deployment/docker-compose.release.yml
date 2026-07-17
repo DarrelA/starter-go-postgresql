@@ -1,0 +1,10 @@
+services:
+  app:
+    environment:
+      - MIGRATE_ON_STARTUP=false
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  migrate:
+    profiles: [release]

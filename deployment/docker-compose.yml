@@ -1,0 +1,118 @@
+name: starter-go-postgresql-${APP_ENV}
+
+services:
+  postgres:
+    image: postgres:18.4-alpine3.24
+    ports:
+      - '6500:5432'
+    volumes:
+      - postgresql_data_${APP_ENV}:/var/lib/postgresql
+    env_file:
+      - ../internal/infrastructure/config/.env.${APP_ENV}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -d $$POSTGRES_DB -U $$POSTGRES_USER']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:9.16
+    profiles: [admin]
+    ports:
+      - '5050:80'
+    volumes:
+      - ../internal/infrastructure/db/postgres/json/servers.${APP_ENV}.json:/pgadmin4/servers.json
+    env_file:
+      - ../internal/infrastructure/config/.env.${APP_ENV}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  redis:
+    image: redis:8.8.0-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redisDB_${APP_ENV}:/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    build:
+      context: ..
+      dockerfile: ./deployment/Dockerfile
+    image: starter-go-postgresql
+    ports:
+      - '8080:8080'
+    volumes:
+      - ./logs:/docker_wd/logs
+    environment:
+      - APP_ENV=${APP_ENV}
+    env_file:
+      - ../internal/infrastructure/config/.env.${APP_ENV}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  migrate:
+    profiles: [release]
+    build:
+      context: ..
+      dockerfile: ./deployment/Dockerfile
+    image: starter-go-postgresql
+    entrypoint: ['./starter-go-postgresql-migrate']
+    environment:
+      - APP_ENV=${APP_ENV}
+    env_file:
+      - ../internal/infrastructure/config/.env.${APP_ENV}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+
+  app-unit-test:
+    build:
+      context: ..
+      dockerfile: ./deployment/Dockerfile.unit_test
+    image: starter-go-postgresql-unit-test
+    volumes:
+      - ./logs:/docker_wd/logs
+      - ../testdata/reports:/docker_wd/testdata/output
+    environment:
+      - APP_ENV=${APP_ENV}
+    env_file:
+      - ../internal/infrastructure/config/.env.${APP_ENV}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  app-integration-test:
+    build:
+      context: ..
+      dockerfile: ./deployment/Dockerfile.integration_test
+    image: starter-go-postgresql-integration-test
+    volumes:
+      - ./logs:/docker_wd/logs
+      - ../testdata/reports:/root/testdata/output
+    environment:
+      - APP_ENV=${APP_ENV}
+    env_file:
+      - ../internal/infrastructure/config/.env.${APP_ENV}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+volumes:
+  redisDB_dev:
+  postgresql_data_dev:
+  redisDB_test:
+  postgresql_data_test:
+  redisDB_prod:
+  postgresql_data_prod:

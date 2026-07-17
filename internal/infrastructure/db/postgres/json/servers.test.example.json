@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Test PostgreSQL",
+      "Group": "Testing",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "pgstarter_test",
+      "Username": "test_app",
+      "Password": "test-only-password",
+      "SSLMode": "prefer"
+    }
+  }
+}
