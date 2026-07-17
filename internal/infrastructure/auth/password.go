@@ -1,4 +1,4 @@
-package bcrypt
+package auth
 
 import (
 	"fmt"
@@ -10,13 +10,15 @@ import (
 
 const errMsgBCryptError = "bcrypt_error"
 
-type Service struct{}
+// PasswordService hashes and verifies password credentials with bcrypt.
+type PasswordService struct{}
 
-func NewService() *Service {
-	return &Service{}
+// NewPasswordService constructs a bcrypt-backed password service.
+func NewPasswordService() *PasswordService {
+	return &PasswordService{}
 }
 
-func (Service) Hash(password string) (string, error) {
+func (PasswordService) Hash(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
 		log.Error().Err(err).Msg(errMsgBCryptError)
@@ -26,18 +28,10 @@ func (Service) Hash(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-func (Service) Verify(hashedPassword string, inputPassword string) error {
+func (PasswordService) Verify(hashedPassword string, inputPassword string) error {
 	if err := bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(inputPassword)); err != nil {
 		return apperror.ErrInvalidCredentials
 	}
 
 	return nil
-}
-
-func HashPassword(password string) (string, error) {
-	return Service{}.Hash(password)
-}
-
-func VerifyPassword(hashedPassword string, inputPassword string) error {
-	return Service{}.Verify(hashedPassword, inputPassword)
 }

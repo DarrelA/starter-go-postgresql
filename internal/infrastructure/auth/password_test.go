@@ -1,4 +1,4 @@
-package bcrypt
+package auth
 
 import (
 	"errors"
@@ -13,9 +13,10 @@ const (
 	incorrectPassword = "wrongPassword"
 )
 
-func TestHashPassword(t *testing.T) {
+func TestPasswordServiceHash(t *testing.T) {
+	service := NewPasswordService()
 	t.Run("successful hash", func(t *testing.T) {
-		hashedPassword, err := HashPassword(password)
+		hashedPassword, err := service.Hash(password)
 
 		if err != nil {
 			t.Errorf("Expected no error, got %v", err)
@@ -33,27 +34,28 @@ func TestHashPassword(t *testing.T) {
 	})
 
 	t.Run("bcrypt error", func(t *testing.T) {
-		_, err := HashPassword(generateLongPassword(80))
+		_, err := service.Hash(generateLongPassword(80))
 		if err == nil {
 			t.Errorf("Expected an error, got nil")
 		}
 	})
 }
 
-func TestVerifyPassword(t *testing.T) {
-	hashedPassword, err := HashPassword(password)
+func TestPasswordServiceVerify(t *testing.T) {
+	service := NewPasswordService()
+	hashedPassword, err := service.Hash(password)
 
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
-	err = VerifyPassword(hashedPassword, password)
+	err = service.Verify(hashedPassword, password)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
 
 	// Test with incorrect password
-	err = VerifyPassword(hashedPassword, incorrectPassword)
+	err = service.Verify(hashedPassword, incorrectPassword)
 	if err == nil {
 		t.Errorf("Expected error, got nil")
 	}
