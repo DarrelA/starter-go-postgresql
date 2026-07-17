@@ -1,0 +1,16 @@
+.DS_Store
+
+# Local environment files and generated credentials.
+internal/infrastructure/config/.env.*
+!internal/infrastructure/config/.env.*.example
+internal/infrastructure/db/postgres/json/servers.*.json
+!internal/infrastructure/db/postgres/json/servers.*.example.json
+refresh_token_keys.txt
+deployment/build/scripts/refresh_token_keys.txt
+
+*.log
+*.log.json
+
+testdata/reports/covdatafiles
+testdata/reports/*.html
+testdata/reports/*.json
