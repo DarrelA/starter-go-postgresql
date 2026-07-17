@@ -1,0 +1,55 @@
+# Stage 1: Build the Go binary
+FROM golang:1.26.5-trixie AS builder
+
+# Set the working directory inside the container
+WORKDIR /docker_wd
+
+# Copy the go.mod and go.sum files to download dependencies
+# Copying these files separately allows Docker to cache the downloaded modules
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Copy the source code into the container
+COPY . .
+
+# Remove the /testdata/reports directory to keep the build context small
+RUN rm -rf /docker_wd/testdata/reports
+
+# Build the application
+# CGO_ENABLED=0: Disables CGO, which is appropriate if you want a pure Go binary without C dependencies
+# GOOS=linux: Sets the target OS to Linux
+# -o starter-go-postgresql-it: Specifies the output file name
+RUN CGO_ENABLED=0 GOOS=linux \
+    go build -cover \
+    -o starter-go-postgresql-it \
+    github.com/DarrelA/starter-go-postgresql/cmd/auth
+
+# Stage 2: Create a smaller image for the final binary
+FROM alpine:3.24.1
+
+# Install bash, jq, curl, and Go
+RUN apk add --no-cache bash jq curl go
+
+# Copy the pre-built binary file from the builder stage
+COPY --from=builder /docker_wd/starter-go-postgresql-it /root
+
+# Copy seed data; schema migrations are embedded in the binary.
+COPY deployment/build/json /root/deployment/build/json
+
+# Copy necessary files for integration test
+COPY /testdata/json /root/testdata/json
+COPY deployment/build/scripts/integration_test.sh /root
+COPY deployment/build/scripts/integration_test_test.sh /root
+COPY deployment/build/scripts/wrap_test_for_coverage.sh /root
+
+# Set the working directory for the container
+WORKDIR /root
+
+# Make the shell scripts executable
+RUN chmod +x /root/integration_test.sh
+RUN chmod +x /root/integration_test_test.sh
+RUN chmod +x /root/wrap_test_for_coverage.sh
+RUN /root/integration_test_test.sh
+
+# Run the shell script when the container starts
+ENTRYPOINT ["/bin/bash", "-c", "go version && ./wrap_test_for_coverage.sh"]
