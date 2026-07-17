@@ -7,9 +7,11 @@ const (
 	ErrMsgPostgresError     = "postgres error"
 	ErrMsgGoogleOAuth2Error = "google oauth2 error"
 
-	ErrMsgSomethingWentWrong  = "something went wrong"
-	ErrMsgPleaseLoginAgain    = "please login again"
-	ErrMsgInvalidToken        = "invalid token"
-	ErrMsgInvalidCredentials  = "invalid credentials"
-	ErrMsgEmailIsAlreadyTaken = "email is already taken"
+	ErrMsgSomethingWentWrong    = "something went wrong"
+	ErrMsgPleaseLoginAgain      = "please login again"
+	ErrMsgInvalidToken          = "invalid token"
+	ErrMsgInvalidCredentials    = "invalid credentials"
+	ErrMsgEmailIsAlreadyTaken   = "email is already taken"
+	ErrMsgInvalidCSRFToken      = "invalid CSRF token"
+	ErrMsgOAuthIdentityConflict = "OAuth identity conflicts with an existing account"
 )
