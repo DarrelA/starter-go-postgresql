@@ -1,0 +1,29 @@
+# Stage 1: Build the Go binary
+FROM golang:1.26.5-trixie AS builder
+
+# Set the working directory inside the container
+WORKDIR /docker_wd
+
+# Copy the go.mod and go.sum files to download dependencies
+# Copying these files separately allows Docker to cache the downloaded modules
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Install go-ignore-cov separately for caching
+# This package excludes specific code sections from coverage analysis to highlight essential test coverage.
+# Use `coverage:ignore file` or `coverage:ignore`.
+RUN go install github.com/quantumcycle/go-ignore-cov@v0.7.1
+
+# Copy the source code into the container
+COPY . .
+
+# Set the build argument for the environment
+ARG APP_ENV
+ENV APP_ENV=${APP_ENV}
+
+# Run the tests directly when the container starts using the environment variable
+ENTRYPOINT ["sh", "-c", \
+    "echo Running test in APP_ENV=${APP_ENV} && \
+    APP_ENV=${APP_ENV} go test ./... -coverprofile=coverage.out && \
+    go-ignore-cov --file coverage.out && \
+    go tool cover -html=coverage.out -o /docker_wd/testdata/output/ut_coverage.html"]

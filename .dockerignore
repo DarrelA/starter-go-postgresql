@@ -1,0 +1,17 @@
+.git
+.github
+.agents
+.codex
+**/.DS_Store
+
+# Local credentials and generated pgAdmin configuration are injected at runtime.
+internal/infrastructure/config/.env.dev
+internal/infrastructure/config/.env.test
+internal/infrastructure/config/.env.prod
+internal/infrastructure/db/postgres/json/servers.dev.json
+internal/infrastructure/db/postgres/json/servers.test.json
+internal/infrastructure/db/postgres/json/servers.prod.json
+
+# Generated output does not belong in image build contexts.
+deployment/logs
+testdata/reports
