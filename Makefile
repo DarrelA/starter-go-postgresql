@@ -12,9 +12,10 @@ DB := postgres redis
 UI := pgadmin
 COMPOSE := docker compose
 VARS := APP_ENV=$(APP_ENV)
+DOCS_ADDR ?= localhost:6060
 
 .DEFAULT_GOAL := all
-.PHONY: all init-env rotate-keys up up-pgadmin migrate d dv wa ut it lg e prune umod
+.PHONY: all init-env rotate-keys up up-pgadmin migrate d dv wa ut it lg e prune umod docs
 
 #####################
 #    Env Configs    #
@@ -147,3 +148,7 @@ prune:
 umod:
 	@go get -u ./...
 	@go mod tidy
+
+# Serve this module's Go documentation without requiring a global pkgsite installation.
+docs:
+	@go tool pkgsite -open -http=$(DOCS_ADDR) -list=false .
